@@ -83,10 +83,16 @@ for (const p of plan.punche || []) {
 const WP = Math.round((W * 1.5) / 2) * 2;
 const HP = Math.round((H * 1.5) / 2) * 2;
 
+// ZACZEPIENIE ZOOMU: bez jawnych x/y zoompan powiększa od LEWEGO GÓRNEGO ROGU,
+// przez co przy każdym najeździe obraz zjeżdża w dół i w prawo. Wygląda to jak
+// dziwne szarpnięcie ekranu. Te dwa wyrażenia trzymają zoom na środku kadru.
+const zX = `iw/2-(iw/zoom/2)`;
+const zY = `ih/2-(ih/zoom/2)`;
+
 czesci.push(
   `[0:v]scale=${WP}:${HP}:force_original_aspect_ratio=increase:flags=lanczos,` +
   `crop=${WP}:${HP},` +
-  `zoompan=z='${zoomWyr}':d=1:s=${WP}x${HP}:fps=${FPS},` +
+  `zoompan=z='${zoomWyr}':x='${zX}':y='${zY}':d=1:s=${WP}x${HP}:fps=${FPS},` +
   `scale=${W}:${H}:flags=lanczos,setsar=1[baza]`
 );
 let biezacy = "baza";
