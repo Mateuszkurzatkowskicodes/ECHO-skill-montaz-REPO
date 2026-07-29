@@ -16,6 +16,14 @@ import {Rolka1Fx} from './compsRolka1';
 import {Rolka2Fx} from './compsRolka2';
 import {Rolka3Fx} from './compsRolka3';
 import {Porownanie} from './compsPorownanie';
+import {
+  ChapterLabel, MultiCountUp, LightSweep, BadgeDwaKolory, KartaCzasu, StrzalkaWskaznik,
+  GlitchText, ScrambleText, MarkerHighlight, MoneyCounter, TypewriterCard, EmojiBurst,
+} from './compsBiblioteka';
+import {
+  HookSlam, SlowoBomba, InterludeWymowka, BadgePrawda, VsKlienci,
+  InterludeSystem, StrikePolecenia,
+} from './compsSezon';
 
 const FPS = 60;
 
@@ -277,6 +285,32 @@ export const Root: React.FC = () => {
         height={1920}
       />
       {/* --- porownanie promujace kurs (zwykly vs po kursie) --- */}
+
+      {/* ============ BIBLIOTEKA OGOLNA (sterowana propsami) ============
+          Podmiana tresci bez pisania nowego komponentu:
+            npx remotion render src/index.ts marker out.mov --props='{"tekst":"HASLO"}'
+      */}
+      <Composition id="chapter-label" component={ChapterLabel} durationInFrames={Math.round(3.0 * FPS)} fps={FPS} width={1080} height={1920} />
+      <Composition id="multi-countup" component={MultiCountUp} durationInFrames={Math.round(4.0 * FPS)} fps={FPS} width={1080} height={1920} />
+      <Composition id="light-sweep" component={LightSweep} durationInFrames={Math.round(1.6 * FPS)} fps={FPS} width={1080} height={1920} />
+      <Composition id="badge-2kolory" component={BadgeDwaKolory} durationInFrames={Math.round(3.5 * FPS)} fps={FPS} width={1080} height={520} />
+      <Composition id="karta-czasu" component={KartaCzasu} durationInFrames={Math.round(1.8 * FPS)} fps={FPS} width={1080} height={1920} />
+      <Composition id="strzalka" component={StrzalkaWskaznik} durationInFrames={Math.round(2.2 * FPS)} fps={FPS} width={1080} height={1920} />
+      <Composition id="glitch" component={GlitchText} durationInFrames={Math.round(1.4 * FPS)} fps={FPS} width={1080} height={1920} />
+      <Composition id="scramble" component={ScrambleText} durationInFrames={Math.round(2.4 * FPS)} fps={FPS} width={1080} height={1920} />
+      <Composition id="marker" component={MarkerHighlight} durationInFrames={Math.round(2.6 * FPS)} fps={FPS} width={1080} height={1920} />
+      <Composition id="money-counter" component={MoneyCounter} durationInFrames={Math.round(3.2 * FPS)} fps={FPS} width={1080} height={1920} />
+      <Composition id="typewriter" component={TypewriterCard} durationInFrames={Math.round(4.5 * FPS)} fps={FPS} width={1080} height={1920} />
+      <Composition id="emoji-burst" component={EmojiBurst} durationInFrames={Math.round(2.0 * FPS)} fps={FPS} width={1080} height={1920} />
+
+      {/* ==== WZORZEC: efekty pisane pod KONKRETNA rolke (patrz compsSezon.tsx) ==== */}
+      <Composition id="sz-hook" component={HookSlam} durationInFrames={Math.round(2.6 * FPS)} fps={FPS} width={1080} height={1920} />
+      <Composition id="sz-bomba" component={SlowoBomba} durationInFrames={Math.round(1.6 * FPS)} fps={FPS} width={1080} height={1920} />
+      <Composition id="sz-wymowka" component={InterludeWymowka} durationInFrames={Math.round(3.2 * FPS)} fps={FPS} width={1080} height={1920} />
+      <Composition id="sz-prawda" component={BadgePrawda} durationInFrames={Math.round(2.9 * FPS)} fps={FPS} width={1080} height={1920} />
+      <Composition id="sz-vs" component={VsKlienci} durationInFrames={Math.round(3.6 * FPS)} fps={FPS} width={1080} height={1920} />
+      <Composition id="sz-strike" component={StrikePolecenia} durationInFrames={Math.round(2.6 * FPS)} fps={FPS} width={1080} height={1920} />
+      <Composition id="sz-system" component={InterludeSystem} durationInFrames={Math.round(4.4 * FPS)} fps={FPS} width={1080} height={1920} />
     </>
   );
 };

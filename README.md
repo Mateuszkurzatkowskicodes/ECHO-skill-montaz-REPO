@@ -8,7 +8,8 @@ napisy karaoke, zoomy, animowane efekty (Remotion), muzyka i cięcia.
 ## Co jest w środku
 
 - `.claude/skills/montaz/SKILL.md` — autorski skill montażu (serce zestawu).
-- `remotion-montaz/` — biblioteka efektów: **68 gotowych kompozycji** (hooki, pełnoekranowe interludia, cutawaye, split-screen przed/po, animowany kursor na zrzutach ekranu, badge, mockupy DM i komentarzy, karty poradnikowe, miniaturki).
+- `narzedzia/` — **narzędzia do montażu** (patrz niżej), używaj ich zawsze zamiast pisać ffmpeg z ręki.
+- `remotion-montaz/` — biblioteka efektów: **87 gotowych kompozycji** (hooki, pełnoekranowe interludia, cutawaye, split-screen przed/po, animowany kursor na zrzutach ekranu, badge, mockupy DM i komentarzy, karty poradnikowe, miniaturki).
 - `wiedza-styl/` — analizy stylu montażu, na których uczył się skill.
 
 ## Aktualizacja z 26.07.2026 (bezpłatna dla wszystkich kursantów)
@@ -22,6 +23,21 @@ Dorzuciłem wszystko, co zbudowałem przy własnych rolkach po premierze kursu:
 
 **Podmień logo na swoje:** plik `remotion-montaz/public/brand-bug.png` jest pusty (przezroczysty).
 Wrzuć tam swoje logo w tej samej nazwie, a pojawi się w rogu kadru wszędzie tam, gdzie efekt tego używa.
+
+## Narzędzia (aktualizacja 29.07.2026)
+
+- `narzedzia/wykryj-ciecia.mjs` — znajduje **prawdziwe sklejki** w nagraniu
+  i wypisuje gotową listę zoom-punchów. Punch ma maskować przeskok między
+  ujęciami, więc idzie WYŁĄCZNIE tam. Nie na akcenty zdań, bo wtedy kamera
+  drga bez powodu.
+- `narzedzia/transkrypcja.py` — whisper z pamięcią podręczną (drugi raz na tym
+  samym pliku jest natychmiast) plus gotowe napisy karaoke `.ass`.
+- `narzedzia/buduj-filtr.mjs` — z krótkiego planu JSON składa cały render.
+  Sam pilnuje ostrości obrazu, kolejności warstw i pułapek ffmpeg.
+
+Do tego **19 nowych efektów** w `compsBiblioteka.tsx` (sterowane propsami,
+jedna kompozycja obsługuje wiele momentów) oraz `compsSezon.tsx` jako wzorzec
+efektów pisanych pod konkretną rolkę.
 
 ## Jak tego użyć
 

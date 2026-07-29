@@ -78,13 +78,87 @@ Styl skalibrowany na żywo przez V1-V8 (short-01, "nie musisz tańczyć") i shor
 
 Pełne analizy z transkryptami i uzasadnieniem: `wiedza-styl/analiza-styl-reel-*.md`.
 
+## NARZĘDZIA (używaj ich zawsze, nie pisz tego z ręki)
+
+W repo jest folder `narzedzia/`. **Zawsze zaczynaj od nich**, bo robią to samo
+szybciej, taniej w tokenach i bez błędów, które inaczej wracają za każdym razem.
+
+**1. Gdzie są prawdziwe sklejki**
+
+```bash
+node narzedzia/wykryj-ciecia.mjs nagranie.mp4
+```
+
+Wypisze gotową listę punchów. **To jest jedyne miejsce, gdzie wolno dać
+zoom-punch.** Punch istnieje po to, żeby zamaskować przeskok ciała i rąk
+w miejscu sklejenia dwóch ujęć. Jeśli wrzucisz go na akcenty zdań albo
+„co jakiś czas", kamera drga bez powodu i montaż wygląda tanio. Gdy nagranie
+jest jednym ciągłym ujęciem, punchów NIE MA wcale.
+
+**2. Transkrypcja i napisy**
+
+```bash
+python narzedzia/transkrypcja.py nagranie.mp4 --ass napisy.ass
+```
+
+Whisper liczy się raz na plik, kolejne uruchomienia są natychmiastowe.
+Od razu wypluwa gotowe napisy karaoke w stylu ECHO. Nie składaj ich ręcznie.
+
+**3. Render**
+
+```bash
+node narzedzia/buduj-filtr.mjs plan.json --zapisz montaz
+bash montaz.sh
+```
+
+**NIE wypisuj `-filter_complex` z ręki.** Napisz krótki plan, resztę zrobi
+generator, razem z zabezpieczeniami (zoompan zamiast scale, `enable=` na każdej
+nakładce, napisy pod interludiami, apostrofy w ścieżkach Windows, zoom liczony
+z zapasem i zejście lanczosem dla ostrości, crf 15 z sufitem bitrate'u).
+
+Plan wygląda tak i to jest CAŁOŚĆ, jaką piszesz:
+
+```json
+{
+  "wejscie": "nagranie.mp4",
+  "wyjscie": "gotowe.mp4",
+  "dlugosc": 45.5,
+  "fps": 30,
+  "napisy": "napisy.ass",
+  "muzyka": { "plik": "muzyka.mp3", "glosnosc": 0.10 },
+  "zoom": { "amplituda": 0.012, "okres": 8 },
+  "punche": [ { "t": 3.23 }, { "t": 6.00 } ],
+  "cutawaye": [ { "plik": "interludium.mp4", "od": 6.3, "do": 9.5 } ],
+  "nakladki": [ { "plik": "hook.mov", "od": 0, "do": 2.6, "x": 0, "y": 0 } ]
+}
+```
+
+## BIBLIOTEKA EFEKTÓW
+
+`remotion-montaz/src/compsBiblioteka.tsx` — 12 gotowych, sterowanych propsami:
+
+`chapter-label` (etykieta „01 / PROBLEM"), `multi-countup` (kilka liczb naraz),
+`light-sweep` (błysk po zrzucie ekranu), `badge-2kolory` (neutralny → ciepły),
+`karta-czasu` („20 MINUT PÓŹNIEJ"), `strzalka` (wskaźnik), `glitch` (rozjazd RGB),
+`scramble` (deszyfrowany tekst), `marker` (podkreślenie), `money-counter`,
+`typewriter` (wpisywany prompt), `emoji-burst`.
+
+```bash
+npx remotion render src/index.ts marker out.mov --props='{"tekst":"TWOJE HASŁO"}' \
+  --codec=prores --prores-profile=4444 --pixel-format=yuva444p10le --image-format=png
+```
+
+`compsSezon.tsx` to z kolei **wzorzec efektów pisanych pod konkretną rolkę**
+(slam z wybuchem cząstek, pełnoekranowe interludium z przekreślaniem, karty VS,
+interludium z rysowanym wykresem). Zajrzyj tam po strukturę, gdy piszesz własne.
+
 ## Workflow (krok po kroku) — OBOWIĄZKOWY proces "dowalonej rolki" (potwierdzony na short-05 V4, 2026-07-15)
 
 0. **Wzorzec PRZED montażem (nie pomijać!):** przejrzyj `wiedza-styl/analiza-styl-*.md` (bazowo `analiza-styl-5-rolek-2026-07-15.md`); nowe referencje od usera → najpierw /claude-watch. Potem krótki research trendów efektów (WebSearch) i **plan efektów moment-po-momencie** (czas → beat → efekt). Dopiero potem render. Minimum efektów w każdej rolce: spring slam hook + particle burst (na klatce piersiowej, NIE na twarzy), 1-2 pełnoekranowe kinetyczne interludia (Remotion: grid+grain+glow, wykres stroke-draw), animowane badge, animowany mockup na CTA, strikethrough/checkmark przy kontrastach. Napisy karaoke \kf na wysokości szyi (MarginV=800), wyłączone w interludiach/pod slamami. Muzyka inna niż w poprzedniej rolce. Bez "wersji prostych" — domyślnie pełny pakiet.
 1. **Wejście:** user daje JUŻ WYBRANY, przycięty plik wideo (sam wybrał najlepsze dble/fragmenty i skleił surowo). Ustal: format docelowy (short/long), cel (IG/TT/YT), czy jest muzyka do użycia (plik) czy dobrać royalty-free.
 2. **Analiza:** ffprobe (parametry, w tym metadane rotacji) → whisper (transkrypcja z timecode'ami, do synchronizacji napisów).
 3. **Plan efektów:** krótko pokaż userowi, co planujesz (styl napisów, gdzie zoomy, jaka muzyka) — nie trzeba już planu cięć, bo cięcia są gotowe.
-4. **Wykonanie:** ffmpeg render z animowanymi napisami + zoomami + muzyką → rough podgląd do folderze na gotowe montaże. Zawsze zweryfikuj wizualnie (wyciągnij klatki podglądowe) przed przekazaniem finalnego pliku.
+4. **Wykonanie:** render przez `narzedzia/buduj-filtr.mjs` (patrz wyżej). Renderuj OD RAZU w pełnej jakości, nie rób wersji podglądowych w niższej rozdzielczości. Zawsze zweryfikuj wizualnie: wyciągnij klatki z GOTOWEGO pliku (`ffmpeg -ss <czas> -i gotowe.mp4 -frames:v 1 klatka.png`) i sprawdź, czy żaden napis ani grafika nie leży na twarzy i czy nic nie wychodzi poza kadr.
 5. **Iteracja:** user ogląda, daje uwagi, poprawiasz parametry (tempo, napisy, głośność muzyki).
 6. **Opis pod rolkę:** przy KAŻDYM ukończonym/zaakceptowanym montażu zapisz obok pliku wideo osobny `<nazwa-wideo>-OPIS.txt` (ten sam folder, `Gotowe-montaze/`) gotowy do wklejenia na FB/IG: hook → ból → wartość/rozwiązanie → CTA-komentarz ze słowem-kluczem + hashtagi, zero "—" (patrz `feedback_no_em_dashes`). Opis ma zgadzać się z tym, co FAKTYCZNIE padło w finalnym zmontowanym nagraniu (nie z pierwotnym scenariuszem, jeśli coś się zmieniło przy montażu/cięciu powtórek). Jeśli CTA obiecuje zasób pod słowo-klucz, sprawdź czy plik istnieje w `folderze na zasoby do DM` — jeśli nie, wypisz to jako ostrzeżenie na dole opisu.
 
