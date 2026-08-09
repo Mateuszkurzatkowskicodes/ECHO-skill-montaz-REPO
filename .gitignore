@@ -5,3 +5,12 @@ node_modules/
 *.log
 .DS_Store
 out/
+
+# powstaje lokalnie u kursanta, nie nalezy do repo
+sfx/
+efekty/
+plan.json
+efekty.json
+filtr.txt
+napisy*.ass
+.echo-historia-efektow.json

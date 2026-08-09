@@ -1,181 +1,265 @@
 ---
 name: montaz
-description: Montaż wideo w stylu "AI business YouTube" — shorty (9:16, do 60s) i długie formaty (16:9). Plan montażu, napisy, cięcia, muzyka, przekazanie do Premiere Pro lub automat przez ffmpeg. Użyj, gdy user prosi o montaż, edycję wideo, shorta, rolkę lub plan montażu nagrania.
+description: Montaż wideo w stylu ECHO — rolki (9:16, do 60s) i długie formaty (16:9). Napisy karaoke, gęste efekty, muzyka, SFX, kontrola jakości. Użyj, gdy user prosi o montaż, edycję wideo, shorta, rolkę lub plan montażu nagrania.
 ---
 
 # Montaż wideo — ECHO
 
-Montujesz (lub planujesz montaż) nagrań w stylu referencyjnym: kanały typu "AI business" na YouTube (talking head + screen recording, szybkie tempo, animowane napisy). Referencje usera: "4 Ways to Make Money With Claude AI", "The New AI Business Model Making Millions In 2026", "How to Make Viral AI UGC for TikTok Ads" itp.
+Montujesz nagrania w stylu "AI business": talking head, szybkie tempo, napisy
+karaoke, gęste animowane efekty, muzyka pod głosem.
 
-## Podział ról (ustalone 13.07 po pierwszym realnym montażu — bądź szczery co do możliwości)
+## Podział ról
 
-**WAŻNE — selekcję dubli robi USER, nie Claude.** Pierwsza próba: Claude ciął na podstawie samej transkrypcji whisper (bez słyszenia audio) — wybór wypadł słabo, zbyt mechanicznie, powtórki i "dziwne" cięcia. User słyszy intonację i energię, Claude tego nie ocenia z samego tekstu. Docelowy przepływ:
-1. **User** nagrywa kilka dubli, SAM wybiera najlepsze fragmenty i skleja je we własnym tempie (byle jak, bez napisów/efektów) w jeden plik .mp4, pionowo.
-2. **Claude** bierze ten już wybrany, przycięty materiał i robi z niego PEŁNY montaż: napisy, zoomy, muzyka, efekty (patrz niżej).
-Claude nadal MOŻE zaproponować plan cięć (transkrypcja + sugestia), jeśli user o to prosi — ale nie renderuje ostatecznego wyboru dubli bez akceptacji, i domyślnie to user dostarcza już wybrany materiał.
+**Wybór dubli robi USER, nie Ty.** Nie słyszysz intonacji ani energii, a z samej
+transkrypcji wychodzą cięcia mechaniczne i powtórki. Przepływ jest taki:
 
-**Claude robi sam (automatycznie), na materiale już wybranym przez usera:**
-- Transkrypcja nagrania (whisper), jeśli potrzebna do synchronizacji napisów
-- Napisy animowane: plik .ass ze stylem (1-4 słowa naraz, keyword w kolorze) lub .srt
-- Render przez ffmpeg: punch-in zoomy, wypalone napisy, muzyka w tle ściszona pod głosem, proste przejścia, korekta orientacji (UWAGA: ffmpeg 8.x auto-stosuje metadane rotate z telefonu — NIE dokładaj ręcznego transpose, bo podwoi obrót; sam scale+pad wystarczy)
-- Eksport do Premiere: EDL / FCPXML z cięciami do dalszej obróbki
+1. User nagrywa kilka dubli, SAM wybiera najlepsze fragmenty i skleja je byle
+   jak (bez napisów i efektów) w jeden plik pionowy.
+2. Ty bierzesz ten gotowy materiał i robisz z niego PEŁNY montaż: napisy, zoomy,
+   efekty, muzyka, SFX, kontrola.
 
-**Remotion = GŁÓWNY silnik efektów (od short-05, 2026-07-15).** Projekt w `remotion-montaz/` (src/comps.tsx ma gotowe wzorce: kinetyczne slamy ze spring physics + particle burst, pełnoekranowe interludia z animowanym wykresem SVG stroke-draw + grid + grain + glow, pill-badge ze spring, mockup DM z typing-indicatorem). Render: `npx remotion render src/index.ts <comp> out.mov --codec=prores --prores-profile=4444 --pixel-format=yuva444p10le --image-format=png` (alpha) lub `--codec=h264` (pełnoekranowe). Overlay w ffmpeg: `setpts=PTS+<start>/TB` + `overlay=enable='between(t,in,out)':eof_action=pass`. User potwierdził: NIE dajemy zewnętrznych AI (Higgsfield itp.), wszystko przez Remotion; efektów ma być DUŻO i mają wyglądać pro, nie "proste animacje". Napisy: karaoke \kf jak w short-01..04 (nie build-up), na wysokości szyi (MarginV=800).
+Plan cięć możesz zaproponować, jeśli user o to poprosi, ale nie decydujesz
+o wyborze dubli za niego.
 
-**Claude robi też EFEKTY SPECJALNE (stack: Remotion + ffmpeg):**
-- **Remotion** (React/Node → render wideo): animowane overlaye komponowane na nagranie — napisy pop/bounce z keywordem w kolorze, wlatujące strzałki/boxy/ikony, mockupy notyfikacji (dymek Messengera z leadem), animowane liczniki i liczby, karty tytułowe sekcji, wykresy, mockupy telefonu. Render do WebM/ProRes z kanałem alpha → overlay w ffmpeg. Każdy efekt pisany pod konkretny moment nagrania (timecode z planu cięć), nie z szablonu.
-- **ffmpeg xfade**: ~50 przejść (slidewhip, zoomin, pixelize, circleopen...) + shake/punch przez crop-expressions, glow/blur, speed ramps.
-- **ASS advanced**: napisy animowane słowo-po-słowie (\t, \fscx, kolory, karaoke) — działa nawet bez Remotion.
-- **Assety**: ikony SVG rysuje Claude; SFX (whoosh/pop/ding) i muzyka z bibliotek royalty-free (np. Pixabay) — pobierz i trzymaj w folderze na muzykę (pobierz royalty-free na bieżąco) do wielokrotnego użytku.
-- **Granice:** generatywne VFX (Runway/Kling/Pika) tylko jeśli user podepnie klucz API zewnętrznej usługi; pluginów Premiere nie odtwarzamy 1:1.
+## NARZĘDZIA — używaj ich zawsze, nie pisz ffmpeg z ręki
 
-**User kończy w Premiere Pro (opcjonalnie):** korekcja koloru, efekty ponad możliwości stacka.
+W repo jest folder `narzedzia/`. Zawierają zabezpieczenia przed błędami, które
+kosztowały realne godziny i których nie widać w logu (render kończy się bez
+błędu, tylko wynik jest zły). Pisanie `-filter_complex` z ręki to najkrótsza
+droga do montażu, w którym efekty są w losowych miejscach.
 
-**Setup przy pierwszym użyciu:** sprawdź `ffmpeg`, `yt-dlp`, `whisper` — jeśli brak, zaproponuj instalację (winget/pip); Remotion: `npm create video` w folderze projektu wideo. Stan na 2026-07-09: brak ffmpeg/yt-dlp/whisper; jest python i node.
-
-## Profil stylu: DŁUGI FORMAT (16:9, YouTube)
-
-⚠️ Profil odtworzony z gatunku referencji — potwierdzony przez usera co do: dynamicznych przejść, efektów, muzyki w tle. Doprecyzuj z userem przy pierwszym montażu.
-
-- **Tempo:** jump cuts — wycinamy KAŻDĄ pauzę, oddech, "yyy". Cięcie średnio co 3-8 s.
-- **Zoomy:** punch-in/punch-out (100% ↔ ~110-120%) na akcenty zdań — co 1-2 zdania, na twardym cięciu, bez animacji płynnej.
-- **Napisy:** duży bold sans (np. Montserrat ExtraBold), 1-4 słowa naraz, biały z czarnym obrysem, słowo-klucz w kolorze (żółty/zielony), lekki pop przy pojawieniu. W długim formacie: napisy na akcenty/sekcje, niekoniecznie cały czas.
-- **Screen recording:** zoom na kursor/klikane miejsce, podświetlenie kliknięć, przybliżenia na ważne fragmenty ekranu.
-- **Grafiki/B-roll:** ikony i strzałki wlatujące na słowa-klucze, boxy z tekstem, wstawki B-roll/memy co 20-40 s, karty tytułowe między sekcjami.
-- **SFX:** whoosh na przejściach sekcji, pop/click na grafikach, subtelny ding na kluczowych liczbach.
-- **Muzyka:** lo-fi / chill beat / ambient loop pod całością, głośność ~-22 do -28 dB względem głosu (ma być tłem, nie konkurencją), ducking pod mową.
-- **Przejścia między sekcjami:** twarde cięcie + whoosh lub szybki zoom-transition; bez crossfade'ów i gwiazdek.
-- **Hook:** pierwsze 15-30 s = zapowiedź wartości + szybki teaser (fragmenty z dalszej części), dopiero potem intro.
-
-## Profil stylu: SHORT / ROLKA (9:16, do 60 s)
-
-Styl skalibrowany na żywo przez V1-V8 (short-01, "nie musisz tańczyć") i short-02 ("wizytówka"), plus 5 analiz `/claude-watch` cudzych rolek (wiedza-styl/analiza-styl-reel-*.md). To jest już nasz SPRAWDZONY bazowy playbook, nie hipoteza:
-
-- **Hook w 1-3 s:** najmocniejsze zdanie NA POCZĄTEK + napis wielki (fs boost), zoom-snap (mocny zoom wygasający w ~0.3s) + flash-in (biały błysk 0.12s) + opcjonalnie mała grafika-liczba/fakt wjeżdżająca obok twarzy (np. "22:00"), żeby hook był gęsty wizualnie, nie tylko tekstowo.
-- **Napisy karaoke:** ASS z `\kf` (kolorowy sweep słowo-po-słowie), 2-4 słowa/linijkę, cięte na naturalnych pauzach/interpunkcji, nie sztywno co N słów.
-- **Zoom ciągły:** "oddychający" zoom (powolna sinusoida) przez cały czas trwania, nie tylko punch-in na cięciach.
-- **Zoom-punch + mikro-błysk na KAŻDYM cięciu między ujęciami** (nie tylko na hooku) — maskuje nieuniknione skoki pozycji ciała/ręki przy sklejaniu osobnych dubli. Bez tego złożone z kilku ujęć nagranie "dziwnie tnie".
-- **B-roll cutaway pełnoekranowy z animowanymi elementami** (ikony/napisy WJEŻDŻAJĄ, slide-in/slide-out) — KAŻDY element musi mieć własny `enable` z czasem zniknięcia, inaczej zostaje na ekranie na stałe (patrz Częste błędy niżej).
-- **Dwuczcionkowy system:** bold sans (Montserrat) na talking head = "mówię do Ciebie"; elegancki serif/italic na pełnoekranowych cutawayach = "pokazuję Ci coś" — rozróżnienie typograficzne samo sygnalizuje zmianę trybu.
-- **Muzyka + SFX prawdziwe** (Pixabay, nie syntetyczne) — pop/ding na każdej grafice/cutawayu, cicho pod głosem (~0.13 vol).
-- **Koniec:** CTA-komentarz w ostatnich 3-5 s, słowo-klucz WIELKIE w napisach (osobny fs boost), + karta-mockup (komentarz/DM) w dolnej jednej trzeciej.
-- **Długość docelowa:** 20-65 s w zależności od ilości wartości do przekazania — retencja > sztywny limit czasu.
-
-### Nowe techniki z analizy 5 cudzych rolek (do wypróbowania w kolejnych montażach)
-
-**Najsilniejszy, wielokrotnie potwierdzony wzorzec (3 z 5 analizowanych reeli):**
-- **Stały split-screen góra/dół zamiast krótkiej wstawki** — górne ~55-60% ekranu to CIĄGLE grający dowód (zrzut ekranu z prawdziwym kursorem, mockup, wykres), dolne to twarz, oba widoczne RÓWNOLEGLE przez dłuższy odcinek (kilkanaście-kilkadziesiąt sekund), nie 2-3s cutaway. Napisy siadają na granicy stref. Świetne pod: pokazywanie wyników kampanii/case study, tutorial, "oto co widać w panelu". Warto przetestować jako alternatywę dla pełnoekranowego cutawaya przy materiale, gdzie user faktycznie ma co pokazać na ekranie przez dłuższy czas.
-
-**Pozostałe, warte wypróbowania punktowo:**
-- Kolorowanie TYLKO 1-2 słów-kluczy w linijce napisu (nie całej linijki) — lżejszy wariant naszego obecnego podświetlenia.
-- Strzałka-wskaźnik lub realistyczny popup UI z polami jako alternatywa dla kolorowej ramki podświetlającej.
-- Komediowa karta "X minut później" (styl SpongeBoba) na przeskoki czasowe przed/po.
-- Chapter labels w rogu kadru ("01 / PROBLEM", "02 / ROZWIĄZANIE") zmieniające się z etapami scenariusza.
-- Wielokolumnowy count-up (kilka liczb rosnących równolegle) zamiast jednej liczby, gdy jest więcej niż jedna metryka.
-- Diagonalny light-sweep na statycznych screen-recordingach, żeby ożywić nieruchomy zrzut ekranu.
-- Ta sama plakietka/badge w dwóch kolorach: neutralny na starcie (etykieta kontekstu) → ciepły gradient na końcu (CTA) — sama zmiana koloru sygnalizuje przejście.
-- Świadome przejście ze split-screenu/cutawaya na czystą pełnoekranową twarz w ostatnich 2-3s przed CTA — wizualnie oddziela "wartość" od "prośby o akcję".
-
-Pełne analizy z transkryptami i uzasadnieniem: `wiedza-styl/analiza-styl-reel-*.md`.
-
-## NARZĘDZIA (używaj ich zawsze, nie pisz tego z ręki)
-
-W repo jest folder `narzedzia/`. **Zawsze zaczynaj od nich**, bo robią to samo
-szybciej, taniej w tokenach i bez błędów, które inaczej wracają za każdym razem.
-
-**1. Gdzie są prawdziwe sklejki**
-
-```bash
-node narzedzia/wykryj-ciecia.mjs nagranie.mp4
-```
-
-Wypisze gotową listę punchów. **To jest jedyne miejsce, gdzie wolno dać
-zoom-punch.** Punch istnieje po to, żeby zamaskować przeskok ciała i rąk
-w miejscu sklejenia dwóch ujęć. Jeśli wrzucisz go na akcenty zdań albo
-„co jakiś czas", kamera drga bez powodu i montaż wygląda tanio. Gdy nagranie
-jest jednym ciągłym ujęciem, punchów NIE MA wcale.
-
-**2. Transkrypcja i napisy**
+### 1. Napisy karaoke
 
 ```bash
 python narzedzia/transkrypcja.py nagranie.mp4 --ass napisy.ass
 ```
 
-Whisper liczy się raz na plik, kolejne uruchomienia są natychmiastowe.
-Od razu wypluwa gotowe napisy karaoke w stylu ECHO. Nie składaj ich ręcznie.
+Rozpoznaje mowę i od razu daje gotowe napisy w stylu ECHO. Wynik jest
+zapamiętywany, więc drugie uruchomienie na tym samym pliku jest natychmiastowe.
+Wycina halucynacje (modele dorzucają na ciszy stopki typu "Napisy stworzone
+przez..."), łamie linijki tak, żeby weszły w kadr, i podświetla słowo-klucz.
 
-**3. Render**
+- `--marginv 920` przy split-screenie (napisy siadają na szwie, nie na twarzy).
+- `--model small` gdy nagranie jest długie, a liczy się czas.
+- Szybciej: `pip install faster-whisper` (narzędzie samo go użyje, jeśli jest).
+
+### 2. Zestaw SFX (raz na komputer)
 
 ```bash
-node narzedzia/buduj-filtr.mjs plan.json --zapisz montaz
-bash montaz.sh
+node narzedzia/zrob-sfx.mjs sfx
 ```
 
-**NIE wypisuj `-filter_complex` z ręki.** Napisz krótki plan, resztę zrobi
-generator, razem z zabezpieczeniami (zoompan zamiast scale, `enable=` na każdej
-nakładce, napisy pod interludiami, apostrofy w ścieżkach Windows, zoom liczony
-z zapasem i zejście lanczosem dla ostrości, crf 15 z sufitem bitrate'u).
+Buduje lokalnie pop, click, ding, whoosh, swipe, impact, riser, sub-drop
+i typing. W repo nie ma plików dźwiękowych z powodu licencji, a bez SFX rolka
+jest technicznie poprawna i kompletnie płaska. Masz własne, kupione albo
+pobrane? Wrzuć je do tego folderu pod tymi samymi nazwami.
 
-Plan wygląda tak i to jest CAŁOŚĆ, jaką piszesz:
+### 3. Plan efektów — GĘSTO i ZA KAŻDYM RAZEM INACZEJ
+
+```bash
+node narzedzia/plan-efektow.mjs nagranie.mp4 --napisy napisy.ass \
+  --muzyka muzyka --renderuj-efekty
+```
+
+To narzędzie pilnuje dwóch rzeczy, o których łatwo zapomnieć:
+
+- **gęstość**: efekt średnio co 3-4 s, wpasowany w momenty, w których coś się
+  faktycznie mówi (bierze czasy z napisów). `--gestosc 3` zagęszcza jeszcze bardziej.
+- **różnorodność**: pamięta w pliku `.echo-historia-efektow.json`, co poszło
+  w poprzednich rolkach, i najpierw sięga po to, czego dawno nie było. Ten sam
+  efekt nie wraca dwa razy w jednej rolce, a kolejna rolka startuje od innego
+  zestawu. Muzyka rotuje tak samo, więc profil nie brzmi jednostajnie.
+
+Dobiera też efekt do treści: liczba dostaje kartę wyniku i dzwonek, kontra
+dostaje przekreślenie, wyliczanka listę z odhaczaniem, końcówka mockup
+komentarza. Wynik to `plan.json` plus `efekty.json`.
+
+**Zawsze przejrzyj `efekty.json` i popraw teksty.** Automat bierze frazy wprost
+z napisów, więc czasem wychodzi zdanie urwane albo bez sensu w oderwaniu od
+kontekstu. To jest miejsce, gdzie Twoja robota daje najwięcej: treść efektu ma
+być krótka, mocna i zrozumiała bez dźwięku.
+
+### 4. Render
+
+```bash
+node narzedzia/buduj-filtr.mjs plan.json --renderuj
+```
+
+`--renderuj` odpala ffmpeg sam, bez skryptu bash, więc działa identycznie na
+Windows bez Git Basha, na macOS i na Linuksie. `--szybko` daje podgląd w niższej
+jakości, gdy sprawdzasz tylko rozstawienie elementów.
+
+Narzędzie samo: bierze fps i długość z nagrania, wykrywa nagranie z zepsutym
+czasem i wyrównuje je, wycina napisy pod wielkimi napisami-efektami, miksuje
+muzykę z duckingiem pod głosem, dokłada SFX i wyrównuje głośność do -14 LUFS.
+
+Plan wygląda tak i to jest CAŁOŚĆ, jaką piszesz ręcznie, gdy nie korzystasz
+z `plan-efektow.mjs`:
 
 ```json
 {
   "wejscie": "nagranie.mp4",
   "wyjscie": "gotowe.mp4",
-  "dlugosc": 45.5,
-  "fps": 30,
   "napisy": "napisy.ass",
-  "muzyka": { "plik": "muzyka.mp3", "glosnosc": 0.10 },
-  "zoom": { "amplituda": 0.012, "okres": 8 },
-  "punche": [ { "t": 3.23 }, { "t": 6.00 } ],
+  "napisyPrzerwy": [ { "od": 0, "do": 1.9 } ],
+  "muzyka": { "plik": "muzyka/utwor.mp3", "glosnosc": 0.17 },
+  "sfx": [ { "plik": "sfx/sfx-pop.wav", "t": 3.6 } ],
+  "hook": { "sila": 0.09 },
+  "punche": [ { "t": 6.02 } ],
   "cutawaye": [ { "plik": "interludium.mp4", "od": 6.3, "do": 9.5 } ],
-  "nakladki": [ { "plik": "hook.mov", "od": 0, "do": 2.6, "x": 0, "y": 0 } ]
+  "splitscreen": [ { "plik": "panel.png", "od": 12, "do": 24 } ],
+  "nakladki": [ { "plik": "efekty/01-fx-slam.mov", "od": 0, "do": 1.9 } ],
+  "logo": { "plik": "logo.png", "szerokosc": 150, "pozycja": "prawy-gorny" }
 }
 ```
 
-## BIBLIOTEKA EFEKTÓW
+Literówka w nazwie pola to błąd z podpowiedzią, a nie ciche pominięcie efektu.
 
-`remotion-montaz/src/compsBiblioteka.tsx` — 12 gotowych, sterowanych propsami:
-
-`chapter-label` (etykieta „01 / PROBLEM"), `multi-countup` (kilka liczb naraz),
-`light-sweep` (błysk po zrzucie ekranu), `badge-2kolory` (neutralny → ciepły),
-`karta-czasu` („20 MINUT PÓŹNIEJ"), `strzalka` (wskaźnik), `glitch` (rozjazd RGB),
-`scramble` (deszyfrowany tekst), `marker` (podkreślenie), `money-counter`,
-`typewriter` (wpisywany prompt), `emoji-burst`.
+### 5. Kontrola przed publikacją (nie pomijaj)
 
 ```bash
-npx remotion render src/index.ts marker out.mov --props='{"tekst":"TWOJE HASŁO"}' \
+node narzedzia/sprawdz.mjs gotowe.mp4 --wobec nagranie.mp4
+```
+
+Sprawdza to, czego nie widać w logu renderu: czy jest dźwięk na całej długości,
+czy montaż nie jest krótszy od nagrania, czy głośność siedzi na poziomie
+platform, czy nie ma czarnych klatek i dłuższej ciszy. Wyciąga też siatkę klatek
+do obejrzenia — **przejrzyj je**, bo tylko tak wyłapiesz napis leżący na twarzy
+albo element wychodzący poza kadr.
+
+### 6. Gdzie naprawdę są sklejki
+
+```bash
+node narzedzia/wykryj-ciecia.mjs nagranie.mp4
+```
+
+To jedyne miejsce, gdzie wolno dać zoom-punch. Punch istnieje po to, żeby
+zamaskować przeskok ciała w miejscu sklejenia dwóch ujęć. Wrzucany na akcenty
+zdań albo "co jakiś czas" sprawia, że kamera drga bez powodu i montaż wygląda
+tanio. Jedno ciągłe ujęcie to zero punchów.
+
+## Profil stylu: ROLKA (9:16, do 60 s)
+
+- **Hook w 1-3 s:** najmocniejsze zdanie na początek, mocny najazd (`hook` w planie),
+  wielki napis, plus efekt już w pierwszej sekundzie. Płaski początek to utracona rolka.
+- **Napisy karaoke:** 2-4 słowa na linijkę, cięte na naturalnych pauzach, jedno
+  słowo-klucz w kolorze, na wysokości szyi.
+- **Zoom:** ciągły "oddychający" (ledwo wyczuwalny) przez cały czas, plus punch
+  wyłącznie na sklejkach.
+- **Efekty:** gęsto, średnio co 3-4 s, za każdym razem inny zestaw. Karty, listy
+  i mockupy siedzą NAD napisami; wielkie napisy-slamy siadają na miejscu napisów
+  i wtedy napis jest wycinany.
+- **Split-screen:** przy materiale, gdzie user faktycznie ma co pokazać (panel,
+  zrzut ekranu, wyniki) — górna część kadru to ciągle grający dowód, dolna twarz,
+  kilkanaście sekund równolegle, nie dwusekundowa wstawka.
+- **Dźwięk:** muzyka cicho pod głosem z duckingiem, SFX na każdym wjeżdżającym
+  elemencie, całość na -14 LUFS. Muzyka inna niż w poprzedniej rolce.
+- **Koniec:** CTA w ostatnich 3-5 s, słowo-klucz wielkie, mockup komentarza.
+- **Długość:** 20-65 s, zależnie od tego, ile jest do powiedzenia. Retencja jest
+  ważniejsza niż trafienie w okrągłą liczbę sekund.
+
+## Profil stylu: DŁUGI FORMAT (16:9)
+
+- Jump cuts, wycinamy każdą pauzę i "yyy", cięcie co 3-8 s.
+- Napisy na akcenty i sekcje, nie przez cały czas.
+- Karty tytułowe między sekcjami, wstawki co 20-40 s.
+- Przy nagraniu ekranu: zoom na kursor i na klikane miejsce.
+- Muzyka lo-fi pod całością, wyraźnie ciszej niż w rolce, z duckingiem.
+- Pierwsze 15-30 s to zapowiedź wartości i teaser dalszej części.
+
+## BIBLIOTEKA EFEKTÓW
+
+W `remotion-montaz/` są dwa rodzaje rzeczy i nie wolno ich mieszać:
+
+**Do renderowania: 28 kompozycji sterowanych propsami.**
+`compsBiblioteka.tsx` (12): `chapter-label`, `multi-countup`, `light-sweep`,
+`badge-2kolory`, `karta-czasu`, `strzalka`, `glitch`, `scramble`, `marker`,
+`money-counter`, `typewriter`, `emoji-burst`.
+`compsBiblioteka2.tsx` (16): `fx-slam`, `fx-lista`, `fx-przekreslenie`,
+`fx-wynik`, `fx-kolo`, `fx-vs`, `fx-komentarz`, `fx-etapy`, `fx-stempel`,
+`fx-krok`, `fx-podkreslenie`, `fx-pytanie`, `fx-ticker`, `fx-odliczanie`,
+`fx-ikony`, `fx-cytat`.
+
+```bash
+node remotion-montaz/node_modules/@remotion/cli/remotion-cli.js render \
+  src/index.ts fx-slam out.mov --props='{"tekst":"TWOJE HASŁO"}' \
   --codec=prores --prores-profile=4444 --pixel-format=yuva444p10le --image-format=png
 ```
 
-`compsSezon.tsx` to z kolei **wzorzec efektów pisanych pod konkretną rolkę**
-(slam z wybuchem cząstek, pełnoekranowe interludium z przekreślaniem, karty VS,
-interludium z rysowanym wykresem). Zajrzyj tam po strukturę, gdy piszesz własne.
+(Uruchamiamy CLI przez `node`, a nie przez `npx`, bo Node na Windows odmawia
+odpalania plików `.cmd` bez powłoki, a powłoka psuje JSON w `--props`.)
 
-## Workflow (krok po kroku) — OBOWIĄZKOWY proces "dowalonej rolki" (potwierdzony na short-05 V4, 2026-07-15)
+**Do czytania, NIE do renderowania: pozostałe pliki `comps*.tsx`.**
+To efekty pisane pod konkretne rolki autora i mają w środku wpisany na sztywno
+jego tekst (o jego klientach i jego ofercie). Wyrenderowane u siebie wstawisz
+sobie w rolkę zdanie o cudzej firmie. Zaglądaj tam po strukturę i pomysły, gdy
+piszesz własny efekt, ale renderuj z biblioteki albo napisz swój komponent.
 
-0. **Wzorzec PRZED montażem (nie pomijać!):** przejrzyj `wiedza-styl/analiza-styl-*.md` (bazowo `analiza-styl-5-rolek-2026-07-15.md`); nowe referencje od usera → najpierw /claude-watch. Potem krótki research trendów efektów (WebSearch) i **plan efektów moment-po-momencie** (czas → beat → efekt). Dopiero potem render. Minimum efektów w każdej rolce: spring slam hook + particle burst (na klatce piersiowej, NIE na twarzy), 1-2 pełnoekranowe kinetyczne interludia (Remotion: grid+grain+glow, wykres stroke-draw), animowane badge, animowany mockup na CTA, strikethrough/checkmark przy kontrastach. Napisy karaoke \kf na wysokości szyi (MarginV=800), wyłączone w interludiach/pod slamami. Muzyka inna niż w poprzedniej rolce. Bez "wersji prostych" — domyślnie pełny pakiet.
-1. **Wejście:** user daje JUŻ WYBRANY, przycięty plik wideo (sam wybrał najlepsze dble/fragmenty i skleił surowo). Ustal: format docelowy (short/long), cel (IG/TT/YT), czy jest muzyka do użycia (plik) czy dobrać royalty-free.
-2. **Analiza:** ffprobe (parametry, w tym metadane rotacji) → whisper (transkrypcja z timecode'ami, do synchronizacji napisów).
-3. **Plan efektów:** krótko pokaż userowi, co planujesz (styl napisów, gdzie zoomy, jaka muzyka) — nie trzeba już planu cięć, bo cięcia są gotowe.
-4. **Wykonanie:** render przez `narzedzia/buduj-filtr.mjs` (patrz wyżej). Renderuj OD RAZU w pełnej jakości, nie rób wersji podglądowych w niższej rozdzielczości. Zawsze zweryfikuj wizualnie: wyciągnij klatki z GOTOWEGO pliku (`ffmpeg -ss <czas> -i gotowe.mp4 -frames:v 1 klatka.png`) i sprawdź, czy żaden napis ani grafika nie leży na twarzy i czy nic nie wychodzi poza kadr.
-5. **Iteracja:** user ogląda, daje uwagi, poprawiasz parametry (tempo, napisy, głośność muzyki).
-6. **Opis pod rolkę:** przy KAŻDYM ukończonym/zaakceptowanym montażu zapisz obok pliku wideo osobny `<nazwa-wideo>-OPIS.txt` (ten sam folder, `Gotowe-montaze/`) gotowy do wklejenia na FB/IG: hook → ból → wartość/rozwiązanie → CTA-komentarz ze słowem-kluczem + hashtagi, zero "—" (patrz `feedback_no_em_dashes`). Opis ma zgadzać się z tym, co FAKTYCZNIE padło w finalnym zmontowanym nagraniu (nie z pierwotnym scenariuszem, jeśli coś się zmieniło przy montażu/cięciu powtórek). Jeśli CTA obiecuje zasób pod słowo-klucz, sprawdź czy plik istnieje w `folderze na zasoby do DM` — jeśli nie, wypisz to jako ostrzeżenie na dole opisu.
+**Logo w rogu:** `remotion-montaz/public/brand-bug.png` jest pusty. Wrzuć tam
+swoje logo pod tą samą nazwą, albo podaj plik w polu `logo` w planie.
+
+## Workflow
+
+1. **Wejście:** user daje już wybrany, przycięty plik. Ustal format (rolka albo
+   długi), gdzie ma pójść i czy ma własną muzykę.
+2. **Napisy:** `transkrypcja.py`.
+3. **Plan:** `plan-efektow.mjs`. Przejrzyj `efekty.json` i popraw teksty efektów.
+4. **Pokaż userowi plan** w dwóch zdaniach: ile efektów, jakie, jaka muzyka.
+5. **Render:** `plan-efektow.mjs --renderuj-efekty`, potem `buduj-filtr.mjs --renderuj`.
+6. **Kontrola:** `sprawdz.mjs` i obejrzenie klatek.
+7. **Opis pod rolkę:** przy każdym gotowym montażu zapisz obok pliku wideo
+   `<nazwa>-OPIS.txt` gotowy do wklejenia: hook, ból, wartość, CTA z hasłem
+   w komentarzu, hashtagi. Opis ma zgadzać się z tym, co FAKTYCZNIE padło
+   w zmontowanym nagraniu, nie z pierwotnym scenariuszem.
 
 ## Zasady twarde
 
-- Napisy po polsku (chyba że materiał anglojęzyczny dla zasięgu globalnego — zapytaj).
-- Nigdy nie renderuj po cichu długiego materiału bez pokazania planu cięć.
-- Muzyka: tylko royalty-free / dostarczona przez usera — pytaj o źródło.
-- Pliki robocze w scratchpadzie, wyniki w folderze projektu.
+- Napisy po polsku, chyba że materiał jest anglojęzyczny pod zasięg globalny.
+- Muzyka tylko royalty-free albo dostarczona przez usera. Pytaj o źródło.
+- Nie renderuj po cichu długiego materiału bez pokazania planu.
+- Nie zostawiaj rolki bez kontroli `sprawdz.mjs` i bez obejrzenia klatek.
+- Pliki robocze w folderze projektu, nie w repo skilla.
 
-## Częste błędy ffmpeg (znalezione w praktyce, sprawdź przed renderem)
+## Pułapki ffmpeg (wszystkie znalezione w praktyce)
 
-- **Rotacja:** ffmpeg 8.x auto-stosuje metadane `rotate` z telefonu — NIE dokładaj ręcznego `transpose`, bo podwoi obrót.
-- **`enable=` na KAŻDYM elemencie overlay** (np. cutaway z wieloma warstwami) — element bez własnego `enable` z czasem końca zostaje na ekranie do końca wideo.
-- **Nigdy nie referencjonuj tego samego labela filtra dwa razy równolegle** (np. `[cur]crop=...[a]` i `[cur][a]overlay=...` w tej samej gałęzi) — w ffmpeg 8.1.2 to potrafi po cichu wyłączyć inny filtr (np. `ass`) na CAŁYM materiale, nie tylko w oknie czasowym efektu, mimo że filtr działa poprawnie w izolacji i mimo braku błędu w logu. Objawy: napisy/nakładki znikają dla całych fragmentów bez wyraźnej przyczyny. **Fix:** zawsze jawny `[cur]split=2[cur_a][cur_b]` przed użyciem tego samego strumienia w dwóch gałęziach (np. jedna do `crop` pod split-screen, druga jako baza `overlay`). Znalezione i naprawione przy montażu short-03 (split-screen), 2026-07-11.
-- Po dodaniu nowego efektu zawsze zweryfikuj klatki NIE TYLKO w oknie czasowym efektu, ale też PRZED nim (np. t=0, t=hook) — bug jak wyżej objawia się poza oknem, łatwo go przeoczyć sprawdzając tylko "czy efekt działa".
-- **`zoompan` MUSI mieć jawne `x` i `y`, inaczej powiększa od lewego górnego rogu.** Bez nich obraz przy każdym najeździe zjeżdża w dół i w prawo, co wygląda jak dziwne szarpnięcie ekranu i psuje cały montaż. Zawsze: `zoompan=z='...':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=WxH`. Znalezione 2026-07-29.
-- **Zoom robić przez `zoompan`, NIE przez `scale` z wyrażeniem czasowym.** `scale=w='...t...':eval=frame,crop=...` segfaultuje ffmpeg 8.1.2 (exit 139) po ~70-90 klatkach, niezależnie od treści wyrażenia — nawet sam `sin()` bez `if/exp` wywala. Log nie pokazuje błędu, plik urywa się bez atomu moov. **Fix:** `zoompan=z='1.0+0.015*sin(2*PI*time/6)+...':d=1:s=1080x1920:fps=60,setsar=1` — zmienna nazywa się `time` (nie `t`), działa stabilnie z dowolnie długim wyrażeniem. Znalezione przy montażu rolki (2026-07-23).
-- **Flash/błysk robić w Remotion, nie przez `overlay` źródła `color=`.** Gałąź `color=white:d=0.2[flash]` + `overlay` też potrafiła segfaultować; biały `fade=t=in:color=white` albo warstwa flash w kompozycji Remotion są bezpieczne.
-- **Ścieżki w `-filter_complex_script` na Windows:** wartości `fontfile=`, `textfile=`, `ass=` MUSZĄ być w apostrofach (`fontfile='C\:/Windows/Fonts/x.ttf'`), inaczej parser filtra wywala się na dwukropku dysku. W Bashu dodatkowo `export MSYS2_ARG_CONV_EXCL="*"` (blokuje konwersję ścieżek MSYS), ale wtedy pliki podawane przez `-i` muszą być w formacie Windows, nie POSIX.
+Narzędzia w `narzedzia/` obchodzą je same. Ta lista jest na wypadek, gdy musisz
+napisać filtr ręcznie, i żeby rozumieć, dlaczego narzędzia robią to tak.
+
+- **Nagranie z zepsutym czasem = montaż na chybił trafił.** Materiał sklejony
+  bez przekodowania albo z ujęć o różnych parametrach obrazu każe ffmpeg
+  przebudować graf filtrów w miejscu sklejenia, a po przebudowie `zoompan`
+  liczy czas OD ZERA. Zmierzone: plik ma 12,02 s, filtry widzą 6,03 s. Efekt:
+  `enable='between(t,od,do)'` trafia w losowe miejsca, wideo wychodzi krótsze,
+  render nie zgłasza żadnego błędu. `buduj-filtr.mjs` wykrywa to i wyrównuje
+  nagranie przed montażem.
+- **`asetpts=PTS-STARTPTS` PO zmianie próbkowania ucina dźwięk w połowie.**
+  Nagranie 44,1 kHz przeliczane na 48 kHz plus `asetpts` dawało 12 s obrazu
+  i 5,8 s dźwięku. Jeśli musisz zresetować czas audio, rób to PRZED `aformat`.
+- **Warstwa przesunięta przez `setpts=PTS+od/TB` potrafi nie pojawić się wcale.**
+  Taki strumień nie ma żadnej klatki przed czasem `od`, a `overlay` czeka na
+  pierwszą klatkę drugiego wejścia. Używaj `tpad=start_duration=od`.
+- **`-r` przy zapisie wyrzuca klatki**, gdy warstwy mają różne tempo (w logu
+  `drop=`). Ustaw `fps=` na końcu łańcucha filtrów, a nie `-r` przy zapisie.
+- **`zoompan` MUSI mieć jawne `x` i `y`**, inaczej powiększa od lewego górnego
+  rogu i obraz zjeżdża w prawo w dół: `x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'`.
+- **Zoom przez `zoompan`, nie przez `scale` z wyrażeniem czasowym.** `scale`
+  z `eval=frame` segfaultuje po kilkudziesięciu klatkach, log nic nie pokazuje,
+  plik urywa się bez atomu moov. W `zoompan` zmienna czasu nazywa się `time`, nie `t`.
+- **`enable=` na KAŻDEJ nakładce.** Element bez własnego czasu zniknięcia
+  zostaje na ekranie do końca wideo. To najczęstszy błąd przy wielowarstwowych
+  cutawayach.
+- **Nigdy nie czytaj tego samego labela filtra dwa razy równolegle.** Potrafi po
+  cichu wyłączyć inny filtr (np. `ass`) na CAŁYM materiale, mimo braku błędu
+  w logu. Zawsze jawny `split` przed rozgałęzieniem.
+- **Jeden wspólny format audio przed miksem.** Mono SFX 44,1 kHz plus stereo
+  muzyka 48 kHz wywalają `amix` albo dają dźwięk w jednym kanale:
+  `aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=stereo`.
+- **Błysk rób w Remotion, nie przez `overlay` źródła `color=`** — ta gałąź też
+  potrafiła segfaultować.
+- **Ścieżki w `-filter_complex_script` na Windows:** wartości `fontfile=`,
+  `textfile=`, `ass=` muszą być w apostrofach, inaczej parser wywala się na
+  dwukropku dysku.
+- **Rotacja:** ffmpeg 8.x sam stosuje metadane `rotate` z telefonu. Nie dokładaj
+  `transpose`, bo podwoisz obrót.
+- Po dodaniu efektu sprawdzaj klatki nie tylko w jego oknie czasowym, ale też
+  przed nim. Część powyższych błędów objawia się poza oknem efektu.

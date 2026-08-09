@@ -1,52 +1,114 @@
 # ECHO — Skill montażu z AI
 
 To jest zestaw, dzięki któremu AI montuje krótkie i długie filmy w stylu ECHO:
-napisy karaoke, zoomy, animowane efekty (Remotion), muzyka i cięcia.
+napisy karaoke, gęste animowane efekty, muzyka ściszana pod głosem, efekty
+dźwiękowe i kontrola jakości przed publikacją.
 
 **Dostęp tylko dla kursantów.** Nie udostępniaj dalej.
 
 ## Co jest w środku
 
 - `.claude/skills/montaz/SKILL.md` — autorski skill montażu (serce zestawu).
-- `narzedzia/` — **narzędzia do montażu** (patrz niżej), używaj ich zawsze zamiast pisać ffmpeg z ręki.
-- `remotion-montaz/` — biblioteka efektów: **87 gotowych kompozycji** (hooki, pełnoekranowe interludia, cutawaye, split-screen przed/po, animowany kursor na zrzutach ekranu, badge, mockupy DM i komentarzy, karty poradnikowe, miniaturki).
+- `narzedzia/` — narzędzia, których AI używa zamiast pisać ffmpeg z ręki.
+- `remotion-montaz/` — biblioteka efektów: 28 kompozycji sterowanych Twoim
+  tekstem plus kilkadziesiąt gotowych wzorców do czytania.
 - `wiedza-styl/` — analizy stylu montażu, na których uczył się skill.
 
-## Aktualizacja z 26.07.2026 (bezpłatna dla wszystkich kursantów)
+## Aktualizacja z sierpnia 2026 (bezpłatna dla wszystkich kursantów)
 
-Dorzuciłem wszystko, co zbudowałem przy własnych rolkach po premierze kursu:
+Największa zmiana od premiery. Wklej komendę aktualizacji ze strony kursu, żeby
+to pobrać.
 
-- **Z 14 do 68 kompozycji Remotion.** Nowe rodziny efektów: komplety pod całe rolki (`Rolka1Fx`, `Rolka2Fx`, `Rolka3Fx`), split-screen porównawczy przed i po (`Porownanie`), animowany kursor jeżdżący po zrzucie ekranu (`MouseScreen`), zestawy cutawayów tematycznych, karty poradnikowe i miniaturki pod YouTube.
-- **Skill uzupełniony o trzy pułapki ffmpeg**, które kosztowały mnie godziny: segfault przy zoomie robionym przez `scale` (rozwiązanie: `zoompan`), segfault przy błysku przez `color=`, oraz apostrofy w ścieżkach przy `-filter_complex_script` na Windows.
+**Efekty**
+- Doszło narzędzie `plan-efektow.mjs`, które rozkłada efekty gęsto (średnio co
+  3-4 sekundy, wpasowane w to, co faktycznie mówisz) i **pamięta, co poszło
+  w poprzednich rolkach**, więc kolejna rolka dostaje inny zestaw. Ten sam efekt
+  nie wraca dwa razy w jednej rolce, a muzyka rotuje tak samo.
+- Efektów sterowanych Twoim tekstem jest teraz **28 zamiast 12**. Nowe: slam,
+  lista z odhaczaniem, przekreślenie, karta wyniku, odręczne zakreślenie i
+  podkreślenie, dwie kolumny "ręcznie kontra z AI", mockup komentarza, pasek
+  etapów, stempel, wielka cyfra kroku, pytanie z odpowiedzią, ticker, odliczanie,
+  trzy ikony, cytat na pełnym ekranie.
+- Efekt dobiera się do treści: liczba dostaje kartę wyniku i dzwonek, kontra
+  przekreślenie, wyliczanka listę, końcówka mockup komentarza pod CTA.
 
-Żeby to pobrać, wystarczy poprosić Claude: „zaktualizuj repo ze skillem montażu i przekopiuj skill na nowo".
+**Dźwięk**
+- Muzyka sama ścisza się pod głosem (ducking) i wchodzi oraz schodzi łagodnie.
+- Doszedł generator efektów dźwiękowych: `node narzedzia/zrob-sfx.mjs sfx` robi
+  u Ciebie na dysku dziewięć dźwięków (pop, click, ding, whoosh, swipe, impact,
+  riser, sub-drop, typing). Są w całości Twoje, więc nikt nie zgłosi roszczenia.
+- Całość wyrównuje się do -14 LUFS, czyli poziomu, na którym grają Instagram,
+  TikTok i YouTube. Koniec z rolką raz za cichą, raz przesterowaną.
 
-**Podmień logo na swoje:** plik `remotion-montaz/public/brand-bug.png` jest pusty (przezroczysty).
-Wrzuć tam swoje logo w tej samej nazwie, a pojawi się w rogu kadru wszędzie tam, gdzie efekt tego używa.
+**Rzeczy, które psuły montaż po cichu (naprawione)**
+- Nagranie sklejone w prostym edytorze potrafiło rozjechać czas tak, że efekty
+  trafiały w losowe momenty, a gotowa rolka wychodziła krótsza od nagrania.
+  Render nie zgłaszał przy tym żadnego błędu. Teraz jest to wykrywane
+  i wyrównywane przed montażem.
+- Nagranie bez ścieżki dźwiękowej wywalało render niezrozumiałym błędem.
+- Literówka w planie montażu (np. „cutaways” zamiast „cutawaye”) była cicho
+  pomijana i rolka powstawała bez części efektów. Teraz to błąd z podpowiedzią.
+- Rolki są montowane w 60 klatkach na sekundę, jeśli tyle ma nagranie.
+  Wcześniej schodziły do 30 i traciły płynność.
+- Wielkie napisy-efekty nie nakładają się już na napisy karaoke.
 
-## Narzędzia (aktualizacja 29.07.2026)
+**Napisy**
+- Kilka razy szybciej, jeśli zainstalujesz `faster-whisper` (komenda
+  aktualizacji robi to za Ciebie).
+- Nie doklejają już zmyślonych zdań w stylu „Napisy stworzone przez...”, które
+  modele dorzucają na ciszy.
+- Jedno słowo-klucz w linijce jest podświetlane innym kolorem.
+- `--marginv 920` przesuwa napisy na szew przy pionowym split-screenie.
 
-- `narzedzia/wykryj-ciecia.mjs` — znajduje **prawdziwe sklejki** w nagraniu
-  i wypisuje gotową listę zoom-punchów. Punch ma maskować przeskok między
-  ujęciami, więc idzie WYŁĄCZNIE tam. Nie na akcenty zdań, bo wtedy kamera
-  drga bez powodu.
-- `narzedzia/transkrypcja.py` — whisper z pamięcią podręczną (drugi raz na tym
-  samym pliku jest natychmiast) plus gotowe napisy karaoke `.ass`.
-- `narzedzia/buduj-filtr.mjs` — z krótkiego planu JSON składa cały render.
-  Sam pilnuje ostrości obrazu, kolejności warstw i pułapek ffmpeg.
+**Kontrola przed publikacją**
+- `node narzedzia/sprawdz.mjs gotowe.mp4 --wobec nagranie.mp4` sprawdza, czy jest
+  dźwięk na całej długości, czy montaż nie jest krótszy od nagrania, czy głośność
+  jest w normie, czy nie ma czarnych klatek i dłuższej ciszy. Wyciąga też klatki
+  do obejrzenia.
 
-Do tego **19 nowych efektów** w `compsBiblioteka.tsx` (sterowane propsami,
-jedna kompozycja obsługuje wiele momentów) oraz `compsSezon.tsx` jako wzorzec
-efektów pisanych pod konkretną rolkę.
+## Narzędzia
 
-## Jak tego użyć
+| Narzędzie | Do czego |
+|---|---|
+| `transkrypcja.py` | napisy karaoke, zapamiętywane między uruchomieniami |
+| `zrob-sfx.mjs` | zestaw dźwięków u Ciebie na dysku (raz na komputer) |
+| `wykryj-ciecia.mjs` | gdzie naprawdę są sklejki, czyli gdzie wolno dać zoom-punch |
+| `plan-efektow.mjs` | gęsty i za każdym razem inny zestaw efektów |
+| `buduj-filtr.mjs` | render całości: zoom, napisy, warstwy, muzyka, SFX, głośność |
+| `sprawdz.mjs` | kontrola gotowego pliku i klatki do obejrzenia |
 
-Nie musisz nic robić ręcznie. W kursie masz jedną komendę, którą wklejasz do
-Claude Code. Ona pobiera to repo i wszystkie potrzebne narzędzia, a skill ląduje
-w Twojej bazie umiejętności. Potem po prostu wrzucasz nagranie i piszesz
-"zmontuj mi tę rolkę".
+Typowy montaż to cztery komendy:
+
+```bash
+python narzedzia/transkrypcja.py nagranie.mp4 --ass napisy.ass
+node narzedzia/plan-efektow.mjs nagranie.mp4 --napisy napisy.ass --muzyka muzyka --renderuj-efekty
+node narzedzia/buduj-filtr.mjs plan.json --renderuj
+node narzedzia/sprawdz.mjs gotowe.mp4 --wobec nagranie.mp4
+```
+
+Nie musisz ich pamiętać. Wrzuć nagranie do folderu i napisz „zmontuj mi tę
+rolkę” — AI wie, w jakiej kolejności je uruchomić.
+
+## Dwie rzeczy do podmiany na własne
+
+- **Logo w rogu:** `remotion-montaz/public/brand-bug.png` jest pusty
+  (przezroczysty). Wrzuć tam swoje logo pod tą samą nazwą.
+- **Efekty dźwiękowe:** jeśli masz własne, kupione albo pobrane, wrzuć je do
+  folderu `sfx` pod tymi samymi nazwami i montaż użyje Twoich.
 
 ## Muzyka
 
-W repo nie ma plików muzycznych (kwestia licencji). AI pobiera muzykę
-royalty-free na bieżąco. Do rolek używaj wyłącznie muzyki bez praw autorskich.
+W repo nie ma plików muzycznych, bo licencje nie pozwalają ich rozdawać dalej.
+Pobierz kilka utworów royalty-free (np. z Pixabay Music) i trzymaj je w jednym
+folderze. Zestaw sam bierze do każdej rolki inny utwór niż ostatnio.
+
+## Ważne: co renderować, a czego nie
+
+W `remotion-montaz/src/` są dwa rodzaje plików:
+
+- `compsBiblioteka.tsx` i `compsBiblioteka2.tsx` — **to renderujesz.** 28 efektów
+  sterowanych tekstem, który podajesz.
+- pozostałe `comps*.tsx` — **to czytasz, nie renderujesz.** Są to efekty pisane
+  pod konkretne rolki autora i mają w środku wpisany na sztywno jego tekst.
+  Wyrenderowane u siebie wstawią Ci w rolkę zdanie o cudzej firmie. Zaglądaj tam
+  po pomysły i strukturę, gdy chcesz napisać własny efekt.

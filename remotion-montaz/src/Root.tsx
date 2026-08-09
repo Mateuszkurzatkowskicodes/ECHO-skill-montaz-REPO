@@ -24,6 +24,11 @@ import {
   HookSlam, SlowoBomba, InterludeWymowka, BadgePrawda, VsKlienci,
   InterludeSystem, StrikePolecenia,
 } from './compsSezon';
+import {
+  SlamSlowo, ListaCheck, Przekreslenie, KartaWyniku, KoloZakreslenie, DwieKolumny,
+  DymekKomentarza, PasekEtapow, Stempel, CyfraKroku, PodkreslenieReczne,
+  PytanieOdpowiedz, Ticker, Odliczanie, TrzyIkony, Cytat,
+} from './compsBiblioteka2';
 
 const FPS = 60;
 
@@ -311,6 +316,26 @@ export const Root: React.FC = () => {
       <Composition id="sz-vs" component={VsKlienci} durationInFrames={Math.round(3.6 * FPS)} fps={FPS} width={1080} height={1920} />
       <Composition id="sz-strike" component={StrikePolecenia} durationInFrames={Math.round(2.6 * FPS)} fps={FPS} width={1080} height={1920} />
       <Composition id="sz-system" component={InterludeSystem} durationInFrames={Math.round(4.4 * FPS)} fps={FPS} width={1080} height={1920} />
+
+      {/* ==== BIBLIOTEKA 2: efekty dobierane automatycznie przez plan-efektow.mjs ====
+           Wszystkie sterowane propsami, wszystkie same ustawiaja sie w kadrze tak,
+           zeby nie wejsc na twarz. Renderuj z --props='{"tekst":"..."}'. */}
+      <Composition id="fx-slam" component={SlamSlowo} durationInFrames={Math.round(1.9 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{tekst: 'BEZ KOMBINOWANIA'}} />
+      <Composition id="fx-lista" component={ListaCheck} durationInFrames={Math.round(3.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{punkty: ['NAGRYWASZ', 'WRZUCASZ PLIK', 'GOTOWE']}} />
+      <Composition id="fx-przekreslenie" component={Przekreslenie} durationInFrames={Math.round(2.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{tekst: 'DROGI MONTAŻYSTA'}} />
+      <Composition id="fx-wynik" component={KartaWyniku} durationInFrames={Math.round(2.8 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{liczba: '24 ZŁ', podpis: 'KOSZT JEDNEGO LEADA'}} />
+      <Composition id="fx-kolo" component={KoloZakreslenie} durationInFrames={Math.round(2.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{tekst: 'DARMOWE'}} />
+      <Composition id="fx-vs" component={DwieKolumny} durationInFrames={Math.round(3.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{zle: '3 GODZINY', dobre: '4 MINUTY'}} />
+      <Composition id="fx-komentarz" component={DymekKomentarza} durationInFrames={Math.round(3.6 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nick: 'karol.hvac', tresc: 'MONTAŻ'}} />
+      <Composition id="fx-etapy" component={PasekEtapow} durationInFrames={Math.round(3.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{etapy: ['NAGRANIE', 'MONTAŻ', 'PUBLIKACJA']}} />
+      <Composition id="fx-stempel" component={Stempel} durationInFrames={Math.round(1.8 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{tekst: 'FAKT'}} />
+      <Composition id="fx-krok" component={CyfraKroku} durationInFrames={Math.round(2.6 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{numer: '1', opis: 'WRZUCASZ NAGRANIE'}} />
+      <Composition id="fx-podkreslenie" component={PodkreslenieReczne} durationInFrames={Math.round(2.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{tekst: 'JEDNA KOMENDA'}} />
+      <Composition id="fx-pytanie" component={PytanieOdpowiedz} durationInFrames={Math.round(3.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{pytanie: 'ILE TO ZAJMUJE?', odpowiedz: '4 MINUTY'}} />
+      <Composition id="fx-ticker" component={Ticker} durationInFrames={Math.round(3.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{tekst: 'MONTAŻ Z AI • BEZ KOMBINOWANIA • '}} />
+      <Composition id="fx-odliczanie" component={Odliczanie} durationInFrames={Math.round(2.6 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{od: 3, podpis: 'TYLE TO ZAJMUJE'}} />
+      <Composition id="fx-ikony" component={TrzyIkony} durationInFrames={Math.round(3.0 * FPS)} fps={FPS} width={1080} height={1920} />
+      <Composition id="fx-cytat" component={Cytat} durationInFrames={Math.round(3.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{tekst: 'NIE MUSISZ TAŃCZYĆ, ŻEBY MIEĆ ZASIĘGI'}} />
     </>
   );
 };
