@@ -76,15 +76,32 @@ komentarza. Wynik to `plan.json` plus `efekty.json`.
 
 **Muzyka: nigdy nie montuj po cichu bez podkładu.** Narzędzie bez folderu `muzyka/`
 po prostu nie doda muzyki i nie zgłosi błędu, a rolka bez podkładu jest technicznie
-poprawna i kompletnie płaska. Zanim wyrenderujesz:
+poprawna i kompletnie płaska.
 
-- Jeśli w folderze `muzyka/` są utwory, wybierz ten, który pasuje do TYPU nagrania,
-  a nie pierwszy z brzegu. Spokojne tłumaczenie czegoś to inny podkład niż mocne
-  wezwanie do działania czy pokazywanie wyników.
-- Jeśli folder jest pusty albo nic nie pasuje do materiału, **powiedz to userowi
-  wprost przed renderem** i podaj konkretnie, jakiego podkładu ma poszukać
-  (nastrój, tempo, ile sekund) i skąd (Pixabay Music, sekcja royalty-free).
-  Lepiej poczekać minutę na plik niż oddać płaską rolkę.
+W repo jest `muzyka-startowa/` z pięcioma podkładami na licencji CC0 (wolno wszystko,
+bez oznaczania autora). Komenda instalacyjna kopiuje je do folderu `muzyka/`, więc
+pierwsza rolka ma z czego brać. Nazwy mówią, do czego pasują:
+
+| Plik | Do jakiego nagrania |
+|---|---|
+| `spokojny-lofi-poranek` | spokojne tłumaczenie, poradnik, "jak to działa" |
+| `cieply-lofi-vintage` | historia, doświadczenie, budowanie zaufania |
+| `lekki-lofi-w-powietrzu` | neutralne tło, gdy muzyka ma nic nie narzucać |
+| `energiczny-phonk-only-human` | wezwanie do działania, pokazywanie wyników |
+| `mocny-phonk-pantheon` | mocny hook, kontra, "przestań robić X" |
+
+Zanim wyrenderujesz:
+
+- **Dobierz utwór do TYPU nagrania, nie bierz pierwszego z brzegu.** Przesłuchaj
+  transkrypcję: spokojne tłumaczenie dostaje inny podkład niż mocne wezwanie
+  do działania. Powiedz userowi, który wybrałeś i dlaczego, jednym zdaniem.
+- **Jeśli żaden z dostępnych nie pasuje do materiału, powiedz to wprost PRZED
+  renderem** i podaj konkretnie, czego ma poszukać (nastrój, tempo, długość)
+  i skąd (Pixabay Music). Lepiej poczekać minutę na właściwy plik niż oddać
+  rolkę z podkładem, który gryzie się z treścią.
+- Zestaw startowy to pięć nastrojów, a nagrania będą różne. Zachęcaj usera, żeby
+  dorzucał własne utwory do `muzyka/`: narzędzie rotuje je między rolkami, więc
+  im więcej ich tam jest, tym mniej jednostajnie brzmi jego profil.
 
 **Zawsze przejrzyj `efekty.json` i popraw teksty.** Automat bierze frazy wprost
 z napisów, więc czasem wychodzi zdanie urwane albo bez sensu w oderwaniu od

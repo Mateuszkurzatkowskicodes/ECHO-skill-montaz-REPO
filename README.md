@@ -98,9 +98,16 @@ rolkę” — AI wie, w jakiej kolejności je uruchomić.
 
 ## Muzyka
 
-W repo nie ma plików muzycznych, bo licencje nie pozwalają ich rozdawać dalej.
-Pobierz kilka utworów royalty-free (np. z Pixabay Music) i trzymaj je w jednym
-folderze. Zestaw sam bierze do każdej rolki inny utwór niż ostatnio.
+W `muzyka-startowa/` jest pięć podkładów na licencji **CC0**, czyli w domenie
+publicznej: komercyjnie, bez oznaczania autora, nikt nie zgłosi do nich roszczenia.
+Komenda instalacyjna kopiuje je do folderu `muzyka/`, więc pierwsza rolka ma z czego
+brać i nie wychodzi bez dźwięku. Co do czego pasuje i skąd to jest:
+`muzyka-startowa/ZRODLA-I-LICENCJA.txt`.
+
+To zestaw na start, nie na zawsze. Do kolejnych rolek dobieraj utwór pod konkretne
+nagranie (Pixabay Music: za darmo, komercyjnie, bez oznaczania) i wrzucaj do tego
+samego folderu. Zestaw sam bierze do każdej rolki inny utwór niż ostatnio, więc im
+więcej ich masz, tym mniej jednostajnie brzmi Twój profil.
 
 ## Ważne: co renderować, a czego nie
 
