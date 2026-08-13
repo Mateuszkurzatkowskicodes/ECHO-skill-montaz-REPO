@@ -74,6 +74,18 @@ Dobiera też efekt do treści: liczba dostaje kartę wyniku i dzwonek, kontra
 dostaje przekreślenie, wyliczanka listę z odhaczaniem, końcówka mockup
 komentarza. Wynik to `plan.json` plus `efekty.json`.
 
+**Muzyka: nigdy nie montuj po cichu bez podkładu.** Narzędzie bez folderu `muzyka/`
+po prostu nie doda muzyki i nie zgłosi błędu, a rolka bez podkładu jest technicznie
+poprawna i kompletnie płaska. Zanim wyrenderujesz:
+
+- Jeśli w folderze `muzyka/` są utwory, wybierz ten, który pasuje do TYPU nagrania,
+  a nie pierwszy z brzegu. Spokojne tłumaczenie czegoś to inny podkład niż mocne
+  wezwanie do działania czy pokazywanie wyników.
+- Jeśli folder jest pusty albo nic nie pasuje do materiału, **powiedz to userowi
+  wprost przed renderem** i podaj konkretnie, jakiego podkładu ma poszukać
+  (nastrój, tempo, ile sekund) i skąd (Pixabay Music, sekcja royalty-free).
+  Lepiej poczekać minutę na plik niż oddać płaską rolkę.
+
 **Zawsze przejrzyj `efekty.json` i popraw teksty.** Automat bierze frazy wprost
 z napisów, więc czasem wychodzi zdanie urwane albo bez sensu w oderwaniu od
 kontekstu. To jest miejsce, gdzie Twoja robota daje najwięcej: treść efektu ma
@@ -207,10 +219,15 @@ swoje logo pod tą samą nazwą, albo podaj plik w polu `logo` w planie.
 4. **Pokaż userowi plan** w dwóch zdaniach: ile efektów, jakie, jaka muzyka.
 5. **Render:** `plan-efektow.mjs --renderuj-efekty`, potem `buduj-filtr.mjs --renderuj`.
 6. **Kontrola:** `sprawdz.mjs` i obejrzenie klatek.
-7. **Opis pod rolkę:** przy każdym gotowym montażu zapisz obok pliku wideo
-   `<nazwa>-OPIS.txt` gotowy do wklejenia: hook, ból, wartość, CTA z hasłem
-   w komentarzu, hashtagi. Opis ma zgadzać się z tym, co FAKTYCZNIE padło
-   w zmontowanym nagraniu, nie z pierwotnym scenariuszem.
+7. **Koniec. Oddajesz gotowy plik i tyle.**
+
+**NIE dopisuj z automatu opisu pod rolkę, hashtagów ani propozycji CTA.** Obietnicą
+tego zestawu jest zmontowana rolka, a nie opis do niej. Dorzucanie tego z własnej
+inicjatywy wydłuża montaż i każe czekać na coś, o co nikt nie prosił.
+
+Jeśli user **wprost poprosi** o opis, wtedy go napisz: hook, ból, wartość, CTA,
+hashtagi, zgodne z tym, co FAKTYCZNIE padło w zmontowanym nagraniu, nie z pierwotnego
+scenariusza. Ale tylko na prośbę.
 
 ## Zasady twarde
 
