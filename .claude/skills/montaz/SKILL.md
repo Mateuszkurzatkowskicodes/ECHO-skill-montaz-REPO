@@ -74,34 +74,44 @@ Dobiera też efekt do treści: liczba dostaje kartę wyniku i dzwonek, kontra
 dostaje przekreślenie, wyliczanka listę z odhaczaniem, końcówka mockup
 komentarza. Wynik to `plan.json` plus `efekty.json`.
 
-**Muzyka: nigdy nie montuj po cichu bez podkładu.** Narzędzie bez folderu `muzyka/`
-po prostu nie doda muzyki i nie zgłosi błędu, a rolka bez podkładu jest technicznie
-poprawna i kompletnie płaska.
+**Muzykę dobierasz TY, user nie ma nic pobierać ani szukać.** To jest twarda zasada.
+Zestaw ma jedenaście podkładów na wszystkie typowe nastroje, więc zawsze jest z czego
+wybrać. **Nigdy nie odsyłaj usera po muzykę i nigdy nie pytaj go, jaki chce podkład** —
+to jest dokładnie ta robota, której ma nie mieć. Przeczytaj transkrypcję, zdecyduj sam
+i powiedz jednym zdaniem, co wybrałeś i dlaczego.
 
-W repo jest `muzyka-startowa/` z pięcioma podkładami na licencji CC0 (wolno wszystko,
-bez oznaczania autora). Komenda instalacyjna kopiuje je do folderu `muzyka/`, więc
-pierwsza rolka ma z czego brać. Nazwy mówią, do czego pasują:
+Narzędzie bez folderu `muzyka/` po prostu nie doda muzyki i nie zgłosi błędu, a rolka
+bez podkładu jest technicznie poprawna i kompletnie płaska. Komenda instalacyjna kopiuje
+`muzyka-startowa/` z repo do `muzyka/`, więc materiał jest na miejscu od pierwszej rolki.
+Wszystko na licencji CC0: komercyjnie, bez oznaczania autora, zero ryzyka roszczeń.
 
-| Plik | Do jakiego nagrania |
+| Plik | Kiedy go bierzesz |
 |---|---|
 | `spokojny-lofi-poranek` | spokojne tłumaczenie, poradnik, "jak to działa" |
 | `cieply-lofi-vintage` | historia, doświadczenie, budowanie zaufania |
 | `lekki-lofi-w-powietrzu` | neutralne tło, gdy muzyka ma nic nie narzucać |
-| `energiczny-phonk-only-human` | wezwanie do działania, pokazywanie wyników |
+| `emocjonalny-spokojny` | osobista historia, porażka, zmiana podejścia |
+| `cieply-optymistyczny` | dobra wiadomość, efekt, "udało się" |
+| `pozytywny-lekki` | luźne, sympatyczne, bez ciężaru |
+| `nowoczesny-tech` | narzędzia, AI, pokazywanie ekranu, konkret techniczny |
+| `motywacyjny-do-dzialania` | wezwanie do działania, "zacznij", CTA na końcu |
+| `energiczny-phonk-only-human` | tempo, wyniki, liczby, szybka wyliczanka |
+| `energiczny-napiecie` | problem, koszt zaniechania, "tracisz na tym" |
 | `mocny-phonk-pantheon` | mocny hook, kontra, "przestań robić X" |
 
-Zanim wyrenderujesz:
+Jak wybierać:
 
-- **Dobierz utwór do TYPU nagrania, nie bierz pierwszego z brzegu.** Przesłuchaj
-  transkrypcję: spokojne tłumaczenie dostaje inny podkład niż mocne wezwanie
-  do działania. Powiedz userowi, który wybrałeś i dlaczego, jednym zdaniem.
-- **Jeśli żaden z dostępnych nie pasuje do materiału, powiedz to wprost PRZED
-  renderem** i podaj konkretnie, czego ma poszukać (nastrój, tempo, długość)
-  i skąd (Pixabay Music). Lepiej poczekać minutę na właściwy plik niż oddać
-  rolkę z podkładem, który gryzie się z treścią.
-- Zestaw startowy to pięć nastrojów, a nagrania będą różne. Zachęcaj usera, żeby
-  dorzucał własne utwory do `muzyka/`: narzędzie rotuje je między rolkami, więc
-  im więcej ich tam jest, tym mniej jednostajnie brzmi jego profil.
+1. **Zdecyduj po treści, nie po kolejności w folderze.** Weź dominujący ton całego
+   nagrania: tłumaczenie czegoś to inny podkład niż wyliczanie strat czy CTA.
+2. **Gdy nagranie zmienia ton** (spokojny wstęp, mocna końcówka), wybieraj pod
+   końcówkę, bo to ona zostaje w głowie i tam siedzi CTA.
+3. **Nie powtarzaj podkładu z poprzedniej rolki.** `plan-efektow.mjs` pilnuje tego sam
+   przez `.echo-historia-efektow.json`, ale jeśli wybierasz ręcznie, sprawdź historię.
+4. **Nie oddawaj rolki bez muzyki.** Jeśli z jakiegoś powodu folder `muzyka/` jest pusty,
+   skopiuj go z repo (`muzyka-startowa/`) i lecisz dalej. To ma się dziać bez udziału usera.
+
+User może dorzucić własne utwory do `muzyka/`, jeśli chce, i wtedy też je bierzesz pod
+uwagę. Ale to jego opcja, nie warunek: bez kiwnięcia palcem ma dostać dobrze dobraną muzykę.
 
 **Zawsze przejrzyj `efekty.json` i popraw teksty.** Automat bierze frazy wprost
 z napisów, więc czasem wychodzi zdanie urwane albo bez sensu w oderwaniu od

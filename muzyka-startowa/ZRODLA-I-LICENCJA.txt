@@ -1,74 +1,75 @@
 ========================================================
-  MUZYKA STARTOWA — skąd jest i co wolno z nią robić
+  MUZYKA — skąd jest i co wolno z nią robić
 ========================================================
 
-Te pięć podkładów jest po to, żebyś przy PIERWSZEJ rolce nie musiał
-niczego szukać. Montaż bez muzyki jest technicznie poprawny i zupełnie
-płaski, a nie o to chodzi.
-
-To jest zestaw na start, nie na zawsze. Do kolejnych rolek dobieraj
-muzykę pod TYP nagrania (patrz niżej).
+Jedenaście podkładów na wszystkie typowe nastroje rolki.
+AI samo wybiera z nich ten, który pasuje do Twojego nagrania.
+Nie musisz nic pobierać, nic wybierać ani nic ustawiać.
 
 
 --------------------------------------------------------
 LICENCJA: wolno wszystko
 --------------------------------------------------------
 
-Wszystkie pięć utworów jest na licencji CC0 1.0 Universal,
+Wszystkie utwory są na licencji CC0 1.0 Universal,
 czyli w domenie publicznej.
 
 Znaczy to dokładnie tyle:
 - możesz ich używać komercyjnie,
 - nie musisz nikogo podpisywać ani oznaczać,
-- nikt nie zgłosi do nich roszczenia na Instagramie, TikToku ani YouTube,
-- możesz je przerabiać i zostawić u siebie na zawsze.
+- nikt nie zgłosi do nich roszczenia na Instagramie,
+  TikToku ani YouTube,
+- możesz je przerabiać i zostają u Ciebie na zawsze.
 
-Autor: HoliznaCC0
-Źródło: Free Music Archive (freemusicarchive.org/music/holiznacc0)
-Licencja: CC0 1.0 Universal (creativecommons.org/publicdomain/zero/1.0)
+Autorzy: HoliznaCC0 oraz John Bartmann
+Źródło: Free Music Archive (freemusicarchive.org)
+Licencja: CC0 1.0 Universal
+          (creativecommons.org/publicdomain/zero/1.0)
 
-Pliki zostały przycięte do 100 sekund i wyrównane głośnościowo,
-żeby nie obciążały pobierania. Oryginały są pod adresem wyżej.
+Pliki zostały przycięte do 100 sekund i wyrównane
+głośnościowo, żeby nie obciążały pobierania.
+Oryginały są pod adresem wyżej.
 
 
 --------------------------------------------------------
 CO DO CZEGO PASUJE
 --------------------------------------------------------
 
-spokojny-lofi-poranek.mp3
-   Tłumaczysz coś spokojnie, poradnik, "jak to działa".
-   Najbezpieczniejszy wybór pod gadającą głowę.
+Ta lista jest dla AI, nie dla Ciebie. Zostawiam ją tutaj,
+gdybyś kiedyś chciał wybrać ręcznie.
 
-cieply-lofi-vintage.mp3
-   Historia, doświadczenie, budowanie zaufania.
-   Cieplejszy niż powyższy, dobry pod opowiadanie.
+SPOKOJNE, POD TŁUMACZENIE
+  spokojny-lofi-poranek    tłumaczysz coś spokojnie, poradnik
+  cieply-lofi-vintage      historia, doświadczenie, zaufanie
+  lekki-lofi-w-powietrzu   neutralne tło, nic nie narzuca
+  emocjonalny-spokojny     osobista historia, zmiana podejścia
 
-lekki-lofi-w-powietrzu.mp3
-   Lekki i neutralny. Gdy nie chcesz, żeby muzyka
-   cokolwiek narzucała.
+POZYTYWNE
+  cieply-optymistyczny     dobra wiadomość, efekt, "udało się"
+  pozytywny-lekki          luźne i sympatyczne, bez ciężaru
 
-energiczny-phonk-only-human.mp3
-   Mocne wejście, wezwanie do działania, pokazywanie wyników.
-   Podbija tempo, więc nie pod spokojne tłumaczenie.
+KONKRET I NARZĘDZIA
+  nowoczesny-tech          AI, narzędzia, pokazywanie ekranu
 
-mocny-phonk-pantheon.mp3
-   Najmocniejszy z zestawu. Hook, kontra, "przestań robić X".
-   Używaj oszczędnie, bo potrafi przykryć spokojny przekaz.
+MOCNE, POD DZIAŁANIE
+  motywacyjny-do-dzialania wezwanie do działania, CTA
+  energiczny-phonk-only-human  tempo, wyniki, liczby
+  energiczny-napiecie      problem, "tracisz na tym"
+  mocny-phonk-pantheon     mocny hook, kontra, "przestań robić X"
 
 
 --------------------------------------------------------
-GDY POTRZEBUJESZ CZEGOŚ INNEGO
+CHCESZ WIĘCEJ? (opcjonalnie, nie musisz)
 --------------------------------------------------------
 
-Ten zestaw ma pięć nastrojów, a Twoje nagrania będą różne.
-Gdy żaden nie pasuje, dobierz utwór pod konkretne nagranie:
+Zestaw wystarcza do normalnej pracy i AI rotuje utwory,
+żeby Twój profil nie brzmiał jednostajnie.
 
-   Pixabay Music (pixabay.com/music) — za darmo, komercyjnie,
-   bez oznaczania autora.
-
-Pobierz plik i wrzuć go do tego samego folderu "muzyka".
-Zestaw sam bierze do każdej kolejnej rolki inny utwór niż ostatnio,
-więc im więcej tam wrzucisz, tym mniej jednostajnie brzmi Twój profil.
+Jeśli mimo to chcesz mieć więcej albo trafić w konkretny
+klimat, pobierz co chcesz z Pixabay Music (pixabay.com/music,
+za darmo i komercyjnie) i wrzuć do tego samego folderu.
+AI będzie brało to pod uwagę przy kolejnych montażach.
 
 Czego NIE wrzucać: piosenek z radia, ze Spotify i z YouTube.
-Instagram albo YouTube potrafi za to wyciszyć albo zablokować film.
+Instagram albo YouTube potrafi za to wyciszyć albo
+zablokować film.
