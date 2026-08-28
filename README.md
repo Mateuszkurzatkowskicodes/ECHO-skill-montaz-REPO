@@ -65,6 +65,12 @@ nie jest płaski, czy nie powtarza się ten sam efekt i czy jest muzyka.
 Połóż `logo.png` w folderze, w którym montujesz, a znak wejdzie w prawy górny
 róg każdej rolki.
 
+**Cięcie materiału: jasny podział**
+Skill mówi teraz wprost, że jeśli poprosisz o pocięcie surowego nagrania, AI to zrobi,
+ale najpierw pokaże Ci propozycję cięć do akceptacji i nie będzie samo zgadywać, które
+podejście było lepsze. Przy pierwszych rolkach nadal najszybciej wychodzi, gdy sam
+zostawisz najlepsze momenty.
+
 **Skill wie więcej o stylu**
 Plik `.claude/skills/montaz/SKILL.md` przestał być listą tego, co wolno, a stał
 się listą progów, które montaż ma spełnić: gęstość efektów, wysokość napisów,

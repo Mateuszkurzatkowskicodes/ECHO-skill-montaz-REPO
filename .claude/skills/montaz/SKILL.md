@@ -14,26 +14,24 @@ zmontowana, a nie jak nagranie z napisami. Jeśli user prosi Cię o "więcej
 efektów", "częściej", "ciekawiej", to znaczy, że nie trzymasz tego pliku.
 Tych rzeczy user nie ma zamawiać. To jest wersja domyślna.
 
-## Podział ról: cięcie robi USER, montaż robisz TY
+## Cięcie materiału: domyślnie od usera, ale nie odmawiasz
 
-**Wyboru dubli i cięcia surowego materiału NIE robisz.** Nie słyszysz intonacji
-ani energii, a z samej transkrypcji wychodzą cięcia mechaniczne, powtórki
-i wywalone najlepsze podejścia. Poza tym automatyczne cięcie jest najsłabszym
-i najwolniejszym kawałkiem całej tej metody: potrafi mielić długo i i tak
-skończyć się materiałem do poprawek.
+Domyślny przepływ: user daje Ci plik już przycięty (sam wybrał najlepsze podejścia
+i skleił je byle jak), a Ty robisz z niego PEŁNY montaż: napisy, zoomy, efekty,
+muzykę, SFX i kontrolę.
 
-Przepływ jest taki:
+**Jeśli user prosi Cię o pocięcie surowego nagrania, robisz to.** Masz transkrypcję
+z czasami, więc potrafisz wyciąć ciszę, przejęzyczenia i powtórzone podejścia.
+Trzymaj się przy tym trzech rzeczy:
 
-1. User nagrywa kilka dubli, SAM wycina przejęzyczenia, ciszę i słabsze
-   podejścia, i skleja resztę byle jak (bez napisów i efektów) w jeden plik
-   pionowy.
-2. Ty bierzesz ten gotowy materiał i robisz z niego PEŁNY montaż: napisy, zoomy,
-   efekty, muzyka, SFX, kontrola.
-
-Jeśli user daje Ci surowe nagranie z dublami i prosi, żebyś to poskładał:
-powiedz mu wprost, że to jedyny etap, w którym jego dziesięć minut jest warte
-więcej niż Twoja godzina, i że przy pierwszych rolkach ma to zrobić sam.
-Plan cięć możesz zaproponować, jeśli user o to prosi. Nie decyduj za niego.
+1. **Pokaż propozycję cięć** (czasy plus co wypada) i daj ją zaakceptować, zamiast po
+   cichu skracać nagranie o połowę.
+2. **Przy kilku podejściach tego samego zdania nie zgaduj po tekście, które było
+   lepsze.** Wypisz je z czasami i zapytaj. Nie słyszysz intonacji ani energii, więc
+   to jedyne miejsce, gdzie user ma nad Tobą realną przewagę.
+3. **Przy pierwszych rolkach powiedz mu, że jeśli sam wybierze najlepsze momenty,
+   rolka zwykle wychodzi dobra od pierwszego razu**, a jego to kilka minut. To rada,
+   nie warunek. Nie odmawiaj i nie każ mu wracać z gotowym plikiem.
 
 ## PROGI JAKOŚCI (to nie są sugestie)
 
@@ -329,8 +327,9 @@ a plan weźmie je sam.
 
 ## Workflow
 
-1. **Wejście:** user daje już wybrany, przycięty plik. Ustal format (rolka albo
-   długi), gdzie ma pójść i czy ma własną muzykę.
+1. **Wejście:** plik od usera. Jeśli jest surowy, ustal, czy tniesz Ty (wtedy najpierw
+   propozycja cięć do akceptacji), czy user przytnie go sam. Ustal też format (rolka
+   albo długi), gdzie ma pójść i czy ma własną muzykę.
 2. **Napisy:** `transkrypcja.py`.
 3. **Plan:** `plan-efektow.mjs`. Przejrzyj `efekty.json` i popraw teksty efektów.
 4. **Pokaż userowi plan** w dwóch zdaniach: ile efektów, jakie, jaka muzyka.
