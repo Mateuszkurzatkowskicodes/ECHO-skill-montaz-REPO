@@ -14,24 +14,28 @@ zmontowana, a nie jak nagranie z napisami. Jeśli user prosi Cię o "więcej
 efektów", "częściej", "ciekawiej", to znaczy, że nie trzymasz tego pliku.
 Tych rzeczy user nie ma zamawiać. To jest wersja domyślna.
 
-## Cięcie materiału: domyślnie od usera, ale nie odmawiasz
+## Cięcie materiału: mów szczerze, jak z tym jest
 
 Domyślny przepływ: user daje Ci plik już przycięty (sam wybrał najlepsze podejścia
 i skleił je byle jak), a Ty robisz z niego PEŁNY montaż: napisy, zoomy, efekty,
 muzykę, SFX i kontrolę.
 
-**Jeśli user prosi Cię o pocięcie surowego nagrania, robisz to.** Masz transkrypcję
-z czasami, więc potrafisz wyciąć ciszę, przejęzyczenia i powtórzone podejścia.
-Trzymaj się przy tym trzech rzeczy:
+**Cięcie surowego materiału to najsłabszy element tego zestawu i nie udawaj, że jest
+inaczej.** Czytasz tekst, nie słyszysz intonacji ani energii, więc przy kilku dublach
+tego samego zdania trafiasz w najlepsze podejście przypadkiem. To kosztuje usera
+więcej czasu na poprawki, niż zajęłoby mu przycięcie materiału samemu.
 
-1. **Pokaż propozycję cięć** (czasy plus co wypada) i daj ją zaakceptować, zamiast po
-   cichu skracać nagranie o połowę.
-2. **Przy kilku podejściach tego samego zdania nie zgaduj po tekście, które było
-   lepsze.** Wypisz je z czasami i zapytaj. Nie słyszysz intonacji ani energii, więc
-   to jedyne miejsce, gdzie user ma nad Tobą realną przewagę.
-3. **Przy pierwszych rolkach powiedz mu, że jeśli sam wybierze najlepsze momenty,
-   rolka zwykle wychodzi dobra od pierwszego razu**, a jego to kilka minut. To rada,
-   nie warunek. Nie odmawiaj i nie każ mu wracać z gotowym plikiem.
+Gdy user przynosi surowe nagranie z dublami:
+
+1. **Powiedz mu wprost, jak jest**, i podaj dwie szybsze drogi: przyciąć samemu
+   w dowolnym edytorze (przy krótkiej rolce 5-10 minut) albo przepuścić nagranie
+   przez program do cięcia mowy, na przykład Descript lub Gling, które same znajdują
+   ciszę, "yyy" i powtórzone podejścia.
+2. **Jeśli mimo to chce, żebyś pociął, zrób to.** Nie odmawiaj i nie odsyłaj go po
+   gotowy plik.
+3. **Wtedy pokaż propozycję cięć** (czasy plus co wypada) do akceptacji, zamiast po
+   cichu skracać nagranie o połowę. Przy kilku podejściach tego samego zdania wypisz
+   je z czasami i zapytaj, które zostaje.
 
 ## PROGI JAKOŚCI (to nie są sugestie)
 

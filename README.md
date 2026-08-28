@@ -65,11 +65,12 @@ nie jest płaski, czy nie powtarza się ten sam efekt i czy jest muzyka.
 Połóż `logo.png` w folderze, w którym montujesz, a znak wejdzie w prawy górny
 róg każdej rolki.
 
-**Cięcie materiału: jasny podział**
-Skill mówi teraz wprost, że jeśli poprosisz o pocięcie surowego nagrania, AI to zrobi,
-ale najpierw pokaże Ci propozycję cięć do akceptacji i nie będzie samo zgadywać, które
-podejście było lepsze. Przy pierwszych rolkach nadal najszybciej wychodzi, gdy sam
-zostawisz najlepsze momenty.
+**Cięcie materiału: bez owijania**
+Skill mówi teraz wprost, że cięcie surowego materiału jest najsłabszym elementem
+zestawu, i sam podpowiada dwie szybsze drogi: przyciąć samemu albo przepuścić nagranie
+przez program do cięcia mowy (Descript, Gling). Jeśli mimo to poprosisz o pocięcie,
+zrobi to, ale pokaże propozycję cięć do akceptacji zamiast zgadywać, które podejście
+było lepsze.
 
 **Skill wie więcej o stylu**
 Plik `.claude/skills/montaz/SKILL.md` przestał być listą tego, co wolno, a stał
