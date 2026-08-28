@@ -53,7 +53,7 @@ Zanim oddasz rolkę, każda z tych rzeczy ma być prawdziwa:
 | Dźwięk | muzyka jest ZAWSZE; SFX maks. około 6 na rolkę |
 | Głośność | -14 LUFS, muzyka z duckingiem pod głosem |
 | Zoom-punch | tylko na sklejkach, nigdy "co jakiś czas" |
-| Kontrola | `sprawdz.mjs` przeszedł i obejrzałeś klatki |
+| Kontrola | `sprawdz.mjs` przeszedł, a `krytyk.mjs` ma komplet "tak" |
 
 `plan-efektow.mjs` trzyma te progi sam, a `sprawdz.mjs` je weryfikuje na gotowym
 pliku. Nie obchodź ich "dla oszczędności czasu": rolka bez efektów jest gotowa
@@ -239,7 +239,32 @@ płaski, czy nie powtarza się ten sam efekt i czy jest muzyka.
 Wyciąga też siatkę klatek do obejrzenia. **Przejrzyj je**, bo tylko tak
 wyłapiesz napis leżący na twarzy albo element wychodzący poza kadr.
 
-### 6. Gdzie naprawdę są sklejki
+### 6. Krytyk, czyli OBEJRZENIE rolki (ostatni krok, nie do pominięcia)
+
+```bash
+node narzedzia/krytyk.mjs gotowe.mp4
+```
+
+`sprawdz.mjs` mierzy liczby. To narzędzie każe Ci ZOBACZYĆ, co wyszło. Wyciąga
+klatki dokładnie w tych momentach, w których coś wjeżdża w kadr (a nie co kilka
+sekund na oślep), dokłada dwa kadry z samymi napisami i kadr z końcówki, skleja
+wszystko w jedną kontaktówkę i wypisuje dziesięć pytań w `krytyk/pytania.md`.
+
+**Obejrzyj kontaktówkę i odpowiedz na każde pytanie, patrząc na obraz, nie
+z pamięci.** Pytania są o rzeczy, których żadne narzędzie nie policzy: czy karta
+nie leży na twarzy, czy wielki napis nie jest urwany w połowie zdania, czy trzy
+ciemne plansze nie stoją pod rząd, czy końcówka ma puentę, czy to w ogóle wygląda
+jak zmontowana rolka.
+
+**Każde "nie" to poprawka i ponowny render, nie dopisek w podsumowaniu.**
+Dopiero komplet "tak" oznacza, że rolka jest gotowa do oddania.
+
+Przy **pierwszych trzech rolkach danego usera przechodź ten krok szczególnie
+dokładnie** i wypisz mu w odpowiedzi, co sprawdziłeś. Nie zna jeszcze tej metody
+i to jest moment, w którym decyduje, czy ona działa. Później robisz to nadal, ale
+bez rozpisywania się.
+
+### 7. Gdzie naprawdę są sklejki
 
 ```bash
 node narzedzia/wykryj-ciecia.mjs nagranie.mp4
@@ -364,10 +389,13 @@ a plan weźmie je sam.
 3. **Plan:** `plan-efektow.mjs`. Przejrzyj `efekty.json` i popraw teksty efektów.
 4. **Pokaż userowi plan** w dwóch zdaniach: ile efektów, jakie, jaka muzyka.
 5. **Render:** `plan-efektow.mjs --renderuj-efekty`, potem `buduj-filtr.mjs --renderuj`.
-6. **Kontrola:** `sprawdz.mjs` i obejrzenie klatek. Jeśli narzędzie zgłasza, że
-   efektów jest za rzadko albo hook jest płaski, popraw i zrenderuj jeszcze raz.
+6. **Kontrola techniczna:** `sprawdz.mjs`. Jeśli narzędzie zgłasza, że efektów
+   jest za rzadko albo otwarcie jest płaskie, popraw i zrenderuj jeszcze raz.
    Nie oddawaj rolki z otwartą listą "DO POPRAWY".
-7. **Koniec. Oddajesz gotowy plik i tyle.**
+7. **Krytyk:** `krytyk.mjs`, obejrzenie kontaktówki i dziesięć pytań. Każde "nie"
+   to poprawka i render. To jest ten krok, po którym pierwsza rolka wychodzi
+   dobra, zamiast wracać z listą uwag od usera.
+8. **Koniec. Oddajesz gotowy plik i tyle.**
 
 **NIE dopisuj z automatu opisu pod rolkę, hashtagów ani propozycji CTA.** Obietnicą
 tego zestawu jest zmontowana rolka, a nie opis do niej. Dorzucanie tego z własnej
@@ -392,7 +420,8 @@ scenariusza. Ale tylko na prośbę.
 
 - Napisy po polsku, chyba że materiał jest anglojęzyczny pod zasięg globalny.
 - Muzyka tylko royalty-free albo dostarczona przez usera. Pytaj o źródło.
-- Nie zostawiaj rolki bez kontroli `sprawdz.mjs` i bez obejrzenia klatek.
+- Nie zostawiaj rolki bez `sprawdz.mjs` i bez przejścia krytyka. Oddanie pliku
+  bez obejrzenia kontaktówki to zgadywanie, a nie montaż.
 - Pliki robocze w folderze projektu, nie w repo skilla.
 
 ## Pułapki ffmpeg (wszystkie znalezione w praktyce)

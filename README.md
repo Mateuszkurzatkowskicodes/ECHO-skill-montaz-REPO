@@ -38,6 +38,15 @@ przenosi te uwagi do środka zestawu.
 - Na dłuższym nagraniu zestaw efektów nie kończy się w połowie: leci druga tura,
   zamiast zostawić drugą część rolki pustą.
 
+**Rolka jest na koniec OGLĄDANA, nie tylko mierzona**
+Doszedł `krytyk.mjs`. Wyciąga klatki dokładnie tam, gdzie coś wjeżdża w kadr,
+skleja całą rolkę w jedną kontaktówkę i daje dziesięć pytań: czy coś leży na
+twarzy, czy napis nie jest urwany w połowie zdania, czy trzy ciemne plansze nie
+stoją pod rząd, czy końcówka ma puentę, czy to w ogóle wygląda jak zmontowana
+rolka. Każde "nie" to poprawka i ponowny render, a nie dopisek w podsumowaniu.
+Wcześniej kontrola sprawdzała tylko liczby, a rzeczy, które się WIDZI,
+przechodziły bez echa.
+
 **Pierwsza rolka ma być mocna bez proszenia**
 - **Muzyka dobiera się pod to, co mówisz.** Zestaw czyta transkrypcję i wybiera
   podkład po treści (końcówka waży podwójnie, bo tam siedzi CTA), a rotacja
@@ -158,7 +167,8 @@ to pobrać.
 | `wykryj-ciecia.mjs` | gdzie naprawdę są sklejki, czyli gdzie wolno dać zoom-punch |
 | `plan-efektow.mjs` | gęsty i za każdym razem inny zestaw efektów |
 | `buduj-filtr.mjs` | render całości: zoom, napisy, warstwy, muzyka, SFX, głośność |
-| `sprawdz.mjs` | kontrola gotowego pliku i klatki do obejrzenia |
+| `sprawdz.mjs` | kontrola techniczna gotowego pliku |
+| `krytyk.mjs` | kontaktówka całej rolki i dziesięć pytań przed oddaniem |
 
 Typowy montaż to cztery komendy:
 
@@ -167,6 +177,7 @@ python narzedzia/transkrypcja.py nagranie.mp4 --ass napisy.ass
 node narzedzia/plan-efektow.mjs nagranie.mp4 --napisy napisy.ass --muzyka muzyka --renderuj-efekty
 node narzedzia/buduj-filtr.mjs plan.json --renderuj
 node narzedzia/sprawdz.mjs gotowe.mp4 --wobec nagranie.mp4
+node narzedzia/krytyk.mjs gotowe.mp4
 ```
 
 Nie musisz ich pamiętać. Wrzuć nagranie do folderu i napisz „zmontuj mi tę
