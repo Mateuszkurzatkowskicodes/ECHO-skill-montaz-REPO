@@ -14,6 +14,64 @@ dźwiękowe i kontrola jakości przed publikacją.
   tekstem plus kilkadziesiąt gotowych wzorców do czytania.
 - `wiedza-styl/` — analizy stylu montażu, na których uczył się skill.
 
+## Aktualizacja 2 (28 sierpnia 2026): rolka ma wyglądać dobrze BEZ proszenia
+
+Skąd się wzięła: najczęstsza uwaga po pierwszej rolce brzmiała "daj więcej
+efektów", "niech będą częściej", "niech będą różne". Skoro wszyscy proszą o to
+samo, to nie jest życzenie, tylko brak w ustawieniu domyślnym. Ta aktualizacja
+przenosi te uwagi do środka zestawu.
+
+**Montaż z automatu jest gęstszy i ciekawszy**
+- Efekty rozkładają się średnio co 3 sekundy zamiast co 3,5, i wchodzą tam,
+  gdzie faktycznie coś mówisz.
+- **Hook zawsze dostaje wielki napis w pierwszej sekundzie.** Wcześniej zdarzało
+  się, że rolka zaczynała się płasko, a to jedyne dwie sekundy, które decydują,
+  czy ktoś zostanie.
+- Dwa podobne efekty nie idą już jeden po drugim (koniec z dwoma zakreśleniami
+  pod rząd). Ten sam efekt nie wraca w jednej rolce, a kolejna rolka startuje
+  od innego zestawu.
+- Na dłuższym nagraniu zestaw efektów nie kończy się w połowie: leci druga tura,
+  zamiast zostawić drugą część rolki pustą.
+
+**Dźwięk brzmi drożej**
+- Efekty dźwiękowe wchodzą tylko na kilku najmocniejszych momentach (hook,
+  liczba, kontra, CTA), maksymalnie sześć na rolkę, z odstępem. Wcześniej dźwięk
+  dostawała każda nakładka i przy gęstym montażu rolka pikała kilkanaście razy.
+- Ten sam dźwięk nie leci dwa razy pod rząd.
+
+**Naprawione błędy, których nie było widać w logu**
+- **Nakładka niższa niż kadr lądowała przy górnej krawędzi ekranu**, czyli
+  zwykle na czole mówiącego. Teraz każdy taki element dostaje swoją wysokość
+  i siada nad napisami.
+- **Efekty z animowaną liczbą wpisywały do rolki kwoty, których nikt nie
+  powiedział** (na przykład "OSZCZĘDZASZ 1500 ZŁ" w nagraniu bez żadnej kwoty).
+  Wyszły z automatu; zostają do ręcznego użycia, gdy naprawdę masz liczby.
+- Karta wyniku pokazywała podpis sklejony z kawałków wyrazów ("ROBI IĄCA"),
+  a liczby rozbite przez napisy karaoke wyglądały jak "1 ,5 TYS".
+- Wielki napis potrafił pokazać jedno urwane słowo, na przykład samo "TĘ".
+- Silnik efektów nie odnajdywał się, jeśli montowałeś w innym folderze niż ten
+  z repo. Teraz szuka go sam.
+
+**Napisy**
+- Żadna linijka nie miga krócej niż 0,7 sekundy.
+- Linijki jednosłowne są scalane z następną, zamiast błyskać i znikać.
+
+**Kontrola przed publikacją sprawdza teraz też sam montaż**
+`node narzedzia/sprawdz.mjs gotowe.mp4` mówi nie tylko, czy plik jest
+technicznie w porządku, ale też czy efektów jest wystarczająco gęsto, czy hook
+nie jest płaski, czy nie powtarza się ten sam efekt i czy jest muzyka.
+
+**Logo w rogu wchodzi samo**
+Połóż `logo.png` w folderze, w którym montujesz, a znak wejdzie w prawy górny
+róg każdej rolki.
+
+**Skill wie więcej o stylu**
+Plik `.claude/skills/montaz/SKILL.md` przestał być listą tego, co wolno, a stał
+się listą progów, które montaż ma spełnić: gęstość efektów, wysokość napisów,
+nic na twarzy, przeplatanie ciemnych i jasnych plansz, panel za postacią zamiast
+pełnoekranowej karty, pokazywanie zamiast opisywania, zoom-punch wyłącznie na
+sklejkach.
+
 ## Aktualizacja z sierpnia 2026 (bezpłatna dla wszystkich kursantów)
 
 Największa zmiana od premiery. Wklej komendę aktualizacji ze strony kursu, żeby

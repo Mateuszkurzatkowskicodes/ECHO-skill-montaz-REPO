@@ -12,6 +12,7 @@
  *   node narzedzia/sprawdz.mjs gotowe.mp4
  *   node narzedzia/sprawdz.mjs gotowe.mp4 --wobec nagranie.mp4   (porównaj długość)
  *   node narzedzia/sprawdz.mjs gotowe.mp4 --klatki 12            (ile klatek wyciągnąć)
+ *   node narzedzia/sprawdz.mjs gotowe.mp4 --plan plan.json       (sprawdź też sam montaż)
  */
 
 import fs from "node:fs";
@@ -31,6 +32,7 @@ const wartosc = (n) => {
 };
 const wobec = wartosc("--wobec");
 const ileKlatek = Number(wartosc("--klatki")) || 9;
+const plikPlanu = wartosc("--plan") || path.join(path.dirname(path.resolve(plik)), "plan.json");
 
 function probe(pytanie, cel = plik) {
   try {
@@ -171,6 +173,62 @@ czasy.forEach((t, i) => {
   });
   if (r.status === 0 && fs.existsSync(cel)) zapisane++;
 });
+
+/* ---------- czy to w ogóle jest zmontowane ----------
+   Kontrola techniczna przepuści rolkę, w której wszystko działa, tylko nic się
+   nie dzieje: dwa efekty na minutę, płaski początek, brak muzyki. Widz odpada
+   po dwóch sekundach i nie ma z tego żadnego sygnału w logu. Jeśli obok pliku
+   leży plan montażu, sprawdzamy też to. */
+if (fs.existsSync(plikPlanu)) {
+  try {
+    const plan = JSON.parse(fs.readFileSync(plikPlanu, "utf8"));
+    const nakladki = plan.nakladki || [];
+    const cutawaye = plan.cutawaye || [];
+    const wszystkie = [...nakladki, ...cutawaye, ...(plan.splitscreen || [])];
+    const coIle = wszystkie.length ? dlugosc / wszystkie.length : Infinity;
+    console.log(`Efekty:      ${wszystkie.length}${wszystkie.length ? `, średnio co ${coIle.toFixed(1)} s` : ""}`);
+
+    if (!wszystkie.length) {
+      uwagi.push("W planie nie ma ani jednego efektu. To jest nagranie z napisami, nie zmontowana rolka.");
+    } else if (coIle > 5) {
+      uwagi.push(
+        `Efekt średnio co ${coIle.toFixed(1)} s to na rolkę za rzadko. Cel: co 3-4 s. ` +
+        "Zagęść: node narzedzia/plan-efektow.mjs nagranie.mp4 --napisy napisy.ass --gestosc 2.5"
+      );
+    } else {
+      ok.push(`efekty gęsto (co ${coIle.toFixed(1)} s)`);
+    }
+
+    const pierwszy = wszystkie.map((n) => n.od).filter((t) => t !== undefined).sort((a, b) => a - b)[0];
+    if (pierwszy === undefined || pierwszy > 2) {
+      uwagi.push(
+        "Pierwsze dwie sekundy są płaskie (pierwszy efekt dopiero " +
+        (pierwszy === undefined ? "nigdzie" : pierwszy.toFixed(1) + " s") +
+        "). To najczęstszy powód, dla którego dobre nagranie nie ma zasięgu."
+      );
+    } else {
+      ok.push("hook ma efekt od pierwszej sekundy");
+    }
+
+    const rodzaje = new Set(nakladki.map((n) => path.basename(n.plik || "").replace(/^\d+-/, "")));
+    if (nakladki.length >= 4 && rodzaje.size < Math.ceil(nakladki.length / 2)) {
+      uwagi.push("Ten sam efekt wraca w rolce kilka razy. Widz czyta to jako jeden powtarzany trik.");
+    }
+
+    if (!plan.muzyka || !plan.muzyka.plik) {
+      uwagi.push("Rolka bez podkładu. Technicznie poprawna, w odbiorze płaska. Dodaj --muzyka muzyka.");
+    } else {
+      ok.push("muzyka dobrana");
+    }
+
+    const ileSfx = (plan.sfx || []).length;
+    if (!ileSfx) uwagi.push("Zero efektów dźwiękowych. Zrób je raz: node narzedzia/zrob-sfx.mjs sfx");
+    else if (ileSfx > 8) uwagi.push(`${ileSfx} dźwięków na jedną rolkę to hałas. Zostaw kilka najmocniejszych.`);
+    else ok.push(`${ileSfx} efektów dźwiękowych`);
+  } catch (e) {
+    // plan nie jest wymagany; jeśli jest zepsuty, nie przerywamy kontroli pliku
+  }
+}
 
 /* ---------- podsumowanie ---------- */
 console.log("");

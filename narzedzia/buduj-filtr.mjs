@@ -548,7 +548,11 @@ cutAudio.forEach((c, i) => {
 // miks + limiter + wyrównanie głośności do poziomu platform (-14 LUFS).
 // Bez tego jedna rolka jest cicha, druga przesterowana, a Instagram i tak
 // podciąga własnym normalizatorem i wychodzi bałagan.
-const loud = plan.loudness === false ? "" : ",loudnorm=I=-14:TP=-1.5:LRA=11";
+// UWAGA: `loudnorm` pracuje wewnetrznie na 192 kHz i tyle wystawia na wyjsciu,
+// przez co koder AAC zapisywal sciezke w 96 kHz. Plik dziala, ale to nietypowa
+// czestotliwosc jak na material pod Instagrama i TikToka, a czesc odtwarzaczy
+// i edytorow sie przy niej krzywi. Wracamy na 48 kHz zaraz po wyrownaniu.
+const loud = plan.loudness === false ? "" : ",loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000";
 if (doMiksu.length === 1) {
   czesci.push(`[${doMiksu[0]}]alimiter=limit=0.97${loud}[wyj_a]`);
 } else {

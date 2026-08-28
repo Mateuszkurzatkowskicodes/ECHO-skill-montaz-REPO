@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 /**
  * plan-efektow.mjs — układa gęsty i ZA KAŻDYM RAZEM INNY zestaw efektów.
+ * Wersja 3 (sierpień 2026): gęściej, mocniejszy hook, mniej pikania w dźwięku,
+ * nakładki niepełnoekranowe siadają tam, gdzie mają, a nie przy górnej krawędzi.
  *
  * PO CO TO JEST:
  * Dwa najczęstsze grzechy montażu robionego przez AI: efektów jest za mało
@@ -11,10 +13,15 @@
  *    faktycznie coś się mówi (bierze czasy z gotowych napisów), a nie na slepo.
  *  - RÓŻNORODNOŚĆ: pamięta w pliku, co poszło w poprzednich rolkach, i najpierw
  *    sięga po to, czego dawno nie było. Ten sam efekt nie wraca dwa razy w jednej
- *    rolce, a kolejna rolka startuje od innego zestawu. Muzyka rotuje tak samo.
+ *    rolce, dwa efekty z tej samej rodziny nie idą jeden po drugim, a kolejna
+ *    rolka startuje od innego zestawu. Muzyka rotuje tak samo.
  *  - DOBÓR DO TREŚCI: liczba w zdaniu dostaje kartę wyniku i dzwonek, kontra
  *    dostaje przekreślenie, wyliczanka dostaje listę z odhaczaniem, końcówka
  *    dostaje mockup komentarza pod CTA.
+ *  - HOOK: pierwsze zdanie ZAWSZE dostaje wielki napis. Płaskie pierwsze dwie
+ *    sekundy to najczęstszy powód, dla którego dobra rolka nie ma zasięgu.
+ *  - DŹWIĘK Z UMIAREM: efekt dźwiękowy idzie na kilka NAJMOCNIEJSZYCH momentów,
+ *    a nie na każdą nakładkę. Rolka, w której pika kilkanaście razy, brzmi tanio.
  *
  * UŻYCIE:
  *   node narzedzia/plan-efektow.mjs nagranie.mp4 --napisy napisy.ass
@@ -53,7 +60,7 @@ const flaga = (n) => args.includes(n);
 const plikNapisow = wartosc("--napisy");
 const folderMuzyki = wartosc("--muzyka");
 const folderSfx = wartosc("--sfx", "sfx");
-const gestosc = Number(wartosc("--gestosc", "3.5"));
+const gestosc = Number(wartosc("--gestosc", "3"));
 const plikPlanu = wartosc("--zapisz", "plan.json");
 const remotionKatalog = wartosc("--remotion", "remotion-montaz");
 const renderujEfekty = flaga("--renderuj-efekty");
@@ -62,55 +69,76 @@ const katalog = path.dirname(path.resolve(plikPlanu));
 const PLIK_HISTORII = path.join(katalog, ".echo-historia-efektow.json");
 
 /* ============================ pule efektów ============================
-   `rola` mówi, kiedy efekt ma sens. `pola` to nazwy propsów, które trzeba
-   wypełnić treścią. `sfx` to dopasowany dźwięk. `dlugosc` w sekundach musi
-   zgadzać się z tym, co jest zarejestrowane w Remotion (Root.tsx). */
+   `rola` mówi, kiedy efekt ma sens. `rodzina` pilnuje, żeby dwa podobne
+   wizualnie efekty nie poszły jeden po drugim (widz i tak zobaczy wtedy "to
+   samo dwa razy"). `pola` to nazwy propsów, które trzeba wypełnić treścią.
+   `sfx` to dopasowany dźwięk, a `mocSfx` decyduje, które momenty dostaną go
+   naprawdę, gdy limit dźwięków się kończy. `wys` to wysokość kompozycji
+   w Remotion: wszystko poniżej 1920 trzeba położyć w kadrze ręcznie, inaczej
+   ffmpeg przykleja to do górnej krawędzi. `dlugosc` w sekundach musi zgadzać
+   się z tym, co jest zarejestrowane w Remotion (Root.tsx). */
 
 const EFEKTY = [
   // mocne akcenty na zdaniu
-  {naNapisach: true, id: "fx-slam", rola: "akcent", pola: ["tekst"], dlugosc: 1.9, sfx: "impact"},
-  {naNapisach: true, id: "fx-stempel", rola: "akcent", pola: ["tekst"], dlugosc: 1.8, sfx: "impact"},
-  {naNapisach: true, id: "fx-podkreslenie", rola: "akcent", pola: ["tekst"], dlugosc: 2.4, sfx: "swipe"},
-  {naNapisach: true, id: "fx-kolo", rola: "akcent", pola: ["tekst"], dlugosc: 2.4, sfx: "swipe"},
-  {naNapisach: true, id: "marker", rola: "akcent", pola: ["tekst"], dlugosc: 2.6, sfx: "swipe"},
-  {naNapisach: true, id: "glitch", rola: "akcent", pola: ["tekst"], dlugosc: 1.4, sfx: "click"},
-  {naNapisach: true, id: "scramble", rola: "akcent", pola: ["tekst"], dlugosc: 2.4, sfx: "typing"},
+  {naNapisach: true, id: "fx-slam", rola: "akcent", rodzina: "napis", pola: ["tekst"], dlugosc: 1.9, sfx: "impact", mocSfx: 9},
+  {naNapisach: true, id: "fx-stempel", rola: "akcent", rodzina: "napis", pola: ["tekst"], dlugosc: 1.8, sfx: "impact", mocSfx: 8},
+  {naNapisach: true, id: "fx-podkreslenie", rola: "akcent", rodzina: "kreska", pola: ["tekst"], dlugosc: 2.4, sfx: "swipe", mocSfx: 4},
+  {naNapisach: true, id: "fx-kolo", rola: "akcent", rodzina: "kreska", pola: ["tekst"], dlugosc: 2.4, sfx: "swipe", mocSfx: 4},
+  {naNapisach: true, id: "marker", rola: "akcent", rodzina: "kreska", pola: ["tekst"], dlugosc: 2.6, sfx: "swipe", mocSfx: 3},
+  {naNapisach: true, id: "glitch", rola: "akcent", rodzina: "napis", pola: ["tekst"], dlugosc: 1.4, sfx: "click", mocSfx: 6},
+  {naNapisach: true, id: "scramble", rola: "akcent", rodzina: "napis", pola: ["tekst"], dlugosc: 2.4, sfx: "typing", mocSfx: 5},
 
   // liczby i wyniki
-  {id: "fx-wynik", rola: "liczba", pola: ["liczba", "podpis"], dlugosc: 2.8, sfx: "ding"},
-  {id: "money-counter", rola: "liczba", pola: [], dlugosc: 3.2, sfx: "ding"},
-  {id: "multi-countup", rola: "liczba", pola: [], dlugosc: 4.0, sfx: "ding"},
-  {id: "fx-odliczanie", rola: "liczba", pola: ["podpis"], dlugosc: 2.6, sfx: "click"},
+  {id: "fx-wynik", rola: "liczba", rodzina: "karta", pola: ["liczba", "podpis"], dlugosc: 2.8, sfx: "ding", mocSfx: 9},
+  // UWAGA: `money-counter` i `multi-countup` są CELOWO poza automatem.
+  // Oba animują liczbę, która rośnie, więc muszą dostać konkretną wartość.
+  // Wzięte z transkrypcji potrafiły zamienić "półtora tysiąca" na "1" albo
+  // dorobić podpis z kawałków wyrazów, czyli wstawić do rolki obietnicę,
+  // której nikt nie złożył. Zostają w bibliotece do ręcznego użycia wtedy,
+  // gdy naprawdę masz liczby do pokazania (opis w SKILL.md).
+  {id: "fx-odliczanie", rola: "liczba", rodzina: "karta", pola: ["podpis"], dlugosc: 2.6, sfx: "click", mocSfx: 6},
 
   // kontrast, "nie tak, a tak"
-  {naNapisach: true, id: "fx-przekreslenie", rola: "kontra", pola: ["tekst"], dlugosc: 2.2, sfx: "swipe"},
-  {id: "fx-vs", rola: "kontra", pola: ["zle", "dobre"], dlugosc: 3.2, sfx: "whoosh"},
+  {naNapisach: true, id: "fx-przekreslenie", rola: "kontra", rodzina: "kreska", pola: ["tekst"], dlugosc: 2.2, sfx: "swipe", mocSfx: 7},
+  {id: "fx-vs", rola: "kontra", rodzina: "karta", pola: ["zle", "dobre"], dlugosc: 3.2, sfx: "whoosh", mocSfx: 9},
 
   // wyliczanki i procesy
-  {id: "fx-lista", rola: "lista", pola: ["punkty"], dlugosc: 3.4, sfx: "pop"},
-  {id: "fx-etapy", rola: "lista", pola: ["etapy"], dlugosc: 3.2, sfx: "pop"},
-  {id: "fx-krok", rola: "lista", pola: ["numer", "opis"], dlugosc: 2.6, sfx: "pop"},
-  {id: "fx-ikony", rola: "lista", pola: [], dlugosc: 3.0, sfx: "pop"},
+  {id: "fx-lista", rola: "lista", rodzina: "lista", pola: ["punkty"], dlugosc: 3.4, sfx: "pop", mocSfx: 6},
+  {id: "fx-etapy", rola: "lista", rodzina: "lista", pola: ["etapy"], dlugosc: 3.2, sfx: "pop", mocSfx: 5},
+  {id: "fx-krok", rola: "lista", rodzina: "karta", pola: ["numer", "opis"], dlugosc: 2.6, sfx: "pop", mocSfx: 5},
+  {id: "fx-ikony", rola: "lista", rodzina: "lista", pola: [], dlugosc: 3.0, sfx: "pop", mocSfx: 4},
 
   // pytanie, ciekawostka, oddech
-  {id: "fx-pytanie", rola: "pytanie", pola: ["pytanie", "odpowiedz"], dlugosc: 3.0, sfx: "pop"},
-  {id: "typewriter", rola: "pytanie", pola: ["tekst"], dlugosc: 4.5, sfx: "typing"},
-  {id: "karta-czasu", rola: "pytanie", pola: ["tekst"], dlugosc: 1.8, sfx: "click"},
+  {id: "fx-pytanie", rola: "pytanie", rodzina: "karta", pola: ["pytanie", "odpowiedz"], dlugosc: 3.0, sfx: "pop", mocSfx: 6},
+  {id: "typewriter", rola: "pytanie", rodzina: "karta", pola: ["tekst"], dlugosc: 4.5, sfx: "typing", mocSfx: 4},
+  {id: "karta-czasu", rola: "pytanie", rodzina: "karta", pola: ["tekst"], dlugosc: 1.8, sfx: "click", mocSfx: 5},
 
   // etykiety i tło
-  {id: "chapter-label", rola: "etykieta", pola: ["numer", "tytul"], dlugosc: 3.0, sfx: "click"},
-  {id: "badge-2kolory", rola: "etykieta", pola: ["tekst"], dlugosc: 3.5, sfx: "pop"},
-  {id: "fx-ticker", rola: "etykieta", pola: ["tekst"], dlugosc: 3.0, sfx: null},
-  {id: "strzalka", rola: "etykieta", pola: [], dlugosc: 2.2, sfx: "swipe"},
-  {id: "light-sweep", rola: "etykieta", pola: [], dlugosc: 1.6, sfx: null},
+  {id: "chapter-label", rola: "etykieta", rodzina: "etykieta", pola: ["numer", "tytul"], dlugosc: 3.0, sfx: "click", mocSfx: 2},
+  {id: "badge-2kolory", rola: "etykieta", rodzina: "etykieta", pola: ["tekst"], dlugosc: 3.5, wys: 520, sfx: "pop", mocSfx: 3},
+  {id: "fx-ticker", rola: "etykieta", rodzina: "etykieta", pola: ["tekst"], dlugosc: 3.0, sfx: null, mocSfx: 0},
+  {id: "strzalka", rola: "etykieta", rodzina: "etykieta", pola: [], dlugosc: 2.2, sfx: "swipe", mocSfx: 2},
+  {id: "light-sweep", rola: "etykieta", rodzina: "etykieta", pola: [], dlugosc: 1.6, sfx: null, mocSfx: 0},
 
   // interludium pełnoekranowe
-  {naNapisach: true, id: "fx-cytat", rola: "interludium", pola: ["tekst"], dlugosc: 3.4, sfx: "whoosh"},
+  {naNapisach: true, id: "fx-cytat", rola: "interludium", rodzina: "karta", pola: ["tekst"], dlugosc: 3.4, sfx: "whoosh", mocSfx: 8},
 
   // końcówka
-  {id: "fx-komentarz", rola: "cta", pola: ["nick", "tresc"], dlugosc: 3.6, sfx: "pop"},
-  {id: "emoji-burst", rola: "cta", pola: [], dlugosc: 2.0, sfx: "pop"}
+  {id: "fx-komentarz", rola: "cta", rodzina: "karta", pola: ["nick", "tresc"], dlugosc: 3.6, sfx: "pop", mocSfx: 9},
+  {id: "emoji-burst", rola: "cta", rodzina: "etykieta", pola: [], dlugosc: 2.0, sfx: "pop", mocSfx: 7}
 ];
+
+/** Rodziny, z których wolno wziąć efekt na sam hook: wielki napis w kadrze. */
+const RODZINY_HOOKA = ["napis", "kreska"];
+
+/* Ile efektów dźwiękowych wolno wpuścić do jednej rolki.
+   Sprawdzone w praktyce: przy kilkunastu "popach" rolka brzmi jak automat
+   z nagrodami. Kilka trafionych uderzeń robi wrażenie dowalonego montażu,
+   kilkanaście robi hałas. */
+const MAKS_SFX = 6;
+/* Minimalny odstęp między dwoma dźwiękami. Dwa pop-y obok siebie zlewają się
+   w jeden brudny trzask. */
+const MIN_ODSTEP_SFX = 1.6;
 
 const SFX_PLIKI = {
   pop: "sfx-pop.wav",
@@ -120,8 +148,21 @@ const SFX_PLIKI = {
   swipe: "sfx-swipe.wav",
   impact: "sfx-impact.wav",
   riser: "sfx-riser.wav",
+  "sub-drop": "sfx-sub-drop.wav",
   typing: "sfx-typing.wav"
 };
+
+/* Kadr rolki. Nakładka niższa niż kadr musi dostać własne `y`, inaczej ffmpeg
+   przykleja ją do góry ekranu, czyli zwykle na czoło mówiącego. Kładziemy ją
+   nad napisami karaoke, na wysokości klatki piersiowej. */
+const WYSOKOSC_KADRU = 1920;
+const NAD_NAPISAMI = 740;
+
+function pozycjaY(efekt) {
+  const wys = efekt.wys || WYSOKOSC_KADRU;
+  if (wys >= WYSOKOSC_KADRU) return 0;
+  return Math.max(0, WYSOKOSC_KADRU - wys - NAD_NAPISAMI);
+}
 
 /* ============================ czytanie napisów ============================ */
 
@@ -170,10 +211,20 @@ const historia = czytajHistorie();
 
 /**
  * Wybiera efekt danej roli, którego najdawniej nie było.
- * `uzyteTeraz` pilnuje, żeby w jednej rolce nie powtórzyć tego samego.
+ * `uzyteTeraz` pilnuje, żeby w jednej rolce nie powtórzyć tego samego efektu,
+ * a `ostatniaRodzina` żeby dwa podobne wizualnie nie poszły jeden po drugim
+ * (dwa zakreślenia pod rząd widz czyta jako "znowu to samo").
  */
-function wybierzEfekt(rola, uzyteTeraz) {
-  const kandydaci = EFEKTY.filter((e) => e.rola === rola && !uzyteTeraz.has(e.id));
+function wybierzEfekt(rola, uzyteTeraz, ostatniaRodzina = null, tylkoRodziny = null, iloscLiczb = 0) {
+  const pasuje = (e) =>
+    e.rola === rola &&
+    !uzyteTeraz.has(e.id) &&
+    (e.wymagaLiczb || 0) <= iloscLiczb &&
+    (!tylkoRodziny || tylkoRodziny.includes(e.rodzina));
+
+  // najpierw próbujemy z innej rodziny niż poprzedni efekt
+  let kandydaci = EFEKTY.filter((e) => pasuje(e) && e.rodzina !== ostatniaRodzina);
+  if (!kandydaci.length) kandydaci = EFEKTY.filter(pasuje);
   if (!kandydaci.length) return null;
   // im mniejszy numer ostatniego użycia, tym dawniej był użyty
   kandydaci.sort((a, b) => (historia.efekty[a.id] || 0) - (historia.efekty[b.id] || 0));
@@ -221,7 +272,9 @@ function fraza(napisy, od, maksZnakow = 26) {
     if (!kolejny) continue;
     if (wynik && (wynik + " " + kolejny).length > maksZnakow) break;
     wynik = wynik ? wynik + " " + kolejny : kolejny;
-    if (/[.!?]$/.test(kolejny)) break;
+    // Kropka kończy myśl, ale nie wtedy, gdy złapaliśmy dopiero jedno krótkie
+    // słowo: na ekranie wychodziło wielkie "TĘ" i nikt nie wiedział, o co chodzi.
+    if (/[.!?]$/.test(kolejny) && wynik.length >= 8) break;
   }
   // fraza nie może kończyć się na słówku funkcyjnym ("...BO MÓWISZ DO"),
   // bo na ekranie wygląda jak urwane w połowie zdania
@@ -230,20 +283,34 @@ function fraza(napisy, od, maksZnakow = 26) {
   while (slowa.length > 1 && ogony.includes(slowa[slowa.length - 1].toLowerCase().replace(/[.,!?:]/g, ""))) {
     slowa.pop();
   }
-  return slowa.join(" ");
+  // napisy karaoke rozbijają liczbę na osobne słowa i wychodzi "1 ,5 TYS"
+  return slowa.join(" ").replace(/\s+([.,])/g, "$1");
 }
 
 /** Wypełnia propsy efektu treścią z napisów. */
-function trescDlaEfektu(efekt, linijka, nastepna, napisy, indeks) {
+function trescDlaEfektu(efekt, linijka, nastepna, napisy, indeks, numerRozdzialu = 1, szeroki = "") {
   const tekst = napisy && napisy.length ? fraza(napisy, indeks) : linijka.tekst.replace(/[.,!?:]+$/, "");
   const dalej = napisy && napisy.length
     ? fraza(napisy, Math.min(napisy.length - 1, indeks + 2))
     : (nastepna ? nastepna.tekst : "").replace(/[.,!?:]+$/, "");
-  const liczba = (tekst.match(/\d[\d\s.,]*\s*(zł|zl|%|min|minut|godzin|h|k|tys)?/i) || [tekst])[0].trim();
+  // "1 ,5 TYS" bierze się stąd, że napisy karaoke rozbijają liczbę na osobne
+  // słowa. Bez tego sklejenia karta wyniku pokazywała liczbę z odstępem przed
+  // przecinkiem, a podpis obok był urwany w połowie wyrazu.
+  const scalone = (szeroki || tekst).replace(/\s+([.,])/g, "$1").replace(/\s{2,}/g, " ").trim();
+  const liczba = (scalone.match(/\d[\d\s.,]*\s*(zł|zl|%|min|minut|godzin|h|k|tys)?/i) || [tekst])[0].replace(/\s+([.,])/g, "$1").trim();
 
   switch (efekt.id) {
-    case "fx-wynik":
-      return {liczba: liczba.toUpperCase(), podpis: tekst.replace(liczba, "").trim().toUpperCase() || "TYLE TO KOSZTUJE"};
+    case "fx-wynik": {
+      // podpis: same słowa bez cyfr, żeby nie wychodziły kawałki wyrazów
+      const podpis = scalone
+        .split(/\s+/)
+        .filter((w) => !/\d/.test(w) && w.replace(/[^a-ząćęłńóśźż]/gi, "").length > 2)
+        .join(" ")
+        .toUpperCase()
+        .slice(0, 26)
+        .trim();
+      return {liczba: liczba.toUpperCase(), podpis: podpis || "TYLE TO KOSZTUJE"};
+    }
     case "fx-vs":
       return {zle: tekst.toUpperCase(), dobre: dalej.toUpperCase() || "TAK JEST LEPIEJ"};
     case "fx-pytanie":
@@ -254,12 +321,55 @@ function trescDlaEfektu(efekt, linijka, nastepna, napisy, indeks) {
       return {etapy: [tekst.toUpperCase(), dalej.toUpperCase() || "...", "GOTOWE"]};
     case "fx-krok":
       return {numer: (liczba.match(/\d+/) || ["1"])[0], opis: tekst.toUpperCase()};
-    case "fx-komentarz":
-      return {nick: "twoj.profil", tresc: tekst.split(" ").slice(-1)[0].toUpperCase()};
+    case "fx-komentarz": {
+      // w mockupie komentarza ma stać SŁOWO-KLUCZ z CTA, a nie ostatni wyraz
+      // zdania, którym często jest spójnik albo "to"
+      const slowa = tekst.split(/\s+/).filter((w) => w.replace(/[^a-ząćęłńóśźż]/gi, "").length > 3);
+      const klucz = slowa.length ? slowa[slowa.length - 1] : tekst.split(/\s+/).slice(-1)[0] || "MONTAŻ";
+      return {nick: "twoj.profil", tresc: klucz.replace(/[.,!?:]+$/, "").toUpperCase()};
+    }
     case "chapter-label":
-      return {numer: "01", tytul: tekst.split(" ").slice(0, 2).join(" ").toUpperCase()};
-    case "fx-odliczanie":
-      return {od: 3, podpis: tekst.toUpperCase()};
+      return {
+        numer: String(numerRozdzialu).padStart(2, "0"),
+        tytul: tekst.split(" ").slice(0, 2).join(" ").toUpperCase()
+      };
+    case "fx-odliczanie": {
+      const podpis = scalone
+        .split(/\s+/)
+        .filter((w) => !/\d/.test(w) && w.replace(/[^a-ząćęłńóśźż]/gi, "").length > 2)
+        .slice(0, 3)
+        .join(" ")
+        .toUpperCase()
+        .slice(0, 22);
+      return {od: 3, podpis: podpis || "TYLE TO ZAJMUJE"};
+    }
+    case "money-counter": {
+      // liczba MUSI pochodzić z tego, co padło w nagraniu
+      const zrodlo = szeroki || tekst;
+      const n = Number((zrodlo.match(/\d[\d\s]*/) || ["0"])[0].replace(/\s/g, "")) || 0;
+      const waluta = /z[łl]/i.test(zrodlo) ? "zł" : /%/.test(zrodlo) ? "%" : "";
+      return {do: n, waluta, podpis: (tekst.replace(/\d[\d\s]*/, "").trim() || "TYLE TO JEST").toUpperCase().slice(0, 22)};
+    }
+    case "multi-countup": {
+      const zrodlo = szeroki || tekst;
+      const liczby = (zrodlo.match(/\d[\d\s]*/g) || []).slice(0, 3).map((x) => Number(x.replace(/\s/g, "")) || 0);
+      const etykiety = zrodlo
+        .split(/\s+/)
+        .filter((w) => w.replace(/[^a-ząćęłńóśźż]/gi, "").length > 3)
+        .slice(0, liczby.length);
+      return {
+        pozycje: liczby.map((n, i) => ({etykieta: (etykiety[i] || "ILE").toUpperCase().slice(0, 12), do: n}))
+      };
+    }
+    case "fx-ikony": {
+      const zrodlo = (szeroki || tekst).split(/\s+/)
+        .map((w) => w.replace(/[.,!?:]+$/, ""))
+        .filter((w) => w.replace(/[^a-ząćęłńóśźż]/gi, "").length > 3)
+        .slice(0, 3);
+      const ikony = ["⚡", "🎯", "✅"];
+      if (zrodlo.length < 3) return {};
+      return {pozycje: zrodlo.map((w, i) => ({ikona: ikony[i], podpis: w.toUpperCase().slice(0, 14)}))};
+    }
     default:
       // większość efektów bierze jedno pole tekstowe
       if (efekt.pola.includes("tekst")) return {tekst: tekst.toUpperCase()};
@@ -288,52 +398,101 @@ const kandydaci = napisy.length
       i
     }));
 
-const ileEfektow = Math.max(3, Math.round(dlugosc / gestosc));
+const ileEfektow = Math.max(4, Math.round(dlugosc / gestosc));
 const uzyteTeraz = new Set();
 const napisyPrzerwy = [];
 const nakladki = [];
-const sfx = [];
+const sfxKandydaci = [];
 const doRenderu = [];
 
 let ostatniKoniec = -99;
+let ostatniaRodzina = null;
 let policzone = 0;
+let licznikRozdzialow = 0;
 
 for (const k of kandydaci) {
   if (policzone >= ileEfektow) break;
   // nie kładziemy efektów jeden na drugim ani gęściej, niż zakłada rytm
-  if (k.t < ostatniKoniec + 0.6) continue;
+  if (k.t < ostatniKoniec + 0.5) continue;
   if (k.t > dlugosc - 1.2) break;
 
   // rolę liczymy z całej frazy, nie z pojedynczej linijki: linijka napisu ma
   // 2-3 słowa i sama rzadko wystarcza, żeby rozpoznać kontrę albo CTA
   const trescMomentu = napisy.length ? fraza(napisy, k.i, 44) : "";
-  const rola = napisy.length ? rolaDlaLinijki(trescMomentu, k.i, kandydaci.length) : "akcent";
-  let efekt = wybierzEfekt(rola, uzyteTeraz);
+  const naHooku = policzone === 0 && k.t < 3.0;
+  // HOOK: pierwsze zdanie zawsze dostaje wielki napis w kadrze, niezależnie od
+  // tego, co w nim padło. Płaskie dwie pierwsze sekundy to najczęstszy powód,
+  // dla którego dobre nagranie nie ma zasięgu.
+  const rola = naHooku ? "akcent" : (napisy.length ? rolaDlaLinijki(trescMomentu, k.i, kandydaci.length) : "akcent");
+  const iloscLiczb = (trescMomentu.match(/\d+/g) || []).length;
+  let efekt = wybierzEfekt(rola, uzyteTeraz, ostatniaRodzina, naHooku ? RODZINY_HOOKA : null, iloscLiczb);
   // rola wyczerpana w tej rolce: bierzemy cokolwiek, czego jeszcze nie było
-  if (!efekt) efekt = wybierzEfekt("akcent", uzyteTeraz) || wybierzEfekt("etykieta", uzyteTeraz);
+  if (!efekt) efekt = wybierzEfekt("akcent", uzyteTeraz, ostatniaRodzina, null, iloscLiczb) || wybierzEfekt("etykieta", uzyteTeraz, ostatniaRodzina, null, iloscLiczb);
+  // cała pula wyczerpana (długie nagranie, gęsty rytm): zaczynamy drugą turę,
+  // bo lepszy powtórzony efekt po trzydziestu sekundach niż płaski kawałek rolki
+  if (!efekt) {
+    uzyteTeraz.clear();
+    efekt = wybierzEfekt(rola, uzyteTeraz, ostatniaRodzina, null, iloscLiczb) || wybierzEfekt("akcent", uzyteTeraz, ostatniaRodzina, null, iloscLiczb);
+  }
   if (!efekt) break;
 
   const trwanie = Math.min(efekt.dlugosc, dlugosc - k.t - 0.2);
   if (trwanie < 1) continue;
 
   const plikEfektu = path.join("efekty", `${String(policzone + 1).padStart(2, "0")}-${efekt.id}.mov`);
-  const props = trescDlaEfektu(efekt, k.linijka, k.nastepna, napisy, k.i);
+  if (efekt.id === "chapter-label") licznikRozdzialow++;
+  const props = trescDlaEfektu(efekt, k.linijka, k.nastepna, napisy, k.i, licznikRozdzialow, trescMomentu);
 
   const od = Number(k.t.toFixed(2));
   const doK = Number((k.t + trwanie).toFixed(2));
-  nakladki.push({plik: plikEfektu, od, do: doK, x: 0, y: 0});
+  // `y`: kompozycja niższa niż kadr musi dostać własną wysokość, inaczej ffmpeg
+  // przykleja ją do górnej krawędzi, czyli zwykle na czoło mówiącego
+  nakladki.push({plik: plikEfektu, od, do: doK, x: 0, y: pozycjaY(efekt)});
   // Wielki napis-efekt siada dokładnie tam, gdzie napisy karaoke. Zgłaszamy
   // okno, w którym napis ma zniknąć, inaczej dwa teksty leżą na sobie.
   if (efekt.naNapisach) napisyPrzerwy.push({od, do: doK});
   doRenderu.push({id: efekt.id, plik: plikEfektu, props, dlugoscSekund: Number(trwanie.toFixed(2))});
   if (efekt.sfx) {
-    sfx.push({plik: path.join(folderSfx, SFX_PLIKI[efekt.sfx]), t: Number(k.t.toFixed(2))});
+    // dźwięki zbieramy jako kandydatów; które faktycznie wejdą, decyduje się
+    // niżej, po całej rolce, żeby nie pikało kilkanaście razy
+    sfxKandydaci.push({
+      rodzaj: efekt.sfx,
+      t: Number(k.t.toFixed(2)),
+      moc: (efekt.mocSfx || 0) + (naHooku ? 5 : 0)
+    });
   }
 
   uzyteTeraz.add(efekt.id);
+  ostatniaRodzina = efekt.rodzina || null;
   historia.efekty[efekt.id] = (historia.rolek || 0) + 1;
   ostatniKoniec = k.t + trwanie;
   policzone++;
+}
+
+/* -------------------- dźwięk: kilka uderzeń, nie kanonada --------------------
+   Wcześniej każdy efekt dostawał swój dźwięk i przy gęstym montażu rolka pikała
+   kilkanaście razy. Brzmi to jak automat z nagrodami, a nie jak montaż. Bierzemy
+   najmocniejsze momenty (hook, liczba, kontra, CTA), pilnujemy odstępu i tego,
+   żeby ten sam dźwięk nie poszedł dwa razy pod rząd. */
+const sfx = [];
+{
+  const wybrane = [];
+  const posilne = [...sfxKandydaci].sort((a, b) => b.moc - a.moc || a.t - b.t);
+  for (const kand of posilne) {
+    if (wybrane.length >= MAKS_SFX) break;
+    if (wybrane.some((w) => Math.abs(w.t - kand.t) < MIN_ODSTEP_SFX)) continue;
+    wybrane.push(kand);
+  }
+  wybrane.sort((a, b) => a.t - b.t);
+  // ten sam dźwięk dwa razy pod rząd brzmi jak zacinająca się płyta
+  for (let i = 1; i < wybrane.length; i++) {
+    if (wybrane[i].rodzaj !== wybrane[i - 1].rodzaj) continue;
+    const zamiennik = {pop: "click", click: "pop", ding: "pop", whoosh: "swipe", swipe: "whoosh", impact: "sub-drop", typing: "click"}[wybrane[i].rodzaj];
+    if (zamiennik) wybrane[i].rodzaj = zamiennik;
+  }
+  wybrane.forEach((w) => {
+    sfx.push({plik: path.join(folderSfx, SFX_PLIKI[w.rodzaj]), t: w.t});
+  });
 }
 
 /* -------------------- sklejki: punche tylko tam -------------------- */
@@ -367,6 +526,20 @@ if (folderMuzyki && fs.existsSync(folderMuzyki)) {
   }
 }
 
+/* -------------------- logo w rogu (brand bug) --------------------
+   Znak w rogu kadru robi robotę: rolka udostępniona dalej albo podkradziona
+   nadal mówi, czyj to materiał. Wchodzi sam, jeśli w folderze montażowym leży
+   plik z logo. Ma to być PLIK, nie nazwa wpisana czcionką: napis wystukany
+   w efekcie wygląda jak podpis, logo wygląda jak marka. */
+let logo = null;
+for (const nazwa of ["logo.png", "brand-bug.png", "logo.jpg"]) {
+  const kandydat = path.join(katalog, nazwa);
+  if (fs.existsSync(kandydat)) {
+    logo = {plik: kandydat, szerokosc: 150, pozycja: "prawy-gorny"};
+    break;
+  }
+}
+
 /* -------------------- zapis planu i listy efektów -------------------- */
 
 const plan = {
@@ -379,6 +552,7 @@ const plan = {
   hook: {sila: 0.09},
   punche,
   nakladki,
+  ...(logo ? {logo} : {}),
   sfx: fs.existsSync(folderSfx) ? sfx : [],
   notatka:
     "Plan ułożony przez plan-efektow.mjs. Przejrzyj treść efektów w efekty.json, " +
@@ -398,12 +572,26 @@ console.log(`Nagranie:    ${path.basename(nagranie)}  (${dlugosc.toFixed(1)} s, 
 console.log(`Napisy:      ${napisy.length ? napisy.length + " linijek" : "brak"}`);
 console.log(`Sklejki:     ${punche.length} (tylko tam idą zoom-punche)`);
 console.log(`Muzyka:      ${muzyka ? path.basename(muzyka.plik) : "brak (podaj --muzyka folder)"}`);
-console.log(`Efekty:      ${doRenderu.length} różnych, średnio co ${(dlugosc / Math.max(1, doRenderu.length)).toFixed(1)} s`);
+const coIle = dlugosc / Math.max(1, doRenderu.length);
+console.log(`Efekty:      ${doRenderu.length} różnych, średnio co ${coIle.toFixed(1)} s`);
 console.log(`Przerwy w napisach: ${napisyPrzerwy.length} (tam wjeżdża wielki napis-efekt)`);
-console.log(`SFX:         ${plan.sfx.length}${plan.sfx.length ? "" : "  (uruchom: node narzedzia/zrob-sfx.mjs)"}`);
+console.log(`SFX:         ${plan.sfx.length} z ${sfxKandydaci.length} możliwych (limit ${MAKS_SFX}, żeby nie pikało bez przerwy)`);
+console.log(`Logo:        ${logo ? path.basename(logo.plik) + " w prawym górnym rogu" : "brak (wrzuć logo.png do folderu montażowego)"}`);
+if (!plan.sfx.length && !fs.existsSync(folderSfx)) {
+  console.log("             Nie ma folderu sfx. Zrób go raz: node narzedzia/zrob-sfx.mjs sfx");
+}
+if (coIle > 5) {
+  console.log(`\nUWAGA: efekt średnio co ${coIle.toFixed(1)} s to jak na rolkę mało. Najczęstsza przyczyna:`);
+  console.log("nagranie nie ma napisów (zrób je najpierw) albo mówisz wolno i linijek jest niewiele.");
+  console.log("Możesz zagęścić: --gestosc 2.5");
+}
 console.log("");
 doRenderu.forEach((e, i) => {
-  const opis = Object.values(e.props).flat().join(" / ").slice(0, 46);
+  const opis = Object.values(e.props)
+    .flat()
+    .map((v) => (v && typeof v === "object" ? Object.values(v).join(" ") : String(v)))
+    .join(" / ")
+    .slice(0, 46);
   console.log(`  ${String(i + 1).padStart(2)}. ${String(nakladki[i].od).padStart(6)} s  ${e.id.padEnd(17)} ${opis}`);
 });
 console.log(`\nZapisane: ${plikPlanu} oraz ${plikEfektow}`);
@@ -424,7 +612,25 @@ function sciezkaCli(folderRemotion) {
   return kandydaci.find((k) => fs.existsSync(k)) || null;
 }
 
-const cliRemotion = sciezkaCli(path.resolve(remotionKatalog));
+/**
+ * Gdzie leży silnik efektów. Wcześniej brany był wyłącznie z bieżącego folderu,
+ * więc montaż uruchomiony gdziekolwiek indziej niż w katalogu z repo kończył się
+ * komunikatem "MUSISZ-NAJPIERW-ZROBIC-NPM-INSTALL", mimo że wszystko było
+ * zainstalowane. Teraz szukamy też obok samych narzędzi, czyli w repo.
+ */
+function znajdzRemotion(podany) {
+  const korzenRepo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+  const kandydaci = [
+    path.resolve(podany),
+    path.join(korzenRepo, "remotion-montaz"),
+    path.resolve(katalog, "remotion-montaz"),
+    path.resolve(katalog, "..", "remotion-montaz")
+  ];
+  return kandydaci.find((k) => fs.existsSync(path.join(k, "package.json"))) || path.resolve(podany);
+}
+
+const folderRemotion = znajdzRemotion(remotionKatalog);
+const cliRemotion = sciezkaCli(folderRemotion);
 const polecenia = doRenderu.map((e) => {
   const klatki = Math.round(e.dlugoscSekund * fps);
   return [
@@ -438,7 +644,11 @@ const polecenia = doRenderu.map((e) => {
 });
 
 if (renderujEfekty) {
-  const remotion = path.resolve(remotionKatalog);
+  const remotion = folderRemotion;
+  if (!cliRemotion) {
+    console.error(`\nSilnik efektów jest niegotowy. Wejdź do ${remotion} i uruchom: npm install`);
+    process.exit(1);
+  }
   if (!fs.existsSync(remotion)) {
     console.error(`\nNie ma folderu Remotion: ${remotion}. Podaj go przez --remotion.`);
     process.exit(1);

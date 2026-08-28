@@ -8,18 +8,51 @@ description: Montaż wideo w stylu ECHO — rolki (9:16, do 60s) i długie forma
 Montujesz nagrania w stylu "AI business": talking head, szybkie tempo, napisy
 karaoke, gęste animowane efekty, muzyka pod głosem.
 
-## Podział ról
+**Wersja 3 (sierpień 2026).** Zmiana kierunku: wcześniej ten plik opisywał,
+co WOLNO zrobić. Teraz opisuje, co MUSI się znaleźć w rolce, żeby wyglądała jak
+zmontowana, a nie jak nagranie z napisami. Jeśli user prosi Cię o "więcej
+efektów", "częściej", "ciekawiej", to znaczy, że nie trzymasz tego pliku.
+Tych rzeczy user nie ma zamawiać. To jest wersja domyślna.
 
-**Wybór dubli robi USER, nie Ty.** Nie słyszysz intonacji ani energii, a z samej
-transkrypcji wychodzą cięcia mechaniczne i powtórki. Przepływ jest taki:
+## Podział ról: cięcie robi USER, montaż robisz TY
 
-1. User nagrywa kilka dubli, SAM wybiera najlepsze fragmenty i skleja je byle
-   jak (bez napisów i efektów) w jeden plik pionowy.
+**Wyboru dubli i cięcia surowego materiału NIE robisz.** Nie słyszysz intonacji
+ani energii, a z samej transkrypcji wychodzą cięcia mechaniczne, powtórki
+i wywalone najlepsze podejścia. Poza tym automatyczne cięcie jest najsłabszym
+i najwolniejszym kawałkiem całej tej metody: potrafi mielić długo i i tak
+skończyć się materiałem do poprawek.
+
+Przepływ jest taki:
+
+1. User nagrywa kilka dubli, SAM wycina przejęzyczenia, ciszę i słabsze
+   podejścia, i skleja resztę byle jak (bez napisów i efektów) w jeden plik
+   pionowy.
 2. Ty bierzesz ten gotowy materiał i robisz z niego PEŁNY montaż: napisy, zoomy,
    efekty, muzyka, SFX, kontrola.
 
-Plan cięć możesz zaproponować, jeśli user o to poprosi, ale nie decydujesz
-o wyborze dubli za niego.
+Jeśli user daje Ci surowe nagranie z dublami i prosi, żebyś to poskładał:
+powiedz mu wprost, że to jedyny etap, w którym jego dziesięć minut jest warte
+więcej niż Twoja godzina, i że przy pierwszych rolkach ma to zrobić sam.
+Plan cięć możesz zaproponować, jeśli user o to prosi. Nie decyduj za niego.
+
+## PROGI JAKOŚCI (to nie są sugestie)
+
+Zanim oddasz rolkę, każda z tych rzeczy ma być prawdziwa:
+
+| Co | Próg |
+|---|---|
+| Pierwszy efekt | zaczyna się przed 1,5 s. Płaski hook = rolka bez zasięgu |
+| Gęstość efektów | średnio co 3-4 s. Powyżej 5 s to nagranie z napisami |
+| Powtórki | żaden efekt nie wraca w tej samej rolce; dwa podobne nie idą pod rząd |
+| Napisy | 2-3 słowa w linijce, każda stoi min. 0,7 s |
+| Dźwięk | muzyka jest ZAWSZE; SFX maks. około 6 na rolkę |
+| Głośność | -14 LUFS, muzyka z duckingiem pod głosem |
+| Zoom-punch | tylko na sklejkach, nigdy "co jakiś czas" |
+| Kontrola | `sprawdz.mjs` przeszedł i obejrzałeś klatki |
+
+`plan-efektow.mjs` trzyma te progi sam, a `sprawdz.mjs` je weryfikuje na gotowym
+pliku. Nie obchodź ich "dla oszczędności czasu": rolka bez efektów jest gotowa
+szybciej i nie ogląda jej nikt.
 
 ## NARZĘDZIA — używaj ich zawsze, nie pisz ffmpeg z ręki
 
@@ -37,7 +70,9 @@ python narzedzia/transkrypcja.py nagranie.mp4 --ass napisy.ass
 Rozpoznaje mowę i od razu daje gotowe napisy w stylu ECHO. Wynik jest
 zapamiętywany, więc drugie uruchomienie na tym samym pliku jest natychmiastowe.
 Wycina halucynacje (modele dorzucają na ciszy stopki typu "Napisy stworzone
-przez..."), łamie linijki tak, żeby weszły w kadr, i podświetla słowo-klucz.
+przez..."), łamie linijki tak, żeby weszły w kadr, podświetla słowo-klucz,
+scala linijki jednosłowne i pilnuje, żeby żaden napis nie mignął krócej niż
+0,7 s.
 
 - `--marginv 920` przy split-screenie (napisy siadają na szwie, nie na twarzy).
 - `--model small` gdy nagranie jest długie, a liczy się czas.
@@ -61,14 +96,25 @@ node narzedzia/plan-efektow.mjs nagranie.mp4 --napisy napisy.ass \
   --muzyka muzyka --renderuj-efekty
 ```
 
-To narzędzie pilnuje dwóch rzeczy, o których łatwo zapomnieć:
+To narzędzie pilnuje rzeczy, o których łatwo zapomnieć:
 
-- **gęstość**: efekt średnio co 3-4 s, wpasowany w momenty, w których coś się
-  faktycznie mówi (bierze czasy z napisów). `--gestosc 3` zagęszcza jeszcze bardziej.
+- **gęstość**: efekt średnio co 3 s, wpasowany w momenty, w których coś się
+  faktycznie mówi (bierze czasy z napisów). `--gestosc 2.5` zagęszcza jeszcze
+  bardziej, `--gestosc 4` rozrzedza pod spokojniejszy materiał.
+- **hook**: pierwsze zdanie ZAWSZE dostaje wielki napis w kadrze, niezależnie
+  od tego, co w nim padło.
 - **różnorodność**: pamięta w pliku `.echo-historia-efektow.json`, co poszło
   w poprzednich rolkach, i najpierw sięga po to, czego dawno nie było. Ten sam
-  efekt nie wraca dwa razy w jednej rolce, a kolejna rolka startuje od innego
-  zestawu. Muzyka rotuje tak samo, więc profil nie brzmi jednostajnie.
+  efekt nie wraca dwa razy w jednej rolce, dwa efekty z tej samej rodziny
+  (na przykład dwie kreski) nie idą jeden po drugim, a kolejna rolka startuje
+  od innego zestawu. Muzyka rotuje tak samo.
+- **dźwięk z umiarem**: dźwięk dostaje kilka najmocniejszych momentów (hook,
+  liczba, kontra, CTA), a nie każda nakładka. Limit to 6 na rolkę i 1,6 s
+  odstępu. Rolka, w której pika kilkanaście razy, brzmi tanio.
+- **pozycja w kadrze**: nakładka niższa niż kadr dostaje własne `y`, żeby nie
+  przykleiła się do górnej krawędzi, czyli zwykle na czoło mówiącego.
+- **logo**: jeśli w folderze montażowym leży `logo.png` albo `brand-bug.png`,
+  wchodzi samo w prawy górny róg.
 
 Dobiera też efekt do treści: liczba dostaje kartę wyniku i dzwonek, kontra
 dostaje przekreślenie, wyliczanka listę z odhaczaniem, końcówka mockup
@@ -76,7 +122,7 @@ komentarza. Wynik to `plan.json` plus `efekty.json`.
 
 **Muzykę dobierasz TY, user nie ma nic pobierać ani szukać.** To jest twarda zasada.
 Zestaw ma jedenaście podkładów na wszystkie typowe nastroje, więc zawsze jest z czego
-wybrać. **Nigdy nie odsyłaj usera po muzykę i nigdy nie pytaj go, jaki chce podkład** —
+wybrać. **Nigdy nie odsyłaj usera po muzykę i nigdy nie pytaj go, jaki chce podkład**,
 to jest dokładnie ta robota, której ma nie mieć. Przeczytaj transkrypcję, zdecyduj sam
 i powiedz jednym zdaniem, co wybrałeś i dlaczego.
 
@@ -116,7 +162,9 @@ uwagę. Ale to jego opcja, nie warunek: bez kiwnięcia palcem ma dostać dobrze 
 **Zawsze przejrzyj `efekty.json` i popraw teksty.** Automat bierze frazy wprost
 z napisów, więc czasem wychodzi zdanie urwane albo bez sensu w oderwaniu od
 kontekstu. To jest miejsce, gdzie Twoja robota daje najwięcej: treść efektu ma
-być krótka, mocna i zrozumiała bez dźwięku.
+być krótka, mocna i zrozumiała bez dźwięku. Zasada: **efekt cytuje to, co
+naprawdę padło.** Nie dopisuj liczb, obietnic ani wyników, których user nie
+powiedział, nawet jeśli "pasowałyby" do karty.
 
 ### 4. Render
 
@@ -160,11 +208,14 @@ Literówka w nazwie pola to błąd z podpowiedzią, a nie ciche pominięcie efek
 node narzedzia/sprawdz.mjs gotowe.mp4 --wobec nagranie.mp4
 ```
 
-Sprawdza to, czego nie widać w logu renderu: czy jest dźwięk na całej długości,
-czy montaż nie jest krótszy od nagrania, czy głośność siedzi na poziomie
-platform, czy nie ma czarnych klatek i dłuższej ciszy. Wyciąga też siatkę klatek
-do obejrzenia — **przejrzyj je**, bo tylko tak wyłapiesz napis leżący na twarzy
-albo element wychodzący poza kadr.
+Sprawdza dwie rzeczy naraz. Technikę: czy jest dźwięk na całej długości, czy
+montaż nie jest krótszy od nagrania, czy głośność siedzi na poziomie platform,
+czy nie ma czarnych klatek i dłuższej ciszy. I sam montaż: jeśli obok pliku leży
+`plan.json`, mówi też, czy efektów jest wystarczająco gęsto, czy hook nie jest
+płaski, czy nie powtarza się ten sam efekt i czy jest muzyka.
+
+Wyciąga też siatkę klatek do obejrzenia. **Przejrzyj je**, bo tylko tak
+wyłapiesz napis leżący na twarzy albo element wychodzący poza kadr.
 
 ### 6. Gdzie naprawdę są sklejki
 
@@ -179,20 +230,42 @@ tanio. Jedno ciągłe ujęcie to zero punchów.
 
 ## Profil stylu: ROLKA (9:16, do 60 s)
 
-- **Hook w 1-3 s:** najmocniejsze zdanie na początek, mocny najazd (`hook` w planie),
-  wielki napis, plus efekt już w pierwszej sekundzie. Płaski początek to utracona rolka.
-- **Napisy karaoke:** 2-4 słowa na linijkę, cięte na naturalnych pauzach, jedno
-  słowo-klucz w kolorze, na wysokości szyi.
+- **Hook w 1-3 s:** najmocniejsze zdanie na początek, mocny najazd (`hook`
+  w planie), wielki napis, efekt już w pierwszej sekundzie. Przy materiale
+  z kilku ujęć: hypercut, czyli seria bardzo krótkich cięć zamiast jednego
+  spokojnego ujęcia. Płaski początek to utracona rolka.
+- **Napisy karaoke:** 2-3 słowa na linijkę, cięte na naturalnych pauzach, jedno
+  słowo-klucz w kolorze, na wysokości szyi (`--marginv 520`). Gdy postać jest
+  nisko w kadrze i napis ląduje na brzuchu, podnieś je (`--marginv 1070`),
+  a przy split-screenie posadź na szwie (`--marginv 920`).
 - **Zoom:** ciągły "oddychający" (ledwo wyczuwalny) przez cały czas, plus punch
   wyłącznie na sklejkach.
 - **Efekty:** gęsto, średnio co 3-4 s, za każdym razem inny zestaw. Karty, listy
   i mockupy siedzą NAD napisami; wielkie napisy-slamy siadają na miejscu napisów
   i wtedy napis jest wycinany.
+- **Nic nigdy nie leży na twarzy.** To jest granica nie do przekroczenia. Napisy
+  na wysokości szyi albo klatki piersiowej, karty i mockupy w środkowej części
+  kadru, etykiety w rogach.
+- **Przeplataj ciemne i jasne.** Kilka ciemnych kart pod rząd zlewa się w jedno
+  tło i widz przestaje je odróżniać. Po ciemnej karcie daj jasną, po pełnym
+  ekranie coś małego w rogu.
 - **Split-screen:** przy materiale, gdzie user faktycznie ma co pokazać (panel,
-  zrzut ekranu, wyniki) — górna część kadru to ciągle grający dowód, dolna twarz,
-  kilkanaście sekund równolegle, nie dwusekundowa wstawka.
-- **Dźwięk:** muzyka cicho pod głosem z duckingiem, SFX na każdym wjeżdżającym
-  elemencie, całość na -14 LUFS. Muzyka inna niż w poprzedniej rolce.
+  zrzut ekranu, wyniki). Górna część kadru to ciągle grający dowód, dolna twarz,
+  kilkanaście sekund równolegle, nie dwusekundowa wstawka. Domyślna granica
+  (szew) to 1010 px: panel u góry, twarz pod nim, napisy na szwie.
+- **Panele ZA postacią, nie zamiast niej.** Gdy porównujesz dwie rzeczy albo
+  pokazujesz materiał, lepiej wjeżdża panel za wyciętą postacią niż
+  pełnoekranowa karta, która wywala mówiącego z kadru na trzy sekundy.
+- **Pokaż, nie opisuj.** Jeśli treść da się pokazać (zrzut ekranu, panel, klip,
+  prosty animowany schemat), pokaż to. Tekstowa odznaka z hasłem jest planem
+  awaryjnym, nie pierwszym wyborem.
+- **Dźwięk:** muzyka cicho pod głosem z duckingiem, SFX na kilku najmocniejszych
+  wejściach (nie na każdym), całość na -14 LUFS. Muzyka inna niż w poprzedniej
+  rolce.
+- **Na starcie jeden element naraz.** W pierwszych sekundach nie kładź dwóch
+  nakładek jednocześnie: widz nie wie, gdzie patrzeć, i wychodzi bałagan.
+- **Logo w rogu to PLIK, nie napis.** Nazwa marki wystukana czcionką w efekcie
+  wygląda jak podpis pod zdjęciem. Logo wygląda jak marka.
 - **Koniec:** CTA w ostatnich 3-5 s, słowo-klucz wielkie, mockup komentarza.
 - **Długość:** 20-65 s, zależnie od tego, ile jest do powiedzenia. Retencja jest
   ważniejsza niż trafienie w okrągłą liczbę sekund.
@@ -228,14 +301,31 @@ node remotion-montaz/node_modules/@remotion/cli/remotion-cli.js render \
 (Uruchamiamy CLI przez `node`, a nie przez `npx`, bo Node na Windows odmawia
 odpalania plików `.cmd` bez powłoki, a powłoka psuje JSON w `--props`.)
 
+**Dwa efekty świadomie poza automatem: `money-counter` i `multi-countup`.**
+Oba animują rosnącą liczbę, więc muszą dostać konkretną wartość. Brane
+automatycznie z transkrypcji potrafiły zamienić "półtora tysiąca" na "1" albo
+dorobić własny podpis, czyli wstawić do rolki obietnicę, której nikt nie złożył.
+Używaj ich RĘCZNIE, gdy user naprawdę ma liczby do pokazania:
+
+```bash
+... render src/index.ts money-counter out.mov --props='{"do":1500,"waluta":"zł","podpis":"OSZCZĘDZASZ"}'
+... render src/index.ts multi-countup out.mov --props='{"pozycje":[{"etykieta":"ROLKI","do":40,"sufiks":"/mies"}]}'
+```
+
 **Do czytania, NIE do renderowania: pozostałe pliki `comps*.tsx`.**
 To efekty pisane pod konkretne rolki autora i mają w środku wpisany na sztywno
 jego tekst (o jego klientach i jego ofercie). Wyrenderowane u siebie wstawisz
 sobie w rolkę zdanie o cudzej firmie. Zaglądaj tam po strukturę i pomysły, gdy
 piszesz własny efekt, ale renderuj z biblioteki albo napisz swój komponent.
 
+**Własny efekt piszesz wtedy, gdy biblioteka nie ma czym pokazać treści.**
+To normalna droga, nie ostateczność: skopiuj najbliższy komponent
+z `compsBiblioteka2.tsx`, zmień zawartość, zarejestruj w `Root.tsx` i wyrenderuj.
+Kompozycja pełnoekranowa ma 1080x1920, mniejsza dostaje własne `y` w planie.
+
 **Logo w rogu:** `remotion-montaz/public/brand-bug.png` jest pusty. Wrzuć tam
-swoje logo pod tą samą nazwą, albo podaj plik w polu `logo` w planie.
+swoje logo pod tą samą nazwą, albo połóż `logo.png` w folderze montażowym,
+a plan weźmie je sam.
 
 ## Workflow
 
@@ -245,7 +335,9 @@ swoje logo pod tą samą nazwą, albo podaj plik w polu `logo` w planie.
 3. **Plan:** `plan-efektow.mjs`. Przejrzyj `efekty.json` i popraw teksty efektów.
 4. **Pokaż userowi plan** w dwóch zdaniach: ile efektów, jakie, jaka muzyka.
 5. **Render:** `plan-efektow.mjs --renderuj-efekty`, potem `buduj-filtr.mjs --renderuj`.
-6. **Kontrola:** `sprawdz.mjs` i obejrzenie klatek.
+6. **Kontrola:** `sprawdz.mjs` i obejrzenie klatek. Jeśli narzędzie zgłasza, że
+   efektów jest za rzadko albo hook jest płaski, popraw i zrenderuj jeszcze raz.
+   Nie oddawaj rolki z otwartą listą "DO POPRAWY".
 7. **Koniec. Oddajesz gotowy plik i tyle.**
 
 **NIE dopisuj z automatu opisu pod rolkę, hashtagów ani propozycji CTA.** Obietnicą
@@ -256,11 +348,21 @@ Jeśli user **wprost poprosi** o opis, wtedy go napisz: hook, ból, wartość, C
 hashtagi, zgodne z tym, co FAKTYCZNIE padło w zmontowanym nagraniu, nie z pierwotnego
 scenariusza. Ale tylko na prośbę.
 
+## Czego nie robić (najczęstsze wpadki)
+
+- Nie oddawaj "wersji prostej na start". Domyślnie idzie pełny zestaw.
+- Nie pytaj usera, ile chce efektów i jaką muzykę. Zdecyduj i powiedz, co wybrałeś.
+- Nie powtarzaj tej samej nakładki w jednej rolce, nawet z innym tekstem.
+- Nie kładź napisu ani grafiki na twarzy.
+- Nie dawaj zoom-punchów poza sklejkami.
+- Nie zostawiaj rolki bez muzyki "bo user nie podał".
+- Nie wstawiaj liczb, których nie było w nagraniu.
+- Nie renderuj długiego materiału po cichu, bez pokazania planu.
+
 ## Zasady twarde
 
 - Napisy po polsku, chyba że materiał jest anglojęzyczny pod zasięg globalny.
 - Muzyka tylko royalty-free albo dostarczona przez usera. Pytaj o źródło.
-- Nie renderuj po cichu długiego materiału bez pokazania planu.
 - Nie zostawiaj rolki bez kontroli `sprawdz.mjs` i bez obejrzenia klatek.
 - Pliki robocze w folderze projektu, nie w repo skilla.
 
@@ -282,6 +384,9 @@ napisać filtr ręcznie, i żeby rozumieć, dlaczego narzędzia robią to tak.
 - **Warstwa przesunięta przez `setpts=PTS+od/TB` potrafi nie pojawić się wcale.**
   Taki strumień nie ma żadnej klatki przed czasem `od`, a `overlay` czeka na
   pierwszą klatkę drugiego wejścia. Używaj `tpad=start_duration=od`.
+- **Nakładka niższa niż kadr przykleja się do GÓRY.** `overlay` bez jawnego `y`
+  kładzie warstwę w punkcie 0,0, czyli zwykle na czoło mówiącego. Kompozycja
+  o wysokości mniejszej niż 1920 musi dostać `y` w planie.
 - **`-r` przy zapisie wyrzuca klatki**, gdy warstwy mają różne tempo (w logu
   `drop=`). Ustaw `fps=` na końcu łańcucha filtrów, a nie `-r` przy zapisie.
 - **`zoompan` MUSI mieć jawne `x` i `y`**, inaczej powiększa od lewego górnego
@@ -293,12 +398,12 @@ napisać filtr ręcznie, i żeby rozumieć, dlaczego narzędzia robią to tak.
   zostaje na ekranie do końca wideo. To najczęstszy błąd przy wielowarstwowych
   cutawayach.
 - **Nigdy nie czytaj tego samego labela filtra dwa razy równolegle.** Potrafi po
-  cichu wyłączyć inny filtr (np. `ass`) na CAŁYM materiale, mimo braku błędu
-  w logu. Zawsze jawny `split` przed rozgałęzieniem.
+  cichu wyłączyć inny filtr (na przykład `ass`) na CAŁYM materiale, mimo braku
+  błędu w logu. Zawsze jawny `split` przed rozgałęzieniem.
 - **Jeden wspólny format audio przed miksem.** Mono SFX 44,1 kHz plus stereo
   muzyka 48 kHz wywalają `amix` albo dają dźwięk w jednym kanale:
   `aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=stereo`.
-- **Błysk rób w Remotion, nie przez `overlay` źródła `color=`** — ta gałąź też
+- **Błysk rób w Remotion, nie przez `overlay` źródła `color=`.** Ta gałąź też
   potrafiła segfaultować.
 - **Ścieżki w `-filter_complex_script` na Windows:** wartości `fontfile=`,
   `textfile=`, `ass=` muszą być w apostrofach, inaczej parser wywala się na

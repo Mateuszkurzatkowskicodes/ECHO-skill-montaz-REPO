@@ -14,3 +14,4 @@ efekty.json
 filtr.txt
 napisy*.ass
 .echo-historia-efektow.json
+__pycache__/

@@ -249,8 +249,13 @@ def wybierz_klucz(grupa):
     return najlepszy
 
 
-def linia_karaoke(grupa, kolorowanie=True):
-    start, koniec = grupa[0]["start"], grupa[-1]["end"]
+MIN_CZAS_LINIJKI = 0.7   # sekundy; krocej i napis tylko mignie
+MIN_SLOW_LINIJKI = 2     # jedno slowo w linijce czyta sie jak blad
+
+
+def linia_karaoke(grupa, kolorowanie=True, koniec_wymuszony=None):
+    start = grupa[0]["start"]
+    koniec = koniec_wymuszony if koniec_wymuszony is not None else grupa[-1]["end"]
     klucz = wybierz_klucz(grupa) if kolorowanie else None
     tekst = ""
     for i, w in enumerate(grupa):
@@ -264,6 +269,36 @@ def linia_karaoke(grupa, kolorowanie=True):
     return f"Dialogue: 0,{czas_ass(start)},{czas_ass(koniec)},ECHO,,0,0,0,,{tekst.strip()}"
 
 
+def dlugosc_znakow(grupa):
+    return sum(len(g["word"].strip()) + 1 for g in grupa) - 1
+
+
+def scal_migajace(grupy):
+    """Laczy linijki, ktore tylko mignelyby na ekranie.
+
+    Whisper zamyka grupe na kazdym przecinku, wiec przy szybkiej mowie wychodzily
+    linijki jednoslowne trwajace 0,2 s. Na gotowej rolce wyglada to jak usterka:
+    cos mignelo i zniklo, zanim dalo sie przeczytac. Laczymy taka linijke
+    z nastepna, o ile obie zmieszcza sie w kadrze.
+    """
+    wynik = []
+    for grupa in grupy:
+        if not wynik:
+            wynik.append(grupa)
+            continue
+        poprzednia = wynik[-1]
+        czas_poprzedniej = poprzednia[-1]["end"] - poprzednia[0]["start"]
+        za_krotka = czas_poprzedniej < MIN_CZAS_LINIJKI or len(poprzednia) < MIN_SLOW_LINIJKI
+        zmiesci_sie = dlugosc_znakow(poprzednia) + 1 + dlugosc_znakow(grupa) <= MAKS_ZNAKOW
+        # laczymy tylko to, co faktycznie ze soba sasiaduje w czasie
+        przylega = grupa[0]["start"] - poprzednia[-1]["end"] < 0.6
+        if za_krotka and zmiesci_sie and przylega:
+            wynik[-1] = poprzednia + grupa
+        else:
+            wynik.append(grupa)
+    return wynik
+
+
 def zbuduj_ass(segmenty, maks_slow=3, marginv=520, fontsize=86, kolorowanie=True):
     """Napisy karaoke: 2-3 slowa na linijke, ciete na pauzach i na dlugosci."""
     linie = [
@@ -271,14 +306,14 @@ def zbuduj_ass(segmenty, maks_slow=3, marginv=520, fontsize=86, kolorowanie=True
             czcionka=dostepna_czcionka(), fontsize=fontsize, marginv=marginv
         )
     ]
+    grupy = []          # linijki z podzialem na slowa
+    proste = []         # segmenty bez znacznikow slow: (start, end, tekst)
+
     for seg in segmenty:
         slowa = [w for w in (seg.get("words") or []) if w.get("start") is not None]
         if not slowa:
             # brak znacznikow slow: cala linijka bez karaoke
-            linie.append(
-                f"Dialogue: 0,{czas_ass(seg['start'])},{czas_ass(seg['end'])},ECHO,,0,0,0,,"
-                + seg["text"].strip().upper()
-            )
+            proste.append((seg["start"], seg["end"], seg["text"].strip().upper()))
             continue
 
         grupa = []
@@ -290,16 +325,32 @@ def zbuduj_ass(segmenty, maks_slow=3, marginv=520, fontsize=86, kolorowanie=True
 
             # Slowo nie miesci sie w biezacej linijce: zamknij ja przed nim.
             if grupa and dlugosc_po > MAKS_ZNAKOW:
-                linie.append(linia_karaoke(grupa, kolorowanie))
+                grupy.append(grupa)
                 grupa = []
 
             grupa.append(w)
             koniec_zdania = czysty.endswith((".", ",", "!", "?", ":"))
             if len(grupa) >= maks_slow or koniec_zdania:
-                linie.append(linia_karaoke(grupa, kolorowanie))
+                grupy.append(grupa)
                 grupa = []
         if grupa:
-            linie.append(linia_karaoke(grupa, kolorowanie))
+            grupy.append(grupa)
+
+    grupy = scal_migajace(grupy)
+
+    # Kazda linijka stoi co najmniej MIN_CZAS_LINIJKI, o ile nie wchodzi w nastepna.
+    # Bez tego przy szybkiej mowie napis znika, zanim oko go zlapie.
+    for i, grupa in enumerate(grupy):
+        start = grupa[0]["start"]
+        koniec = grupa[-1]["end"]
+        if koniec - start < MIN_CZAS_LINIJKI:
+            granica = grupy[i + 1][0]["start"] - 0.02 if i + 1 < len(grupy) else start + MIN_CZAS_LINIJKI
+            koniec = max(koniec, min(start + MIN_CZAS_LINIJKI, granica))
+        linie.append(linia_karaoke(grupa, kolorowanie, koniec_wymuszony=koniec))
+
+    for start, koniec, tekst in proste:
+        linie.append(f"Dialogue: 0,{czas_ass(start)},{czas_ass(koniec)},ECHO,,0,0,0,,{tekst}")
+
     return "\n".join(linie) + "\n"
 
 
