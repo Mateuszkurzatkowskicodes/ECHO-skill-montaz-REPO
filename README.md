@@ -24,9 +24,14 @@ przenosi te uwagi do środka zestawu.
 **Montaż z automatu jest gęstszy i ciekawszy**
 - Efekty rozkładają się średnio co 3 sekundy zamiast co 3,5, i wchodzą tam,
   gdzie faktycznie coś mówisz.
-- **Hook zawsze dostaje wielki napis w pierwszej sekundzie.** Wcześniej zdarzało
-  się, że rolka zaczynała się płasko, a to jedyne dwie sekundy, które decydują,
-  czy ktoś zostanie.
+- **Otwarcie rolki rotuje.** Pierwsze sekundy dostają jedną z pięciu form:
+  wielkie słowo, zakreślenie na napisie, pełnoekranowa plansza, mała etykieta
+  przy twarzy albo sama twarz z mocniejszym najazdem, bez żadnej nakładki.
+  Zestaw pamięta, czym zaczęła się poprzednia rolka, i tym razem sięga po co
+  innego. Chodzi o to, żeby profil nie wyglądał jak szablon.
+- **Efekty nie idą równo jak metronom.** Gęściej na otwarciu, luźniej w środku,
+  gdy coś tłumaczysz, i znowu gęściej na końcówce. Końcówka nie zostaje pusta,
+  bo rolka urwana bez puenty wygląda jak przerwane zdanie.
 - Dwa podobne efekty nie idą już jeden po drugim (koniec z dwoma zakreśleniami
   pod rząd). Ten sam efekt nie wraca w jednej rolce, a kolejna rolka startuje
   od innego zestawu.

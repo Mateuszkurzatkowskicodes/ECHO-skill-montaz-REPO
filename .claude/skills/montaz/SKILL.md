@@ -43,7 +43,7 @@ Zanim oddasz rolkę, każda z tych rzeczy ma być prawdziwa:
 
 | Co | Próg |
 |---|---|
-| Pierwszy efekt | zaczyna się przed 1,5 s. Płaski hook = rolka bez zasięgu |
+| Otwarcie | w pierwszych 2 s dzieje się coś mocnego, ale ZA KAŻDYM RAZEM INACZEJ |
 | Gęstość efektów | średnio co 3-4 s. Powyżej 5 s to nagranie z napisami |
 | Powtórki | żaden efekt nie wraca w tej samej rolce; dwa podobne nie idą pod rząd |
 | Napisy | 2-3 słowa w linijce, każda stoi min. 0,7 s |
@@ -103,8 +103,10 @@ To narzędzie pilnuje rzeczy, o których łatwo zapomnieć:
 - **gęstość**: efekt średnio co 3 s, wpasowany w momenty, w których coś się
   faktycznie mówi (bierze czasy z napisów). `--gestosc 2.5` zagęszcza jeszcze
   bardziej, `--gestosc 4` rozrzedza pod spokojniejszy materiał.
-- **hook**: pierwsze zdanie ZAWSZE dostaje wielki napis w kadrze, niezależnie
-  od tego, co w nim padło.
+- **otwarcie**: pierwsze sekundy dostają jedną z pięciu form i **forma rotuje
+  między rolkami**: wielkie słowo, zakreślenie na napisie, pełnoekranowa plansza,
+  mała etykieta przy twarzy albo sama twarz z mocniejszym najazdem i pierwszym
+  efektem dopiero po hooku. Zestaw pamięta, czym zaczęła się poprzednia rolka.
 - **różnorodność**: pamięta w pliku `.echo-historia-efektow.json`, co poszło
   w poprzednich rolkach, i najpierw sięga po to, czego dawno nie było. Ten sam
   efekt nie wraca dwa razy w jednej rolce, dwa efekty z tej samej rodziny
@@ -113,6 +115,9 @@ To narzędzie pilnuje rzeczy, o których łatwo zapomnieć:
 - **dźwięk z umiarem**: dźwięk dostaje kilka najmocniejszych momentów (hook,
   liczba, kontra, CTA), a nie każda nakładka. Limit to 6 na rolkę i 1,6 s
   odstępu. Rolka, w której pika kilkanaście razy, brzmi tanio.
+- **rytm**: efekty nie idą równo jak metronom. Gęściej na otwarciu, luźniej
+  w środku, gdy coś tłumaczysz, i znowu gęściej na końcówce, gdzie siedzi puenta.
+  Końcówka nigdy nie zostaje pusta.
 - **pozycja w kadrze**: nakładka niższa niż kadr dostaje własne `y`, żeby nie
   przykleiła się do górnej krawędzi, czyli zwykle na czoło mówiącego.
 - **logo**: jeśli w folderze montażowym leży `logo.png` albo `brand-bug.png`,
@@ -232,10 +237,15 @@ tanio. Jedno ciągłe ujęcie to zero punchów.
 
 ## Profil stylu: ROLKA (9:16, do 60 s)
 
-- **Hook w 1-3 s:** najmocniejsze zdanie na początek, mocny najazd (`hook`
-  w planie), wielki napis, efekt już w pierwszej sekundzie. Przy materiale
-  z kilku ujęć: hypercut, czyli seria bardzo krótkich cięć zamiast jednego
-  spokojnego ujęcia. Płaski początek to utracona rolka.
+- **Otwarcie w 1-3 s:** najmocniejsze zdanie na początek i mocny najazd (`hook`
+  w planie). **Nie ma jednej słusznej formy hooka.** Wielki napis to tylko jedna
+  z nich i nie może wracać w każdej rolce, bo profil zaczyna wyglądać jak szablon
+  i widz przewija odruchowo. Do wyboru: wielkie słowo, zakreślenie na napisie,
+  pełnoekranowa plansza z pierwszym zdaniem, mała etykieta przy twarzy albo sama
+  twarz z mocniejszym najazdem, bez żadnej nakładki. `plan-efektow.mjs` rotuje to
+  sam. Przy materiale z kilku ujęć dochodzi hypercut, czyli seria bardzo krótkich
+  cięć zamiast jednego spokojnego ujęcia. Płaskie otwarcie to utracona rolka,
+  ale płaskie nie znaczy "bez napisu": znaczy "nic się nie dzieje".
 - **Napisy karaoke:** 2-3 słowa na linijkę, cięte na naturalnych pauzach, jedno
   słowo-klucz w kolorze, na wysokości szyi (`--marginv 520`). Gdy postać jest
   nisko w kadrze i napis ląduje na brzuchu, podnieś je (`--marginv 1070`),
@@ -269,6 +279,7 @@ tanio. Jedno ciągłe ujęcie to zero punchów.
 - **Logo w rogu to PLIK, nie napis.** Nazwa marki wystukana czcionką w efekcie
   wygląda jak podpis pod zdjęciem. Logo wygląda jak marka.
 - **Koniec:** CTA w ostatnich 3-5 s, słowo-klucz wielkie, mockup komentarza.
+  Końcówka bez żadnego efektu wygląda, jakby rolce urwało się zdanie.
 - **Długość:** 20-65 s, zależnie od tego, ile jest do powiedzenia. Retencja jest
   ważniejsza niż trafienie w okrągłą liczbę sekund.
 

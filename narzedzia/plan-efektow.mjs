@@ -60,7 +60,7 @@ const flaga = (n) => args.includes(n);
 const plikNapisow = wartosc("--napisy");
 const folderMuzyki = wartosc("--muzyka");
 const folderSfx = wartosc("--sfx", "sfx");
-const gestosc = Number(wartosc("--gestosc", "3"));
+const gestosc = Number(wartosc("--gestosc", "2.8"));
 const plikPlanu = wartosc("--zapisz", "plan.json");
 const remotionKatalog = wartosc("--remotion", "remotion-montaz");
 const renderujEfekty = flaga("--renderuj-efekty");
@@ -128,8 +128,77 @@ const EFEKTY = [
   {id: "emoji-burst", rola: "cta", rodzina: "etykieta", pola: [], dlugosc: 2.0, sfx: "pop", mocSfx: 7}
 ];
 
-/** Rodziny, z których wolno wziąć efekt na sam hook: wielki napis w kadrze. */
-const RODZINY_HOOKA = ["napis", "kreska"];
+/* ============================ OTWARCIE ROLKI ============================
+   Nie ma czegos takiego jak "hook to zawsze wielki napis". Dobre otwarcia
+   wygladaja roznie i wlasnie na tym polega ich sila: gdy kazda rolka na profilu
+   zaczyna sie tak samo, widz przewija ja odruchowo, zanim cokolwiek przeczyta.
+   Dlatego otwarcie ROTUJE tak samo jak efekty: zestaw pamieta, czym zaczela sie
+   poprzednia rolka, i tym razem siega po co innego. */
+
+const OTWARCIA = [
+  {
+    id: "slowo",
+    opis: "wielkie slowo w kadrze",
+    rodziny: ["napis"],
+    sila: 0.09
+  },
+  {
+    id: "kreska",
+    opis: "zakreslenie albo podkreslenie na napisie",
+    rodziny: ["kreska"],
+    sila: 0.08
+  },
+  {
+    id: "plansza",
+    opis: "pelnoekranowa plansza z pierwszym zdaniem",
+    rodziny: ["karta"],
+    role: ["interludium", "pytanie"],
+    sila: 0.07
+  },
+  {
+    id: "etykieta",
+    opis: "mala etykieta w kadrze, twarz zostaje na wierzchu",
+    rodziny: ["etykieta"],
+    role: ["etykieta"],
+    sila: 0.10
+  },
+  {
+    // Czasem najmocniejsze otwarcie to sama twarz i jedno zdanie. Wtedy zamiast
+    // nakladki dostajemy mocniejszy najazd, a pierwszy efekt wchodzi dopiero,
+    // gdy zdanie sie skonczy. Bez tego wariantu profil wyglada jak szablon.
+    id: "czysty",
+    opis: "sama twarz i mocny najazd, pierwszy efekt dopiero po hooku",
+    rodziny: null,
+    sila: 0.14,
+    pusteSekundy: 2.4
+  }
+];
+
+/** Otwarcie, ktorego najdawniej nie bylo. */
+/** Cokolwiek z zadanych rodzin, gdy rola pierwszego zdania nie ma tam nic. */
+function wybierzZRodzin(rodziny, uzyteTeraz) {
+  if (!rodziny) return null;
+  const kandydaci = EFEKTY.filter(
+    (e) => rodziny.includes(e.rodzina) && !uzyteTeraz.has(e.id) && !(e.wymagaLiczb || 0)
+  );
+  if (!kandydaci.length) return null;
+  kandydaci.sort((a, b) => (historia.efekty[a.id] || 0) - (historia.efekty[b.id] || 0));
+  const pula = kandydaci.slice(0, Math.min(3, kandydaci.length));
+  return pula[Math.floor(Math.random() * pula.length)];
+}
+
+/**
+ * Otwarcie, ktorego najdawniej nie bylo.
+ * Bierzemy WYLACZNIE te o najmniejszym numerze uzycia, a losujemy dopiero
+ * miedzy remisami. Losowanie z szerszej puli potrafilo powtorzyc otwarcie
+ * z poprzedniej rolki, czyli dokladnie to, czemu ta rotacja ma zapobiegac.
+ */
+function wybierzOtwarcie() {
+  const h = historia.otwarcia || {};
+  const najmniej = Math.min(...OTWARCIA.map((o) => h[o.id] || 0));
+  const pula = OTWARCIA.filter((o) => (h[o.id] || 0) === najmniej);
+  return pula[Math.floor(Math.random() * pula.length)];
+}
 
 /* Ile efektów dźwiękowych wolno wpuścić do jednej rolki.
    Sprawdzone w praktyce: przy kilkunastu "popach" rolka brzmi jak automat
@@ -405,27 +474,54 @@ const nakladki = [];
 const sfxKandydaci = [];
 const doRenderu = [];
 
+const otwarcie = wybierzOtwarcie();
+// Otwarcie "czyste" nie ma nakladki: przez pierwsze sekundy jest sama twarz
+// i mocniejszy najazd, a efekty zaczynaja sie dopiero po pierwszym zdaniu.
+const startEfektow = otwarcie.pusteSekundy || 0;
+
+/* RYTM: efekty NIE moga byc rozlozone rowno jak metronom, bo wtedy montaz
+   wyglada na wygenerowany. Prawdziwy montaz oddycha: gesto na otwarciu, luzniej
+   w srodku, gdy cos tlumaczysz, i znowu gesto na koncowce, gdzie siedzi puenta
+   i CTA. Ta funkcja mowi, ile sekund ma minac od poprzedniego efektu. */
+function odstepDla(t) {
+  const p = dlugosc > 0 ? t / dlugosc : 0;
+  if (p < 0.22) return gestosc * 0.78;
+  if (p > 0.72) return gestosc * 0.85;
+  return gestosc * 1.18;
+}
+
 let ostatniKoniec = -99;
+let ostatniStart = -99;
 let ostatniaRodzina = null;
 let policzone = 0;
 let licznikRozdzialow = 0;
 
 for (const k of kandydaci) {
   if (policzone >= ileEfektow) break;
+  if (k.t < startEfektow) continue;
   // nie kładziemy efektów jeden na drugim ani gęściej, niż zakłada rytm
-  if (k.t < ostatniKoniec + 0.5) continue;
+  if (k.t < ostatniKoniec + 0.4) continue;
+  if (policzone && k.t < ostatniStart + odstepDla(k.t)) continue;
   if (k.t > dlugosc - 1.2) break;
 
   // rolę liczymy z całej frazy, nie z pojedynczej linijki: linijka napisu ma
   // 2-3 słowa i sama rzadko wystarcza, żeby rozpoznać kontrę albo CTA
   const trescMomentu = napisy.length ? fraza(napisy, k.i, 44) : "";
-  const naHooku = policzone === 0 && k.t < 3.0;
-  // HOOK: pierwsze zdanie zawsze dostaje wielki napis w kadrze, niezależnie od
-  // tego, co w nim padło. Płaskie dwie pierwsze sekundy to najczęstszy powód,
-  // dla którego dobre nagranie nie ma zasięgu.
-  const rola = naHooku ? "akcent" : (napisy.length ? rolaDlaLinijki(trescMomentu, k.i, kandydaci.length) : "akcent");
+  // Pierwszy efekt w rolce dostaje forme wylosowanego otwarcia, a nie sztywno
+  // wielki napis. Otwarcia rotuja miedzy rolkami, patrz OTWARCIA wyzej.
+  const naHooku = policzone === 0 && k.t < startEfektow + 3.0;
+  const rolaZTresci = napisy.length ? rolaDlaLinijki(trescMomentu, k.i, kandydaci.length) : "akcent";
+  const rolaOtwarcia = naHooku && otwarcie.role
+    ? otwarcie.role[Math.floor(Math.random() * otwarcie.role.length)]
+    : null;
+  const rola = rolaOtwarcia || rolaZTresci;
   const iloscLiczb = (trescMomentu.match(/\d+/g) || []).length;
-  let efekt = wybierzEfekt(rola, uzyteTeraz, ostatniaRodzina, naHooku ? RODZINY_HOOKA : null, iloscLiczb);
+  let efekt = wybierzEfekt(rola, uzyteTeraz, ostatniaRodzina, naHooku ? otwarcie.rodziny : null, iloscLiczb);
+  if (!efekt && naHooku) efekt = wybierzEfekt(rolaZTresci, uzyteTeraz, ostatniaRodzina, otwarcie.rodziny, iloscLiczb);
+  // Forma otwarcia jest wazniejsza niz dopasowanie roli do tresci: rolka ma
+  // zaczynac sie inaczej niz poprzednia, nawet jesli w pierwszym zdaniu padla
+  // liczba albo pytanie. Bez tego otwarcie po cichu wracalo do wielkiego napisu.
+  if (!efekt && naHooku) efekt = wybierzZRodzin(otwarcie.rodziny, uzyteTeraz);
   // rola wyczerpana w tej rolce: bierzemy cokolwiek, czego jeszcze nie było
   if (!efekt) efekt = wybierzEfekt("akcent", uzyteTeraz, ostatniaRodzina, null, iloscLiczb) || wybierzEfekt("etykieta", uzyteTeraz, ostatniaRodzina, null, iloscLiczb);
   // cała pula wyczerpana (długie nagranie, gęsty rytm): zaczynamy drugą turę,
@@ -466,7 +562,48 @@ for (const k of kandydaci) {
   ostatniaRodzina = efekt.rodzina || null;
   historia.efekty[efekt.id] = (historia.rolek || 0) + 1;
   ostatniKoniec = k.t + trwanie;
+  ostatniStart = k.t;
   policzone++;
+}
+
+/* -------------------- koncowka musi byc domknieta --------------------
+   Ostatnie sekundy to puenta i CTA, czyli jedyny moment, w ktorym widz ma cos
+   zrobic. Rolka, ktora w tym miejscu jest pusta, konczy sie tak, jakby urwalo
+   jej sie zdanie. Jesli rytm nie postawil tam nic sam, dokladamy jeden efekt. */
+if (napisy.length && dlugosc > 8) {
+  const koniecOstatniego = nakladki.length ? Math.max(...nakladki.map((n) => n.do)) : 0;
+  const oknoKoncowki = dlugosc - 5.5;
+  if (koniecOstatniego < oknoKoncowki) {
+    // szukamy ostatniej linijki, ktora zdazy sie zmiescic w calosci
+    const kandydat = [...kandydaci].reverse().find((k) => k.t > oknoKoncowki && k.t < dlugosc - 2.2);
+    if (kandydat) {
+      const efekt =
+        wybierzEfekt("cta", uzyteTeraz, ostatniaRodzina) ||
+        wybierzEfekt("akcent", uzyteTeraz, ostatniaRodzina) ||
+        wybierzEfekt("etykieta", uzyteTeraz, ostatniaRodzina);
+      if (efekt) {
+        const trwanie = Math.min(efekt.dlugosc, dlugosc - kandydat.t - 0.2);
+        if (trwanie >= 1) {
+          const trescMomentu = fraza(napisy, kandydat.i, 44);
+          const plikEfektu = path.join("efekty", `${String(policzone + 1).padStart(2, "0")}-${efekt.id}.mov`);
+          const od = Number(kandydat.t.toFixed(2));
+          const doK = Number((kandydat.t + trwanie).toFixed(2));
+          nakladki.push({plik: plikEfektu, od, do: doK, x: 0, y: pozycjaY(efekt)});
+          if (efekt.naNapisach) napisyPrzerwy.push({od, do: doK});
+          doRenderu.push({
+            id: efekt.id,
+            plik: plikEfektu,
+            props: trescDlaEfektu(efekt, kandydat.linijka, kandydat.nastepna, napisy, kandydat.i, licznikRozdzialow, trescMomentu),
+            dlugoscSekund: Number(trwanie.toFixed(2))
+          });
+          if (efekt.sfx) sfxKandydaci.push({rodzaj: efekt.sfx, t: od, moc: (efekt.mocSfx || 0) + 3});
+          uzyteTeraz.add(efekt.id);
+          historia.efekty[efekt.id] = (historia.rolek || 0) + 1;
+          policzone++;
+        }
+      }
+    }
+  }
 }
 
 /* -------------------- dźwięk: kilka uderzeń, nie kanonada --------------------
@@ -549,7 +686,7 @@ const plan = {
   ...(plikNapisow ? {napisy: plikNapisow} : {}),
   ...(napisyPrzerwy.length ? {napisyPrzerwy} : {}),
   ...(muzyka ? {muzyka} : {}),
-  hook: {sila: 0.09},
+  hook: {sila: otwarcie.sila},
   punche,
   nakladki,
   ...(logo ? {logo} : {}),
@@ -563,6 +700,8 @@ fs.writeFileSync(plikPlanu, JSON.stringify(plan, null, 2), "utf8");
 const plikEfektow = path.join(katalog, "efekty.json");
 fs.writeFileSync(plikEfektow, JSON.stringify(doRenderu, null, 2), "utf8");
 
+historia.otwarcia = historia.otwarcia || {};
+historia.otwarcia[otwarcie.id] = (historia.rolek || 0) + 1;
 historia.rolek = (historia.rolek || 0) + 1;
 zapiszHistorie(historia);
 
@@ -572,6 +711,7 @@ console.log(`Nagranie:    ${path.basename(nagranie)}  (${dlugosc.toFixed(1)} s, 
 console.log(`Napisy:      ${napisy.length ? napisy.length + " linijek" : "brak"}`);
 console.log(`Sklejki:     ${punche.length} (tylko tam idą zoom-punche)`);
 console.log(`Muzyka:      ${muzyka ? path.basename(muzyka.plik) : "brak (podaj --muzyka folder)"}`);
+console.log(`Otwarcie:    ${otwarcie.opis} (rotuje miedzy rolkami)`);
 const coIle = dlugosc / Math.max(1, doRenderu.length);
 console.log(`Efekty:      ${doRenderu.length} różnych, średnio co ${coIle.toFixed(1)} s`);
 console.log(`Przerwy w napisach: ${napisyPrzerwy.length} (tam wjeżdża wielki napis-efekt)`);

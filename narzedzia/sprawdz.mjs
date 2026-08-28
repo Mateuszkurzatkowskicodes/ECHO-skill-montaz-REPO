@@ -199,15 +199,21 @@ if (fs.existsSync(plikPlanu)) {
       ok.push(`efekty gęsto (co ${coIle.toFixed(1)} s)`);
     }
 
+    // Otwarcie bez nakladki jest OK, o ile w zamian jest mocniejszy najazd: to
+    // jedna z form hooka, a nie brak montazu. Marudzimy dopiero, gdy na starcie
+    // nie dzieje sie nic: ani efekt, ani wyrazny najazd.
     const pierwszy = wszystkie.map((n) => n.od).filter((t) => t !== undefined).sort((a, b) => a - b)[0];
-    if (pierwszy === undefined || pierwszy > 2) {
+    const mocnyNajazd = plan.hook && plan.hook.sila >= 0.12;
+    const prog = mocnyNajazd ? 3.2 : 2;
+    if (pierwszy === undefined || pierwszy > prog) {
       uwagi.push(
-        "Pierwsze dwie sekundy są płaskie (pierwszy efekt dopiero " +
+        "Otwarcie jest płaskie (pierwszy efekt dopiero " +
         (pierwszy === undefined ? "nigdzie" : pierwszy.toFixed(1) + " s") +
+        (mocnyNajazd ? ", a najazd sam tego nie udźwignie" : "") +
         "). To najczęstszy powód, dla którego dobre nagranie nie ma zasięgu."
       );
     } else {
-      ok.push("hook ma efekt od pierwszej sekundy");
+      ok.push(mocnyNajazd && pierwszy > 1.2 ? "otwarcie na mocnym najeździe" : "otwarcie ma efekt od pierwszej sekundy");
     }
 
     const rodzaje = new Set(nakladki.map((n) => path.basename(n.plik || "").replace(/^\d+-/, "")));
