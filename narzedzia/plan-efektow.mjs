@@ -60,7 +60,7 @@ const flaga = (n) => args.includes(n);
 const plikNapisow = wartosc("--napisy");
 const folderMuzyki = wartosc("--muzyka");
 const folderSfx = wartosc("--sfx", "sfx");
-const gestosc = Number(wartosc("--gestosc", "2.8"));
+const gestosc = Number(wartosc("--gestosc", "2.6"));
 const plikPlanu = wartosc("--zapisz", "plan.json");
 const remotionKatalog = wartosc("--remotion", "remotion-montaz");
 const renderujEfekty = flaga("--renderuj-efekty");
@@ -627,8 +627,35 @@ const sfx = [];
     const zamiennik = {pop: "click", click: "pop", ding: "pop", whoosh: "swipe", swipe: "whoosh", impact: "sub-drop", typing: "click"}[wybrane[i].rodzaj];
     if (zamiennik) wybrane[i].rodzaj = zamiennik;
   }
+  /* DRAMATURGIA: dwa dzwieki, ktore nie sa akcentem na nakladce, tylko robota
+     na calej rolce. Nie licza sie do limitu "popow", bo nie pikaja: jeden
+     podbija samo wejscie, drugi buduje napiecie przed puenta. Bez nich montaz
+     jest poprawny, ale plaski w miejscach, w ktorych powinien byc mocny. */
+  const dramaturgia = [];
+  if (otwarcie.pusteSekundy) {
+    // otwarcie bez nakladki nie mialo zadnego akcentu: sam obraz i cisza
+    dramaturgia.push({rodzaj: "sub-drop", t: 0.12});
+  }
+  const ostatniaNakladka = nakladki.length
+    ? nakladki.reduce((a, b) => (b.od > a.od ? b : a))
+    : null;
+  if (ostatniaNakladka && ostatniaNakladka.od > 4) {
+    const t = Number(Math.max(0.3, ostatniaNakladka.od - 1.05).toFixed(2));
+    dramaturgia.push({rodzaj: "riser", t});
+  }
+  for (const d of dramaturgia) {
+    if (wybrane.some((w) => Math.abs(w.t - d.t) < 0.9)) continue;
+    wybrane.push(d);
+  }
+  wybrane.sort((a, b) => a.t - b.t);
+
   wybrane.forEach((w) => {
-    sfx.push({plik: path.join(folderSfx, SFX_PLIKI[w.rodzaj]), t: w.t});
+    sfx.push({
+      plik: path.join(folderSfx, SFX_PLIKI[w.rodzaj]),
+      t: w.t,
+      // riser ma narastac pod spodem, a nie przykrywac glos
+      ...(w.rodzaj === "riser" ? {glosnosc: 0.3} : {})
+    });
   });
 }
 
@@ -648,18 +675,82 @@ if (znalezione) {
     .map((t) => ({t}));
 }
 
-/* -------------------- muzyka: inna niż ostatnio -------------------- */
+/* -------------------- muzyka: pod tresc, nie po kolei --------------------
+   Wczesniej brany byl po prostu utwor, ktorego dawno nie bylo. Rotacja jest
+   potrzebna, zeby profil nie brzmial jednostajnie, ale sama w sobie potrafi
+   podlozyc spokojne lofi pod nagranie o tym, ile tracisz, albo phonk pod
+   spokojne tlumaczenie. Dlatego najpierw czytamy, o czym jest nagranie, a
+   rotacja rozstrzyga dopiero remisy. */
+
+const NASTROJE = [
+  {plik: "mocny-phonk-pantheon", slowa: ["przestań", "przestan", "błąd", "blad", "źle", "zle", "myślisz", "myslisz", "wszyscy", "koniec", "nieprawda", "mit"]},
+  {plik: "energiczny-napiecie", slowa: ["tracisz", "strata", "problem", "kosztuje", "koszt", "ryzyko", "drogo", "przepalasz", "traci"]},
+  {plik: "energiczny-phonk-only-human", slowa: ["tysiąc", "tysiac", "procent", "szybko", "wyniki", "rekord", "razy", "minut", "sekund"]},
+  {plik: "nowoczesny-tech", slowa: ["ai", "sztuczna", "narzędzie", "narzedzie", "program", "komenda", "automat", "montaż", "montaz", "komputer", "aplikacja"]},
+  {plik: "motywacyjny-do-dzialania", slowa: ["zacznij", "zrób", "zrob", "działaj", "dzialaj", "napisz", "komentarz", "spróbuj", "sprobuj", "wejdź", "wejdz"]},
+  {plik: "cieply-optymistyczny", slowa: ["udało", "udalo", "działa", "dziala", "wyszło", "wyszlo", "efekt", "gotowe", "super", "świetnie", "swietnie"]},
+  {plik: "emocjonalny-spokojny", slowa: ["bałem", "balem", "porażka", "porazka", "trudne", "ciężko", "ciezko", "zrezygnowałem", "wstyd", "szczerze"]},
+  {plik: "cieply-lofi-vintage", slowa: ["kiedyś", "kiedys", "zaczynałem", "zaczynalem", "pamiętam", "pamietam", "historia", "lata", "wcześniej", "wczesniej"]},
+  {plik: "spokojny-lofi-poranek", slowa: ["pokażę", "pokaze", "tłumaczę", "tlumacze", "krok", "prosto", "wyjaśnię", "wyjasnie", "jak"]},
+  {plik: "pozytywny-lekki", slowa: ["luźno", "luzno", "śmiesznie", "smiesznie", "fajnie", "spoko", "przyjemnie"]}
+];
+
+/**
+ * Jak mocno nagranie ciagnie w strone danego nastroju.
+ * Liczymy WYSTAPIENIA, nie same trafione slowa: nagranie, w ktorym "AI" pada
+ * osiem razy, ma isc pod podklad techniczny, a nie remisowac z podkladem,
+ * w ktorym raz padlo slowo "minut". Jedno slowo liczymy najwyzej trzy razy,
+ * zeby powtarzany wtret nie przewazyl calej reszty.
+ */
+function dopasowanieNastroju(tekst, nastroj) {
+  const slowa = tekst.toLowerCase().split(/[^a-ząćęłńóśźż]+/).filter(Boolean);
+  let punkty = 0;
+  for (const kluczowe of nastroj.slowa) {
+    const ile = slowa.filter((w) => w === kluczowe || w.startsWith(kluczowe)).length;
+    punkty += Math.min(3, ile);
+  }
+  return punkty;
+}
+
 let muzyka = null;
+let muzykaPowod = "";
 if (folderMuzyki && fs.existsSync(folderMuzyki)) {
   const utwory = fs
     .readdirSync(folderMuzyki)
     .filter((f) => /\.(mp3|wav|m4a|aac|ogg)$/i.test(f))
     .map((f) => path.join(folderMuzyki, f));
   if (utwory.length) {
-    utwory.sort((a, b) => (historia.muzyka[a] || 0) - (historia.muzyka[b] || 0));
-    const wybrany = utwory[0];
-    historia.muzyka[wybrany] = (historia.rolek || 0) + 1;
-    muzyka = {plik: wybrany, glosnosc: 0.17};
+    const calaTresc = napisy.map((l) => l.tekst).join(" ");
+    // koncowka wazy podwojnie: to ona zostaje w glowie i tam siedzi CTA
+    const koncowka = napisy.slice(Math.floor(napisy.length * 0.7)).map((l) => l.tekst).join(" ");
+    const tekstDoOceny = calaTresc + " " + koncowka;
+
+    const oceny = utwory.map((plik) => {
+      const nazwa = path.basename(plik).replace(/\.[^.]+$/, "").toLowerCase();
+      const nastroj = NASTROJE.find((n) => nazwa.includes(n.plik));
+      return {
+        plik,
+        trafienia: nastroj && calaTresc ? dopasowanieNastroju(tekstDoOceny, nastroj) : 0,
+        ostatnio: historia.muzyka[plik] || 0
+      };
+    });
+
+    // najpierw dopasowanie do tresci, przy remisie ten, ktorego dawno nie bylo
+    oceny.sort((a, b) => b.trafienia - a.trafienia || a.ostatnio - b.ostatnio);
+    const wybrany = oceny[0];
+    historia.muzyka[wybrany.plik] = (historia.rolek || 0) + 1;
+
+    /* Wejscie od mocniejszego miejsca utworu. Podklady CC0 czesto zaczynaja sie
+       kilkunastosekundowym narastaniem, a rolka trwa 30 sekund: przy starcie od
+       zera dostajemy pod hook prawie cisze. Wchodzimy tam, gdzie utwor gra juz
+       pelna paczka, o ile jest z czego brac. */
+    const dlugoscUtworu = dlugoscPliku(wybrany.plik) || 0;
+    const wejscie = dlugoscUtworu > dlugosc + 30 ? 12 : dlugoscUtworu > dlugosc + 16 ? 8 : 0;
+
+    muzyka = {plik: wybrany.plik, glosnosc: 0.17, ...(wejscie ? {od: wejscie} : {})};
+    muzykaPowod = wybrany.trafienia
+      ? `pasuje do tresci (${wybrany.trafienia} pkt)`
+      : "rotacja, tresc nie wskazala nastroju";
   }
 }
 
@@ -710,7 +801,7 @@ zapiszHistorie(historia);
 console.log(`Nagranie:    ${path.basename(nagranie)}  (${dlugosc.toFixed(1)} s, ${fps} fps)`);
 console.log(`Napisy:      ${napisy.length ? napisy.length + " linijek" : "brak"}`);
 console.log(`Sklejki:     ${punche.length} (tylko tam idą zoom-punche)`);
-console.log(`Muzyka:      ${muzyka ? path.basename(muzyka.plik) : "brak (podaj --muzyka folder)"}`);
+console.log(`Muzyka:      ${muzyka ? path.basename(muzyka.plik) + (muzykaPowod ? "  (" + muzykaPowod + ")" : "") : "brak (podaj --muzyka folder)"}`);
 console.log(`Otwarcie:    ${otwarcie.opis} (rotuje miedzy rolkami)`);
 const coIle = dlugosc / Math.max(1, doRenderu.length);
 console.log(`Efekty:      ${doRenderu.length} różnych, średnio co ${coIle.toFixed(1)} s`);

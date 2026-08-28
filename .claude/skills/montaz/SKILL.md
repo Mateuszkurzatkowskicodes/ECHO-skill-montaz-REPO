@@ -77,7 +77,9 @@ zapamiętywany, więc drugie uruchomienie na tym samym pliku jest natychmiastowe
 Wycina halucynacje (modele dorzucają na ciszy stopki typu "Napisy stworzone
 przez..."), łamie linijki tak, żeby weszły w kadr, podświetla słowo-klucz,
 scala linijki jednosłowne i pilnuje, żeby żaden napis nie mignął krócej niż
-0,7 s.
+0,7 s. Każda linijka wjeżdża lekkim "popem": pojawia się odrobinę mniejsza
+i w 130 ms dochodzi do pełnej wielkości. To ta różnica między napisami żywymi
+a napisami, które po prostu są.
 
 - `--marginv 920` przy split-screenie (napisy siadają na szwie, nie na twarzy).
 - `--model small` gdy nagranie jest długie, a liczy się czas.
@@ -115,9 +117,18 @@ To narzędzie pilnuje rzeczy, o których łatwo zapomnieć:
   efekt nie wraca dwa razy w jednej rolce, dwa efekty z tej samej rodziny
   (na przykład dwie kreski) nie idą jeden po drugim, a kolejna rolka startuje
   od innego zestawu. Muzyka rotuje tak samo.
-- **dźwięk z umiarem**: dźwięk dostaje kilka najmocniejszych momentów (hook,
-  liczba, kontra, CTA), a nie każda nakładka. Limit to 6 na rolkę i 1,6 s
+- **dźwięk z umiarem**: akcent dźwiękowy dostaje kilka najmocniejszych momentów
+  (hook, liczba, kontra, CTA), a nie każda nakładka. Limit to 6 na rolkę i 1,6 s
   odstępu. Rolka, w której pika kilkanaście razy, brzmi tanio.
+- **dźwiękowa dramaturgia**: poza tymi akcentami wchodzą jeszcze dwa dźwięki,
+  które pracują na całą rolkę: `riser` narastający sekundę przed puentą i `sub-drop`
+  na starcie, gdy otwarcie idzie bez nakładki i inaczej zaczynałoby się ciszą.
+  Nie liczą się do limitu, bo nie pikają, tylko budują.
+- **muzyka pod treść**: narzędzie czyta transkrypcję i dobiera podkład po tym,
+  o czym mówisz (końcówka waży podwójnie, bo tam siedzi CTA), a rotacja
+  rozstrzyga dopiero remis. Wchodzi też od mocniejszego miejsca utworu, a nie
+  od pierwszej sekundy: podkłady CC0 często zaczynają się narastaniem, więc pod
+  hookiem robiła się prawie cisza.
 - **rytm**: efekty nie idą równo jak metronom. Gęściej na otwarciu, luźniej
   w środku, gdy coś tłumaczysz, i znowu gęściej na końcówce, gdzie siedzi puenta.
   Końcówka nigdy nie zostaje pusta.
@@ -130,11 +141,12 @@ Dobiera też efekt do treści: liczba dostaje kartę wyniku i dzwonek, kontra
 dostaje przekreślenie, wyliczanka listę z odhaczaniem, końcówka mockup
 komentarza. Wynik to `plan.json` plus `efekty.json`.
 
-**Muzykę dobierasz TY, user nie ma nic pobierać ani szukać.** To jest twarda zasada.
-Zestaw ma jedenaście podkładów na wszystkie typowe nastroje, więc zawsze jest z czego
-wybrać. **Nigdy nie odsyłaj usera po muzykę i nigdy nie pytaj go, jaki chce podkład**,
-to jest dokładnie ta robota, której ma nie mieć. Przeczytaj transkrypcję, zdecyduj sam
-i powiedz jednym zdaniem, co wybrałeś i dlaczego.
+**Muzykę dobiera narzędzie, a Ty ją zatwierdzasz. User nie ma nic pobierać ani szukać.**
+To jest twarda zasada. Zestaw ma jedenaście podkładów na wszystkie typowe nastroje,
+a `plan-efektow.mjs` wybiera po treści nagrania i wypisuje, dlaczego. **Nigdy nie odsyłaj
+usera po muzykę i nigdy nie pytaj go, jaki chce podkład**, to jest dokładnie ta robota,
+której ma nie mieć. Zerknij na wybór narzędzia, zmień go, jeśli słyszysz, że nie pasuje,
+i powiedz userowi jednym zdaniem, co gra pod jego rolką i dlaczego.
 
 Narzędzie bez folderu `muzyka/` po prostu nie doda muzyki i nie zgłosi błędu, a rolka
 bez podkładu jest technicznie poprawna i kompletnie płaska. Komenda instalacyjna kopiuje

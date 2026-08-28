@@ -253,11 +253,20 @@ MIN_CZAS_LINIJKI = 0.7   # sekundy; krocej i napis tylko mignie
 MIN_SLOW_LINIJKI = 2     # jedno slowo w linijce czyta sie jak blad
 
 
+# Kazda linijka wjezdza lekkim "popem": pojawia sie o dziesiec procent mniejsza
+# i w 130 ms dochodzi do pelnej wielkosci, z krotkim przenikaniem. Roznica jest
+# niepozorna na papierze, a na gotowej rolce to ona odroznia napisy zywe od
+# napisow, ktore po prostu sa. Zadnych dodatkowych narzedzi to nie wymaga.
+WEJSCIE_LINIJKI = "{FAD(70,60)FSCX90FSCY90T(0,130,FSCX100FSCY100)}".replace(
+    "FAD", chr(92) + "fad").replace("FSCX", chr(92) + "fscx").replace(
+    "FSCY", chr(92) + "fscy").replace("T(", chr(92) + "t(")
+
+
 def linia_karaoke(grupa, kolorowanie=True, koniec_wymuszony=None):
     start = grupa[0]["start"]
     koniec = koniec_wymuszony if koniec_wymuszony is not None else grupa[-1]["end"]
     klucz = wybierz_klucz(grupa) if kolorowanie else None
-    tekst = ""
+    tekst = WEJSCIE_LINIJKI
     for i, w in enumerate(grupa):
         trwanie = max(1, int((w["end"] - w["start"]) * 100))  # setne sekundy
         slowo = w["word"].strip().upper()

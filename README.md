@@ -38,6 +38,19 @@ przenosi te uwagi do środka zestawu.
 - Na dłuższym nagraniu zestaw efektów nie kończy się w połowie: leci druga tura,
   zamiast zostawić drugą część rolki pustą.
 
+**Pierwsza rolka ma być mocna bez proszenia**
+- **Muzyka dobiera się pod to, co mówisz.** Zestaw czyta transkrypcję i wybiera
+  podkład po treści (końcówka waży podwójnie, bo tam siedzi CTA), a rotacja
+  rozstrzyga dopiero remis. Wcześniej brał po prostu ten, którego dawno nie było.
+- **Podkład wchodzi od mocniejszego miejsca utworu.** Podkłady CC0 często zaczynają
+  się kilkunastosekundowym narastaniem, a rolka trwa 30 sekund: pod hookiem robiła
+  się prawie cisza.
+- **Napisy wjeżdżają "popem"**, czyli pojawiają się odrobinę mniejsze i w 130 ms
+  dochodzą do pełnej wielkości. Drobiazg, po którym widać, że to montaż, a nie
+  wklejony tekst.
+- **Dźwięk ma dramaturgię, nie tylko akcenty:** riser narasta sekundę przed puentą,
+  a gdy otwarcie idzie bez nakładki, start podbija sub-drop.
+
 **Dźwięk brzmi drożej**
 - Efekty dźwiękowe wchodzą tylko na kilku najmocniejszych momentach (hook,
   liczba, kontra, CTA), maksymalnie sześć na rolkę, z odstępem. Wcześniej dźwięk
