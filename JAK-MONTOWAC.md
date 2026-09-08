@@ -99,6 +99,19 @@ skopiuj najbliższą rzecz z `compsAnimacje.tsx`, zmień zawartość i zarejestr
 w `Root.tsx`. Tak właśnie powstają rolki autora zestawu: pod każdą pisze się
 kilka komponentów pod jej konkretną treść.
 
+## Dwa narzędzia poza zwykłym montażem
+
+**Znaczek marki w rogu.** Jeśli user nie ma logo, zrób mu je z nazwy:
+`python narzedzia/zrob-logo.py "nazwa marki"`. Ląduje w `public/brand-bug.png`
+i wchodzi sam w sceny pełnoekranowe. Skopiowany do folderu montażowego jako
+`logo.png` stoi w rogu przez całą rolkę, tak jak w rolkach autora.
+
+**Postać wycięta z tła.** Gdy user chce porównanie albo pokazać materiał tak,
+żeby panel wjechał ZA niego:
+`python narzedzia/wytnij-postac.py nagranie.mp4 --od 3 --do 9 postac.mov`.
+Wymaga `pip install mediapipe opencv-contrib-python`, model pobiera się sam.
+Sprawdź najpierw jedną klatkę (`--sprawdz 4.0 podglad.png`).
+
 ## Czego NIE robić
 
 - Nie zostawiaj formy, którą wylosował automat, jeśli mówi o czym innym.

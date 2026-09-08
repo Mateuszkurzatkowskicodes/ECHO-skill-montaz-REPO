@@ -579,7 +579,12 @@ tanio. Jedno ciągłe ujęcie to zero punchów.
   zrzut ekranu, wyniki). Górna część kadru to ciągle grający dowód, dolna twarz,
   kilkanaście sekund równolegle, nie dwusekundowa wstawka. Domyślna granica
   (szew) to 1010 px: panel u góry, twarz pod nim, napisy na szwie.
-- **Panele ZA postacią, nie zamiast niej.** Gdy porównujesz dwie rzeczy albo
+- **Panele ZA postacią, nie zamiast niej.** Klip z samą postacią, bez tła,
+  robi `python narzedzia/wytnij-postac.py nagranie.mp4 --od 3 --do 9 postac.mov`
+  (najpierw `--sprawdz 4.0 podglad.png`, żeby ocenić kontur). W planie kładziesz
+  potem panel niżej, a `postac.mov` jako nakładkę nad nim. Narzędzie jest
+  zaawansowane i automat go nie używa: sięgasz po nie przy porównaniach
+  i pokazywaniu materiału. Gdy porównujesz dwie rzeczy albo
   pokazujesz materiał, lepiej wjeżdża panel za wyciętą postacią niż
   pełnoekranowa karta, która wywala mówiącego z kadru na trzy sekundy.
 - **Pokaż, nie opisuj.** Jeśli treść da się pokazać (zrzut ekranu, panel, klip,
