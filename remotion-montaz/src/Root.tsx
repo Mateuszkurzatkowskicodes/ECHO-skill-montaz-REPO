@@ -42,6 +42,9 @@ import {
 import {
   GrafPierscien, GrafSuwak, GrafSlupki, GrafPowiadomienia, GrafKonto,
 } from './compsGrafiki';
+import {
+  AnimWykres, AnimKalendarz, AnimZegar, AnimTimeline, AnimOrbita, AnimFala,
+} from './compsAnimacje';
 
 const FPS = 60;
 
@@ -404,6 +407,19 @@ export const Root: React.FC = () => {
       <Composition id="graf-slupki" component={GrafSlupki} durationInFrames={Math.round(4.6 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nadtytul: 'zasięgi miesiąc po miesiącu', jasne: false}} />
       <Composition id="graf-powiadomienia" component={GrafPowiadomienia} durationInFrames={Math.round(4.6 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nadtytul: 'a potem to wygląda tak', jasne: false}} />
       <Composition id="graf-konto" component={GrafKonto} durationInFrames={Math.round(4.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nadtytul: 'twoje konto', nick: 'twoja.firma', obserwujacy: 4870, jasne: true}} />
+
+      {/* ANIMOWANE ILUSTRACJE. Rysuja to, o czym mowi mowiacy, i sa w ruchu przez
+          caly swoj czas: linia wykresu sie rysuje i zalamuje, kartki kalendarza
+          odrywaja sie, wskazowki pedza, sciezki montazu ukladaja sie na osi,
+          ikony sciagaja do srodka, fala rosnie. Zadnych ramek z napisem.
+          Szczegoly: src/compsAnimacje.tsx */}
+      <Composition id="anim-wykres" component={AnimWykres} durationInFrames={Math.round(4.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'i nagle', puenta: '', wDol: true, jasne: false}} />
+      <Composition id="anim-wzrost" component={AnimWykres} durationInFrames={Math.round(4.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'i wtedy', puenta: '', wDol: false, jasne: false}} />
+      <Composition id="anim-kalendarz" component={AnimKalendarz} durationInFrames={Math.round(4.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'mijają miesiące', puenta: '', jasne: false}} />
+      <Composition id="anim-zegar" component={AnimZegar} durationInFrames={Math.round(4.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'a czas leci', puenta: '', jasne: false}} />
+      <Composition id="anim-timeline" component={AnimTimeline} durationInFrames={Math.round(4.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'tak to wygląda w środku', puenta: '', etykieta: 'MONTAŻ'}} />
+      <Composition id="anim-orbita" component={AnimOrbita} durationInFrames={Math.round(4.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'wszystko naraz', srodek: '🤯', puenta: '', jasne: false}} />
+      <Composition id="anim-fala" component={AnimFala} durationInFrames={Math.round(4.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'i wtedy zaczyna się dziać', puenta: '', jasne: false}} />
     </>
   );
 };

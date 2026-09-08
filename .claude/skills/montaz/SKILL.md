@@ -132,6 +132,30 @@ czasowym:
 **Hasło ma ilustrować to zdanie.** Nie temat rolki, nie to, co pada dziesięć
 sekund dalej. Efekt mówiący o czym innym niż mówiący jest gorszy niż brak efektu.
 
+## ZERO RAMEK Z NAPISEM. TYLKO ANIMOWANE ILUSTRACJE
+
+Wszystkie efekty typu "tekst w ramce nad napisami" wyleciały z automatu
+08.09.2026 i **nie wolno ich tam wracać**: `karta-teza`, `badge-ikona`,
+`karta-liczba`, `pigulki-nie`, `karta-zamiana`, `mockup-plik`, `k-wynik`,
+`k-lista`, `k-komentarz`, `sekw-nakladka`. Autor odrzucał je konsekwentnie
+jednym zdaniem: **"takie coś zrobi każdy w Canvie"**. Zostają w bibliotece
+do ręcznego użycia, ale automat po nie nie sięga.
+
+Trzon zestawu to teraz `compsAnimacje.tsx`, czyli rzeczy, które RYSUJĄ:
+
+| Kompozycja | Co widać |
+|---|---|
+| `anim-wykres` | linia rysuje się i załamuje w dół, tło czerwienieje |
+| `anim-wzrost` | ta sama linia, ale pnie się w górę, na zielono |
+| `anim-kalendarz` | kartki odrywają się i odlatują jedna po drugiej |
+| `anim-zegar` | wskazówki pędzą przez tarczę, ślad czasu narasta |
+| `anim-timeline` | ścieżki montażu układają się, głowica jedzie przez oś |
+| `anim-orbita` | ikony krążą wokół środka i ściągają do niego |
+| `anim-fala` | fala zasięgów rośnie i pulsuje |
+
+Każda animuje się **od pierwszej do ostatniej klatki** i nigdy nie stoi. Tekst
+jest podpisem rysunku, nie treścią efektu.
+
 ## GRAFIKI, KTÓRE ILUSTRUJĄ (nie napis w ramce)
 
 Najmocniejsze momenty w rolkach autora nie są napisami, tylko rysunkami. Widz ich

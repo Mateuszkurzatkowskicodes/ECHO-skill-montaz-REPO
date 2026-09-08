@@ -107,32 +107,35 @@ const EFEKTY = [
      2,8 s, tylko cos, co narasta przez 5-6 sekund i dokłada elementy w rytm
      mowy. Dlatego stoja na poczatku puli i maja najdluzszy czas trwania.
      Statyczne karty nizej sa uzupelnieniem, nie trzonem. */
-  {id: "sekw-nakladka", rola: "akcent", rodzina: "sekwencja", pola: ["pozycje"], dlugosc: 4.0, wys: 300, sfx: "pop", mocSfx: 8},
   {id: "sekw-terminal", rola: "lista", rodzina: "sekwencja", pola: ["kroki"], dlugosc: 4.4, wys: 300, sfx: "click", mocSfx: 8},
   {scena: true, tlo: "jasne", id: "sekw-pelna", rola: "kontra", rodzina: "sekwencja", pola: ["pozycje"], dlugosc: 4.2, sfx: "whoosh", mocSfx: 9},
   {scena: true, tlo: "jasne", id: "sekw-przekreslona", rola: "kontra", rodzina: "sekwencja", pola: ["pozycje"], dlugosc: 4.2, sfx: "swipe", mocSfx: 9},
   {scena: true, tlo: "ciemne", id: "sekw-checklista", rola: "lista", rodzina: "sekwencja", pola: ["punkty"], dlugosc: 4.6, sfx: "pop", mocSfx: 8},
 
   // akcent: podstawowa forma efektu
-  {id: "karta-teza", rola: "akcent", rodzina: "karta", pola: ["nadtytul", "tekst"], dlugosc: 2.8, wys: 280, sfx: "impact", mocSfx: 9},
-  {id: "badge-ikona", rola: "akcent", rodzina: "etykieta", pola: ["ikona", "tekst"], dlugosc: 2.6, wys: 280, sfx: "pop", mocSfx: 6, limit: 1},
 
   // liczby i wyniki
-  {id: "karta-liczba", rola: "liczba", rodzina: "karta", pola: ["ikona", "liczba", "podpis"], dlugosc: 2.8, wys: 280, sfx: "ding", mocSfx: 9},
 
   // kontrast, "nie tak, a tak"
-  {id: "pigulki-nie", rola: "kontra", rodzina: "lista", pola: ["punkty"], dlugosc: 3.0, wys: 280, sfx: "swipe", mocSfx: 8, limit: 1},
-  {id: "karta-zamiana", rola: "kontra", rodzina: "karta", pola: ["nadtytul", "stare", "nowe"], dlugosc: 3.4, wys: 280, sfx: "whoosh", mocSfx: 9},
 
   // proces: pokazuje, zamiast opisywac
-  {id: "mockup-plik", rola: "lista", rodzina: "karta", pola: [], dlugosc: 3.4, wys: 280, sfx: "click", mocSfx: 7},
 
   /* Warianty zbudowane ze starych komponentow biblioteki, osadzone w niskiej
      kompozycji. Bez nich automat wyczerpywal pule w polowie rolki i powtarzal
      ten sam efekt dwa razy. */
-  {id: "k-wynik", rola: "liczba", rodzina: "karta", pola: ["liczba", "podpis"], dlugosc: 2.8, wys: 280, sfx: "ding", mocSfx: 8},
-  {id: "k-lista", rola: "lista", rodzina: "lista", pola: ["punkty"], dlugosc: 3.4, wys: 280, sfx: "pop", mocSfx: 6},
-  {id: "k-komentarz", rola: "cta", rodzina: "karta", pola: ["nick", "tresc"], dlugosc: 3.4, wys: 280, sfx: "pop", mocSfx: 9},
+
+  /* ANIMOWANE ILUSTRACJE. Trzon zestawu od 08.09.2026: rysuja to, o czym mowi
+     mowiacy, i sa w ruchu przez caly swoj czas. Wszystkie "ramki z napisem"
+     wylecialy z puli, bo autor odrzucal je konsekwentnie: "takie cos zrobi
+     kazdy w Canvie". `wymagaLiczb` nie jest tu potrzebne, bo zaden z tych
+     efektow nie cytuje liczby, tylko pokazuje zjawisko. */
+  {scena: true, tlo: "ciemne", id: "anim-wykres", rola: "kontra", rodzina: "animacja", pola: ["podpis"], dlugosc: 4.0, sfx: "sub-drop", mocSfx: 9},
+  {scena: true, tlo: "ciemne", id: "anim-wzrost", rola: "lista", rodzina: "animacja", pola: ["podpis"], dlugosc: 4.0, sfx: "riser", mocSfx: 9},
+  {scena: true, tlo: "ciemne", id: "anim-kalendarz", rola: "akcent", rodzina: "animacja", pola: ["podpis"], dlugosc: 4.2, sfx: "swipe", mocSfx: 8},
+  {scena: true, tlo: "ciemne", id: "anim-zegar", rola: "liczba", rodzina: "animacja", pola: ["podpis"], dlugosc: 4.0, sfx: "click", mocSfx: 8},
+  {scena: true, tlo: "ciemne", id: "anim-timeline", rola: "lista", rodzina: "animacja", pola: ["podpis"], dlugosc: 4.4, sfx: "click", mocSfx: 8},
+  {scena: true, tlo: "ciemne", id: "anim-orbita", rola: "kontra", rodzina: "animacja", pola: ["podpis"], dlugosc: 4.4, sfx: "whoosh", mocSfx: 9},
+  {scena: true, tlo: "ciemne", id: "anim-fala", rola: "cta", rodzina: "animacja", pola: ["podpis"], dlugosc: 4.2, sfx: "riser", mocSfx: 9},
 
   /* GRAFIKI, KTORE ILUSTRUJA. Najmocniejsze momenty w rolkach autora nie sa
      napisami, tylko rysunkami: pierscien dobiegajacy do wartosci, suwak na
@@ -574,6 +577,18 @@ function trescDlaEfektu(efekt, linijka, nastepna, napisy, indeks, numerRozdzialu
        ikone dobrana do tresci. Gdy nie da sie zebrac przynajmniej dwoch
        sensownych fraz, pole jest null i ukladanie pomija ten moment: pusta
        sekwencja wyglada gorzej niz jej brak. */
+    case "anim-wykres":
+    case "anim-wzrost":
+    case "anim-kalendarz":
+    case "anim-zegar":
+    case "anim-timeline":
+    case "anim-orbita":
+    case "anim-fala":
+      // Animacje pokazuja zjawisko, nie cytuja nagrania. Podpis i puenta sa do
+      // wpisania recznie, przy przepisywaniu tekstow: wtedy trafiaja w zdanie,
+      // ktore leci pod nimi.
+      return {podpis: "", puenta: ""};
+
     case "graf-pierscien":
       return {nadtytul: "", wartosc: liczba.toUpperCase(), podpis: "", jasne: false};
     case "graf-suwak":
