@@ -367,6 +367,17 @@ export const Root: React.FC = () => {
       <Composition id="badge-ikona" component={BadgeIkona} durationInFrames={Math.round(2.6 * FPS)} fps={FPS} width={1080} height={WYS_KARTY} defaultProps={{ikona: '🚫', tekst: 'NIE MUSISZ SIĘ UCZYĆ'}} />
       <Composition id="mockup-plik" component={MockupPlik} durationInFrames={Math.round(3.4 * FPS)} fps={FPS} width={1080} height={WYS_KARTY} defaultProps={{nazwa: 'nagranie-surowe.mp4', podpis: 'bez cięcia · bez efektów', etykieta: 'montuję...'}} />
       <Composition id="karta-zamiana" component={KartaZamiana} durationInFrames={Math.round(3.4 * FPS)} fps={FPS} width={1080} height={WYS_KARTY} defaultProps={{nadtytul: 'montażysta co miesiąc', stare: 'TYSIĄCE ZŁ', nowe: '0 ZŁ', podpis: ''}} />
+
+      {/* Warianty kart zbudowane z komponentow, ktore juz byly w bibliotece,
+          ale wisialy na pelnym kadrze i przez to ladowaly na wysokosci napisow.
+          Tutaj dostaja niska kompozycje i pozycje 'srodek', wiec plan kladzie
+          je co do piksela w pasie miedzy broda a napisami. Powod dolozenia:
+          przy szesciu kartach automat wyczerpywal pule w polowie rolki
+          i powtarzal ten sam efekt. Dwa kolejne warianty (k-pytanie, k-krok)
+          zostaly odrzucone: w niskiej kompozycji renderowaly sie puste. */}
+      <Composition id="k-wynik" component={KartaWyniku} durationInFrames={Math.round(2.8 * FPS)} fps={FPS} width={1080} height={WYS_KARTY} defaultProps={{liczba: '24 ZŁ', podpis: 'KOSZT JEDNEGO LEADA', pozycja: 'srodek'}} />
+      <Composition id="k-lista" component={ListaCheck} durationInFrames={Math.round(3.4 * FPS)} fps={FPS} width={1080} height={WYS_KARTY} defaultProps={{punkty: ['NAGRYWASZ', 'GOTOWE'], pozycja: 'srodek'}} />
+      <Composition id="k-komentarz" component={DymekKomentarza} durationInFrames={Math.round(3.4 * FPS)} fps={FPS} width={1080} height={WYS_KARTY} defaultProps={{nick: 'twoj.profil', tresc: 'NAPISZ', pozycja: 'srodek'}} />
     </>
   );
 };

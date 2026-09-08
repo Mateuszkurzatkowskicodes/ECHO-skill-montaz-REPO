@@ -69,6 +69,43 @@ zasłonić, to scena pełnoekranowa, bo ona zmienia cały kadr i ma własny teks
 Wszystko inne siedzi NAD napisami, na wysokości klatki piersiowej
 (`pozycja: "dol"` w propsach, a przy niskich kompozycjach plan robi to sam).
 
+## CO W OGÓLE MOŻE WEJŚĆ DO ROLKI (pula automatu)
+
+Automat losuje **wyłącznie** z dwóch rodzin: kart nad napisami i scen
+pełnoekranowych. Wszystko inne, co jest w bibliotece, zostało z niej wyjęte
+08.09.2026, bo w rolce wyglądało źle i widać to było na klatkach:
+
+- **wielkie napisy-cytaty** (`fx-slam`, `fx-stempel`, `glitch`, `scramble`,
+  `marker`, `fx-podkreslenie`, `fx-kolo`, `fx-przekreslenie`, `fx-cytat`,
+  `typewriter`): pokazują frazę z transkrypcji wielką czcionką zamiast napisów.
+  To to samo zdanie drugi raz, urwane w losowym miejscu.
+- **ozdobniki** (`fx-ticker`, `strzalka`, `light-sweep`, `emoji-burst`): nic nie
+  wnoszą, a zajmują miejsce prawdziwego efektu. `fx-ticker` w kadrze stawał jako
+  fraza urwana z obu stron i sklejona sama ze sobą.
+
+Nie wracaj ich do automatu. Używaj ich ręcznie, gdy sam wybierzesz moment
+i napiszesz do niego własne, krótkie hasło.
+
+## NIC NIE LEŻY NA TWARZY, I PILNUJE TEGO NARZĘDZIE
+
+```bash
+python narzedzia/gdzie-twarz.py nagranie.mp4
+```
+
+Mówi, na jakiej wysokości kończy się twarz i od którego piksela wolno kłaść
+efekt. `plan-efektow.mjs` woła to sam i ustawia `y` każdej karty tak, żeby
+zmieściła się w pasie **poniżej brody i powyżej napisów**. Wcześniej wysokość
+była stałą liczbą dobraną pod jedno nagranie: przy innym kadrowaniu wielki
+napis lądował mówiącemu na ustach.
+
+Pas bywa wąski. Przy zbliżeniu zostaje niecałe 300 px i dlatego karty są niskie
+(280 px) i zwarte. Jeśli projektujesz własną kartę, zmieść ją w tej wysokości,
+inaczej położy się na napisach. Sprawdź to renderem pojedynczej klatki, zanim
+wstawisz ją do rolki.
+
+Gdy w kadrze nie ma miejsca na kartę, **użyj sceny pełnoekranowej**: ona zasłania
+wszystko i problem znika.
+
 ## KARTY NAD NAPISAMI (podstawowa forma efektu)
 
 To jest forma, która dominuje w rolkach uznanych za dobre: mała karta z ramką,

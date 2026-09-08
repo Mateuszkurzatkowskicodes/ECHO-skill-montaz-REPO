@@ -32,8 +32,13 @@ const GREEN = '#4ED47A';
 const RED = '#F0453B';
 const KARTA_TLO = 'rgba(11,15,22,0.92)';
 
-/** Wysokosc kompozycji. Karty sa niskie i plan kladzie je NAD napisami. */
-export const WYS_KARTY = 620;
+/** Wysokosc kompozycji karty.
+    280 px to nie jest liczba z powietrza. Napis karaoke ma MarginV 520, ale sam
+    zajmuje jeszcze okolo 120 px w gore, wiec jego GORNA krawedz jest na 1330.
+    Miedzy broda a ta krawedzia zostaje niecale 300 px i tyle wolno zajac karcie.
+    Wyzsza albo wchodzila na twarz, albo kladla sie na napisach. Wszystko tutaj jest
+    wiec zwarte: mniejsze paddingi i stopnie pisma niz w scenach. */
+export const WYS_KARTY = 280;
 
 /** Nadtytul kursywa. Maly, przygaszony, nad glowna trescia. Sygnatura stylu. */
 const Nadtytul: React.FC<{tekst?: string; post: number; jasny?: boolean}> = ({tekst, post, jasny}) =>
@@ -42,13 +47,13 @@ const Nadtytul: React.FC<{tekst?: string; post: number; jasny?: boolean}> = ({te
       style={{
         fontFamily: SANS,
         fontStyle: 'italic',
-        fontSize: 34,
+        fontSize: 28,
         fontWeight: 600,
         color: jasny ? 'rgba(40,40,40,0.62)' : 'rgba(255,255,255,0.86)',
         // Cien: nadtytul stoi na nagraniu, wiec na jasnym tle (sciana, koszulka)
         // sam bialy tekst po prostu znikal.
         textShadow: jasny ? 'none' : '0 3px 14px rgba(0,0,0,0.9), 0 0 26px rgba(0,0,0,0.75)',
-        marginBottom: 16,
+        marginBottom: 10,
         opacity: post,
         transform: `translateY(${interpolate(post, [0, 1], [-14, 0])}px)`,
         textAlign: 'center',
@@ -92,7 +97,7 @@ export const KartaTeza: React.FC<{nadtytul?: string; tekst?: string}> = ({
   const frame = useCurrentFrame();
   const {fps, durationInFrames} = useVideoConfig();
   const {post} = wjazd(frame, fps, durationInFrames);
-  const fs = stopien(tekst, 62, 38, 1750);
+  const fs = stopien(tekst, 52, 34, 1500);
 
   return (
     <AbsoluteFill style={ramkaKarty}>
@@ -103,7 +108,7 @@ export const KartaTeza: React.FC<{nadtytul?: string; tekst?: string}> = ({
             background: KARTA_TLO,
             border: `3px solid ${ORANGE}`,
             borderRadius: 22,
-            padding: '28px 38px',
+            padding: '20px 32px',
             maxWidth: 900,
             boxShadow: `0 22px 60px rgba(0,0,0,0.55), 0 0 40px ${ORANGE}33`,
           }}
@@ -150,16 +155,16 @@ export const KartaLiczba: React.FC<{ikona?: string; liczba?: string; podpis?: st
           background: KARTA_TLO,
           border: `3px solid ${ORANGE}`,
           borderRadius: 22,
-          padding: '24px 34px',
+          padding: '18px 28px',
           maxWidth: 940,
           opacity: post,
           transform: `translateY(${interpolate(post, [0, 1], [46, 0])}px) scale(${puls})`,
           boxShadow: `0 22px 60px rgba(0,0,0,0.55), 0 0 40px ${ORANGE}33`,
         }}
       >
-        <div style={{fontSize: 62, lineHeight: 1, flexShrink: 0}}>{ikona}</div>
+        <div style={{fontSize: 50, lineHeight: 1, flexShrink: 0}}>{ikona}</div>
         <div style={{display: 'flex', flexDirection: 'column', gap: 4}}>
-          <div style={{fontFamily: SANS, fontSize: 64, fontWeight: 900, color: '#fff', lineHeight: 1}}>
+          <div style={{fontFamily: SANS, fontSize: 54, fontWeight: 900, color: '#fff', lineHeight: 1}}>
             {liczba}
           </div>
           <div
@@ -192,7 +197,7 @@ export const PigulkiNie: React.FC<{punkty?: string[]; nadtytul?: string}> = ({
 
   return (
     <AbsoluteFill style={ramkaKarty}>
-      <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14}}>
+      <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10}}>
         <Nadtytul tekst={nadtytul} post={post} />
         {punkty.slice(0, 3).map((p, i) => {
           const w = wjazd(frame, fps, durationInFrames, 6 + i * 7);
@@ -206,7 +211,7 @@ export const PigulkiNie: React.FC<{punkty?: string[]; nadtytul?: string}> = ({
                 background: KARTA_TLO,
                 border: `2px solid ${RED}aa`,
                 borderRadius: 999,
-                padding: '16px 30px',
+                padding: '13px 26px',
                 opacity: w.post,
                 transform: `translateX(${interpolate(w.wjechal, [0, 1], [-70, 0])}px)`,
                 boxShadow: '0 16px 40px rgba(0,0,0,0.5)',
@@ -235,7 +240,7 @@ export const BadgeIkona: React.FC<{ikona?: string; tekst?: string; kolor?: strin
   const frame = useCurrentFrame();
   const {fps, durationInFrames} = useVideoConfig();
   const {post, wjechal} = wjazd(frame, fps, durationInFrames);
-  const fs = stopien(tekst, 40, 27, 1050);
+  const fs = stopien(tekst, 36, 25, 950);
 
   return (
     <AbsoluteFill style={ramkaKarty}>
@@ -247,7 +252,7 @@ export const BadgeIkona: React.FC<{ikona?: string; tekst?: string; kolor?: strin
           background: KARTA_TLO,
           border: `2px solid ${kolor}`,
           borderRadius: 999,
-          padding: '16px 30px',
+          padding: '13px 26px',
           maxWidth: 900,
           opacity: post,
           transform: `translateY(${interpolate(wjechal, [0, 1], [40, 0])}px)`,
@@ -403,7 +408,7 @@ export const KartaZamiana: React.FC<{nadtytul?: string; stare?: string; nowe?: s
           <div
             style={{
               fontFamily: SANS,
-              fontSize: stopien(stare, 68, 40, 1500),
+              fontSize: stopien(stare, 46, 30, 1150),
               fontWeight: 900,
               color: 'rgba(255,255,255,0.55)',
               letterSpacing: -1,
@@ -428,18 +433,7 @@ export const KartaZamiana: React.FC<{nadtytul?: string; stare?: string; nowe?: s
         <div
           style={{
             fontFamily: SANS,
-            fontSize: 40,
-            color: 'rgba(255,255,255,0.6)',
-            opacity: noweP,
-            lineHeight: 1,
-          }}
-        >
-          {'↓'}
-        </div>
-        <div
-          style={{
-            fontFamily: SANS,
-            fontSize: stopien(nowe, 96, 54, 1700),
+            fontSize: stopien(nowe, 60, 38, 1300),
             fontWeight: 900,
             color: GREEN,
             letterSpacing: -2,

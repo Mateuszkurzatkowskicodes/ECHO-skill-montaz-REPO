@@ -88,82 +88,52 @@ const PLIK_HISTORII = path.join(katalog, ".echo-historia-efektow.json");
    kladzie efekt nad napisami. Gole napisy-slamy zostaja w bibliotece do recznego
    uzycia, patrz SKILL.md. */
 const EFEKTY = [
-  // mocne akcenty na zdaniu: karty nad napisami, napisy zostaja widoczne
-  {id: "karta-teza", rola: "akcent", rodzina: "karta", pola: ["nadtytul", "tekst"], dlugosc: 2.8, wys: 620, sfx: "impact", mocSfx: 9},
-  {id: "badge-ikona", rola: "akcent", rodzina: "etykieta", pola: ["ikona", "tekst"], dlugosc: 2.6, wys: 620, sfx: "pop", mocSfx: 6},
-  {id: "fx-stempel", rola: "akcent", rodzina: "napis", pola: ["tekst"], dlugosc: 1.8, pozycja: "dol", sfx: "impact", mocSfx: 8},
-  {id: "fx-podkreslenie", rola: "akcent", rodzina: "kreska", pola: ["tekst"], dlugosc: 2.4, pozycja: "dol", sfx: "swipe", mocSfx: 4},
-  {id: "fx-kolo", rola: "akcent", rodzina: "kreska", pola: ["tekst"], dlugosc: 2.4, pozycja: "dol", sfx: "swipe", mocSfx: 4},
+  /* PULA AUTOMATU: tylko karty nad napisami i sceny pelnoekranowe.
+     08.09.2026 wypadly z niej WSZYSTKIE pelnokadrowe efekty tekstowe
+     (fx-slam, fx-stempel, fx-podkreslenie, fx-kolo, fx-przekreslenie, glitch,
+     scramble, marker, fx-cytat, typewriter, fx-ticker, strzalka, light-sweep,
+     emoji-burst i reszta). Powod jest dwojaki i oba widac na klatkach:
+       1. To sa cytaty z transkrypcji pokazane wielka czcionka, czyli to samo
+          zdanie drugi raz, urwane w losowym miejscu.
+       2. Ich pozycje ustala sam komponent, wiec plan nie moze ich odsunac od
+          twarzy. "POSLUCHAJ" ladowalo na ustach mowiacego.
+     Karty maja wlasna wysokosc (`wys`), wiec plan kladzie je co do piksela:
+     ponizej twarzy i nad napisami. Reszta zostaje w bibliotece do RECZNEGO
+     uzycia, gdy sam wybierzesz moment i napiszesz haslo. */
+
+  // akcent: podstawowa forma efektu
+  {id: "karta-teza", rola: "akcent", rodzina: "karta", pola: ["nadtytul", "tekst"], dlugosc: 2.8, wys: 280, sfx: "impact", mocSfx: 9},
+  {id: "badge-ikona", rola: "akcent", rodzina: "etykieta", pola: ["ikona", "tekst"], dlugosc: 2.6, wys: 280, sfx: "pop", mocSfx: 6},
 
   // liczby i wyniki
-  {id: "karta-liczba", rola: "liczba", rodzina: "karta", pola: ["ikona", "liczba", "podpis"], dlugosc: 2.8, wys: 620, sfx: "ding", mocSfx: 9},
-  {id: "fx-wynik", rola: "liczba", rodzina: "karta", pola: ["liczba", "podpis"], dlugosc: 2.8, sfx: "ding", mocSfx: 9},
-  // UWAGA: `money-counter` i `multi-countup` są CELOWO poza automatem.
-  // Oba animują liczbę, która rośnie, więc muszą dostać konkretną wartość.
-  // Wzięte z transkrypcji potrafiły zamienić "półtora tysiąca" na "1" albo
-  // dorobić podpis z kawałków wyrazów, czyli wstawić do rolki obietnicę,
-  // której nikt nie złożył. Zostają w bibliotece do ręcznego użycia wtedy,
-  // gdy naprawdę masz liczby do pokazania (opis w SKILL.md).
-  {id: "fx-odliczanie", rola: "liczba", rodzina: "karta", pola: ["podpis"], dlugosc: 2.6, sfx: "click", mocSfx: 6},
+  {id: "karta-liczba", rola: "liczba", rodzina: "karta", pola: ["ikona", "liczba", "podpis"], dlugosc: 2.8, wys: 280, sfx: "ding", mocSfx: 9},
 
   // kontrast, "nie tak, a tak"
-  {id: "pigulki-nie", rola: "kontra", rodzina: "lista", pola: ["punkty"], dlugosc: 3.0, wys: 620, sfx: "swipe", mocSfx: 8},
-  {id: "karta-zamiana", rola: "kontra", rodzina: "karta", pola: ["nadtytul", "stare", "nowe"], dlugosc: 3.4, wys: 620, sfx: "whoosh", mocSfx: 9},
-  {id: "fx-przekreslenie", rola: "kontra", rodzina: "kreska", pola: ["tekst"], dlugosc: 2.2, pozycja: "dol", sfx: "swipe", mocSfx: 7},
-  {id: "fx-vs", rola: "kontra", rodzina: "karta", pola: ["zle", "dobre"], dlugosc: 3.2, sfx: "whoosh", mocSfx: 9},
+  {id: "pigulki-nie", rola: "kontra", rodzina: "lista", pola: ["punkty"], dlugosc: 3.0, wys: 280, sfx: "swipe", mocSfx: 8},
+  {id: "karta-zamiana", rola: "kontra", rodzina: "karta", pola: ["nadtytul", "stare", "nowe"], dlugosc: 3.4, wys: 280, sfx: "whoosh", mocSfx: 9},
 
-  // wyliczanki i procesy
-  {id: "mockup-plik", rola: "lista", rodzina: "karta", pola: [], dlugosc: 3.4, wys: 620, sfx: "click", mocSfx: 7},
-  {id: "fx-lista", rola: "lista", rodzina: "lista", pola: ["punkty"], dlugosc: 3.4, sfx: "pop", mocSfx: 6},
-  {id: "fx-etapy", rola: "lista", rodzina: "lista", pola: ["etapy"], dlugosc: 3.2, sfx: "pop", mocSfx: 5},
-  {id: "fx-krok", rola: "lista", rodzina: "karta", pola: ["numer", "opis"], dlugosc: 2.6, sfx: "pop", mocSfx: 5},
-  {id: "fx-ikony", rola: "lista", rodzina: "lista", pola: [], dlugosc: 3.0, sfx: "pop", mocSfx: 4},
+  // proces: pokazuje, zamiast opisywac
+  {id: "mockup-plik", rola: "lista", rodzina: "karta", pola: [], dlugosc: 3.4, wys: 280, sfx: "click", mocSfx: 7},
 
-  // pytanie, ciekawostka, oddech
-  {id: "fx-pytanie", rola: "pytanie", rodzina: "karta", pola: ["pytanie", "odpowiedz"], dlugosc: 3.0, sfx: "pop", mocSfx: 6},
-  {id: "typewriter", rola: "pytanie", rodzina: "karta", pola: ["tekst"], dlugosc: 4.5, sfx: "typing", mocSfx: 4},
-  {id: "karta-czasu", rola: "pytanie", rodzina: "karta", pola: ["tekst"], dlugosc: 1.8, sfx: "click", mocSfx: 5},
+  /* Warianty zbudowane ze starych komponentow biblioteki, osadzone w niskiej
+     kompozycji. Bez nich automat wyczerpywal pule w polowie rolki i powtarzal
+     ten sam efekt dwa razy. */
+  {id: "k-wynik", rola: "liczba", rodzina: "karta", pola: ["liczba", "podpis"], dlugosc: 2.8, wys: 280, sfx: "ding", mocSfx: 8},
+  {id: "k-lista", rola: "lista", rodzina: "lista", pola: ["punkty"], dlugosc: 3.4, wys: 280, sfx: "pop", mocSfx: 6},
+  {id: "k-komentarz", rola: "cta", rodzina: "karta", pola: ["nick", "tresc"], dlugosc: 3.4, wys: 280, sfx: "pop", mocSfx: 9},
 
-  // etykiety i tło
-  {id: "chapter-label", rola: "etykieta", rodzina: "etykieta", pola: ["numer", "tytul"], dlugosc: 3.0, sfx: "click", mocSfx: 2},
-  {id: "badge-2kolory", rola: "etykieta", rodzina: "etykieta", pola: ["tekst"], dlugosc: 3.5, wys: 520, sfx: "pop", mocSfx: 3},
-  // `fx-ticker` wypadl z automatu 08.09.2026. Pasek przewija tekst w petli,
-  // wiec w kadrze staje "M CI TERAZPOWIEM CI TERAZPOWIEM CI TE": fraza urwana
-  // z obu stron i skleiona sama ze soba. Widz czyta to jako blad renderowania,
-  // nie jako efekt. Zostaje w bibliotece do recznego uzycia z krotkim haslem.
-  {id: "strzalka", rola: "etykieta", rodzina: "etykieta", pola: [], dlugosc: 2.2, sfx: "swipe", mocSfx: 2},
-  {id: "light-sweep", rola: "etykieta", rodzina: "etykieta", pola: [], dlugosc: 1.6, sfx: null, mocSfx: 0},
-
-  // UWAGA: `fx-slam`, `glitch`, `scramble`, `marker` i `fx-cytat` sa poza automatem.
-  // Wszystkie robia to samo: biora fraze z transkrypcji i pokazuja ja wielka
-  // czcionka zamiast napisow. Fraza wycieta automatem prawie zawsze urywa sie
-  // w zlym miejscu, a napisy migaja. Zostaja do recznego uzycia z WLASNYM,
-  // krotkim haslem, gdy naprawde chcesz uderzyc jednym slowem.
-
-  // końcówka
-  {id: "fx-komentarz", rola: "cta", rodzina: "karta", pola: ["nick", "tresc"], dlugosc: 3.6, sfx: "pop", mocSfx: 9},
-  {id: "emoji-burst", rola: "cta", rodzina: "etykieta", pola: [], dlugosc: 2.0, sfx: "pop", mocSfx: 7},
-
-  /* SCENY PELNOEKRANOWE (dodane 08.09.2026).
-     Wszystko wyzej to NAKLADKI: maly element na tle nagrania. Rolka zlozona
-     z samych nakladek wyglada jak "nagranie z napisami", bo kadr caly czas
-     jest ten sam. Sceny zaslaniaja kadr w calosci i to one daja wrazenie
-     zmontowanego materialu. Kazda ma `scena: true`, wiec ukladanie nizej
-     pilnuje, ile ich wchodzi i zeby ciemna nie szla po ciemnej.
-     `naNapisach: true`, bo scena ma wlasny tekst i napisy karaoke musza
-     na ten czas zniknac. Dlugosci MUSZA zgadzac sie z Root.tsx. */
+  /* SCENY PELNOEKRANOWE. Jedyne, co ma prawo zaslonic napisy i twarz, bo
+     zmieniaja caly kadr i maja wlasny tekst. Automat przeplata ciemne z jasnymi. */
   {scena: true, tlo: "ciemne", naNapisach: true, id: "scena-teza", rola: "akcent", rodzina: "scena", pola: ["tekst"], dlugosc: 3.2, sfx: "impact", mocSfx: 9},
-  // UWAGA: `scena-kontra` jest CELOWO poza automatem, z tego samego powodu co
-  // `money-counter`. Potrzebuje czterech pol: co jest zle, co dobre i jak
-  // nazwac obie strony. Z transkrypcji nie da sie tego rozdzielic uczciwie:
-  // przy tescie obie kolumny dostaly to samo zdanie, czyli porownanie czegos
-  // z samym soba. Uzywaj jej RECZNIE, gdy user faktycznie zestawia dwie rzeczy.
   {scena: true, tlo: "jasne", naNapisach: true, id: "scena-lista", rola: "lista", rodzina: "scena", pola: ["punkty"], dlugosc: 3.8, sfx: "pop", mocSfx: 7},
   {scena: true, tlo: "ciemne", naNapisach: true, id: "scena-liczba", rola: "liczba", rodzina: "scena", pola: ["liczba", "podpis"], dlugosc: 3.0, sfx: "ding", mocSfx: 9},
   {scena: true, tlo: "jasne", naNapisach: true, id: "scena-problem", rola: "kontra", rodzina: "scena", pola: ["punkty"], dlugosc: 3.8, sfx: "swipe", mocSfx: 8},
   {scena: true, tlo: "ciemne", naNapisach: true, id: "scena-kroki", rola: "lista", rodzina: "scena", pola: ["kroki"], dlugosc: 3.8, sfx: "pop", mocSfx: 7},
   {scena: true, tlo: "jasne", naNapisach: true, id: "scena-komentarz", rola: "cta", rodzina: "scena", pola: ["nick", "tresc"], dlugosc: 3.4, sfx: "pop", mocSfx: 9},
   {scena: true, tlo: "ciemne", naNapisach: true, id: "scena-cta", rola: "cta", rodzina: "scena", pola: ["haslo", "podpis"], dlugosc: 3.2, sfx: "impact", mocSfx: 9}
+
+  // `scena-kontra` i `money-counter`: poza automatem, wymagaja danych, ktorych
+  // nie da sie uczciwie wyciac z transkrypcji. Patrz SKILL.md.
 ];
 
 /* Sceny sa wybierane osobno od reszty, bo maja pilnowac dwoch rzeczy naraz:
@@ -284,10 +254,25 @@ const SFX_PLIKI = {
 const WYSOKOSC_KADRU = 1920;
 const NAD_NAPISAMI = 740;
 
-function pozycjaY(efekt) {
+/**
+ * Gdzie postawic nakladke.
+ *
+ * Karty maja tresc przy DOLNEJ krawedzi swojej kompozycji, wiec ustawiamy je
+ * tak, zeby ta krawedz wypadla tuz nad napisami karaoke. Gorna krawedz karty
+ * schodzi wtedy ponizej twarzy, czyli tam, gdzie efekt ma prawo byc.
+ * `bezpieczneOd` przychodzi z pomiaru nagrania (gdzie-twarz.py); gdy pomiar
+ * sie nie udal, dostajemy ostrozna wartosc domyslna.
+ */
+function pozycjaY(efekt, bezpieczneOd, dolNapisow) {
   const wys = efekt.wys || WYSOKOSC_KADRU;
   if (wys >= WYSOKOSC_KADRU) return 0;
-  return Math.max(0, WYSOKOSC_KADRU - wys - NAD_NAPISAMI);
+  const dolKarty = (dolNapisow || WYSOKOSC_KADRU - 520) - 95;
+  let y = dolKarty - wys;
+  // Gdy karta siegnelaby na twarz, spychamy ja nizej, ale nie na napisy.
+  if (bezpieczneOd && y < bezpieczneOd - wys * 0.15) {
+    y = Math.round(bezpieczneOd - wys * 0.15);
+  }
+  return Math.max(0, Math.min(y, WYSOKOSC_KADRU - wys));
 }
 
 /* ============================ czytanie napisów ============================ */
@@ -534,6 +519,18 @@ function trescDlaEfektu(efekt, linijka, nastepna, napisy, indeks, numerRozdzialu
       const b = krotkieHaslo(napisy, Math.min(napisy.length - 1, indeks + 2), 3);
       return a && b ? {nadtytul: "", stare: a.toUpperCase(), nowe: b.toUpperCase(), podpis: ""} : {stare: null};
     }
+    case "k-wynik":
+      return {liczba: liczba.toUpperCase(), podpis: (scalone.split(/\s+/).filter((w) => !/\d/.test(w) && w.length > 2).slice(0, 3).join(" ") || "tyle to jest").toUpperCase()};
+    case "k-lista": {
+      const a1 = krotkieHaslo(napisy, indeks, 3);
+      const b1 = krotkieHaslo(napisy, Math.min(napisy.length - 1, indeks + 2), 3);
+      const p1 = [a1, b1].filter(Boolean);
+      return p1.length ? {punkty: p1.map((x) => x.toUpperCase())} : {punkty: null};
+    }
+    case "k-komentarz": {
+      const sl = tekst.split(/\s+/).filter((w) => w.replace(/[^a-ząćęłńóśźż]/gi, "").length > 3);
+      return {nick: "twoj.profil", tresc: (sl.length ? sl[sl.length - 1] : "komentarz").replace(/[.,!?:]+$/, "").toUpperCase()};
+    }
     case "mockup-plik":
       // Mockup pokazuje proces, nie cytuje nagrania: nie ma czego zepsuc.
       return {};
@@ -634,6 +631,45 @@ function trescDlaEfektu(efekt, linijka, nastepna, napisy, indeks, numerRozdzialu
 /* ============================== układanie ============================== */
 
 const dlugosc = dlugoscPliku(nagranie);
+
+/* GDZIE WOLNO POLOZYC EFEKT.
+   Wysokosc byla wczesniej stala, dobrana pod jedno nagranie. Przy innym
+   kadrowaniu ta sama liczba ladowala mowiacemu na ustach. Teraz pytamy
+   nagranie: narzedzie gdzie-twarz.py zwraca dolna krawedz twarzy, a my
+   kladziemy karty PONIZEJ niej i NAD napisami. Gdy detekcja nie zadziala
+   (brak opencv, nietypowy kadr), zostaje ostrozna wartosc domyslna i nic
+   sie nie wywala. */
+function zmierzTwarz(plikWideo) {
+  const skrypt = path.join(path.dirname(fileURLToPath(import.meta.url)), "gdzie-twarz.py");
+  if (!fs.existsSync(skrypt)) return null;
+  for (const python of ["python", "python3", "py"]) {
+    const r = spawnSync(python, [skrypt, plikWideo, "--json"], {encoding: "utf8"});
+    if (r.status === 0 && r.stdout) {
+      try {
+        return JSON.parse(r.stdout.trim().split("\n").pop());
+      } catch {
+        return null;
+      }
+    }
+  }
+  return null;
+}
+
+const twarz = zmierzTwarz(nagranie);
+/* Napisy karaoke siedza 520 px od dolu, wiec dolna krawedz efektu musi zostac
+   nad nimi. Gorna krawedz musi zostac ponizej twarzy. Miedzy tymi dwiema
+   liniami jest pas, w ktorym efekt jest bezpieczny. */
+const DOL_NAPISOW = WYSOKOSC_KADRU - 520;
+const BEZPIECZNE_OD = twarz && twarz.bezpieczneY
+  ? twarz.bezpieczneY
+  : Math.round(WYSOKOSC_KADRU * 0.62);
+
+if (twarz && twarz.twarzDol) {
+  console.log(`Twarz:       konczy sie na ${twarz.twarzDol} px, efekty kladę od ${BEZPIECZNE_OD} px`);
+} else {
+  console.log(`Twarz:       nie wykryta, biorę ostrożne ${BEZPIECZNE_OD} px`);
+}
+
 const fps = Math.round(tempoKlatek(nagranie) || 60);
 const napisy = czytajNapisy(plikNapisow);
 
@@ -758,7 +794,7 @@ for (const k of kandydaci) {
   const doK = Number((k.t + trwanie).toFixed(2));
   // `y`: kompozycja niższa niż kadr musi dostać własną wysokość, inaczej ffmpeg
   // przykleja ją do górnej krawędzi, czyli zwykle na czoło mówiącego
-  nakladki.push({plik: plikEfektu, od, do: doK, x: 0, y: pozycjaY(efekt)});
+  nakladki.push({plik: plikEfektu, od, do: doK, x: 0, y: pozycjaY(efekt, BEZPIECZNE_OD, DOL_NAPISOW)});
   // Wielki napis-efekt siada dokładnie tam, gdzie napisy karaoke. Zgłaszamy
   // okno, w którym napis ma zniknąć, inaczej dwa teksty leżą na sobie.
   if (efekt.naNapisach) napisyPrzerwy.push({od, do: doK});
@@ -807,7 +843,7 @@ if (napisy.length && dlugosc > 8) {
           const plikEfektu = path.join("efekty", `${String(policzone + 1).padStart(2, "0")}-${efekt.id}.mov`);
           const od = Number(kandydat.t.toFixed(2));
           const doK = Number((kandydat.t + trwanie).toFixed(2));
-          nakladki.push({plik: plikEfektu, od, do: doK, x: 0, y: pozycjaY(efekt)});
+          nakladki.push({plik: plikEfektu, od, do: doK, x: 0, y: pozycjaY(efekt, BEZPIECZNE_OD, DOL_NAPISOW)});
           if (efekt.naNapisach) napisyPrzerwy.push({od, do: doK});
           doRenderu.push({
             id: efekt.id,
