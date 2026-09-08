@@ -593,18 +593,43 @@ function trescDlaEfektu(efekt, linijka, nastepna, napisy, indeks, numerRozdzialu
        ikone dobrana do tresci. Gdy nie da sie zebrac przynajmniej dwoch
        sensownych fraz, pole jest null i ukladanie pomija ten moment: pusta
        sekwencja wyglada gorzej niz jej brak. */
+    /* Te efekty POTRZEBUJA konkretnej tresci i bez niej wygladaja jak usterka:
+       licznik pokazuje "0", porownanie sama strzalke, pasek pusty pasek.
+       Gdy nie da sie ich uczciwie wypelnic z nagrania, zwracamy null i ukladanie
+       pomija ten moment. Lepiej szesc wypelnionych efektow niz osiem, z ktorych
+       dwa sa puste. */
     case "nak-licznik": {
-      const lb = (liczba.match(/[\d\s.,]+/) || ["0"])[0].replace(/[\s.,]/g, "");
-      return {do: Number(lb) || 0, jednostka: "", podpis: "", wDol: false};
+      const lb = (liczba.match(/[\d\s.,]+/) || [""])[0].replace(/[\s.,]/g, "");
+      const wartosc = Number(lb);
+      if (!wartosc) return {do: null};
+      const podpisL = scalone
+        .split(/\s+/)
+        .filter((w) => !/\d/.test(w) && w.replace(/[^a-ząćęłńóśźż]/gi, "").length > 3)
+        .slice(0, 2)
+        .join(" ");
+      return {do: wartosc, jednostka: "", podpis: podpisL.toLowerCase(), wDol: false};
     }
-    case "nak-pasek":
-      return {etykieta: "", kroki: []};
-    case "nak-ikony":
-      return {ikony: ["🎬", "✂️", "🎵", "📤"], podpisy: []};
-    case "nak-equalizer":
-      return {podpis: ""};
-    case "nak-porownanie":
-      return {lewaEtykieta: "", lewaWartosc: "", prawaEtykieta: "", prawaWartosc: ""};
+    case "nak-pasek": {
+      const krokiP = frazyDoListy(napisy, indeks, 3, 2);
+      return krokiP.length >= 2 ? {etykieta: "KROK PO KROKU", kroki: krokiP} : {kroki: null};
+    }
+    case "nak-ikony": {
+      const podpisyI = frazyDoListy(napisy, indeks, 3, 2);
+      return podpisyI.length >= 2
+        ? {ikony: podpisyI.map((t, i) => ikonaDla(t, i)), podpisy: podpisyI.map((t) => t.toLowerCase())}
+        : {podpisy: null};
+    }
+    case "nak-equalizer": {
+      const h2 = krotkieHaslo(napisy, indeks, 3);
+      return h2 ? {podpis: h2.toLowerCase()} : {podpis: null};
+    }
+    case "nak-porownanie": {
+      const a2 = krotkieHaslo(napisy, indeks, 2);
+      const b2 = krotkieHaslo(napisy, Math.min(napisy.length - 1, indeks + 2), 2);
+      return a2 && b2
+        ? {lewaEtykieta: "TERAZ", lewaWartosc: a2.toLowerCase(), prawaEtykieta: "POTEM", prawaWartosc: b2.toLowerCase()}
+        : {lewaWartosc: null};
+    }
 
     case "anim-wykres":
     case "anim-wzrost":
