@@ -350,6 +350,11 @@ czesci.push(
 let biezacy = "baza";
 /** Filtr napisow, wstawiany na koncu lancucha (patrz uwaga o kolejnosci nizej). */
 let napisyDoWstawienia = null;
+/** Sufiks z folderem czcionek, potrzebny takze przy przebudowie filtru napisow. */
+let zCzcionkamiGlobalnie = "";
+/** Sciezka do pliku ASS. Poza blokiem napisow, bo przepisujemy go jeszcze raz
+    nizej, gdy trzeba obnizyc linijki pod pelnoekranowa scena. */
+let plikNapisow = null;
 
 /* ==================== 2. napisy (POD interludiami) ====================
    Napisy idą zaraz po bazie, żeby pełnoekranowe interludium je zakryło.
@@ -361,7 +366,7 @@ let napisyDoWstawienia = null;
    kombinować z włączaniem filtra w czasie, po prostu odsiewamy kolidujące
    linijki do kopii pliku napisów — działa pewnie w każdej wersji ffmpeg. */
 if (plan.napisy) {
-  let plikNapisow = plan.napisy;
+  plikNapisow = plan.napisy;
   const przerwy = plan.napisyPrzerwy || [];
   if (przerwy.length) {
     const czasNaSekundy = (t) => {
@@ -395,6 +400,7 @@ if (plan.napisy) {
   const zCzcionkami = folderCzcionek
     ? `:fontsdir=${sciezkaDlaFiltra(folderCzcionek)}`
     : "";
+  zCzcionkamiGlobalnie = zCzcionkami;
   /* UWAGA NA KOLEJNOSC. Napisy wstawiamy na SAMYM KONCU lancucha, juz po
      nakladkach, a nie tutaj. Wczesniej szly przed nimi i kazda pelnoekranowa
      scena po prostu je zakrywala: przez cztery sekundy widz nie mial czego
@@ -487,6 +493,49 @@ const cutAudio = [];
   );
   biezacy = `po_${et}`;
 });
+
+/* DWIE WYSOKOSCI NAPISOW.
+   Tak robi to autor w swoich skryptach (gen_ass2_r4.py): gdy w kadrze jest sama
+   postac, napis siedzi na klatce piersiowej (styl ECHO, 850 px od dolu), a gdy
+   leci pelnoekranowa scena, schodzi nisko (ECHO_NISKO, 520 px), zeby nie wchodzic
+   w jej tresc. Wczesniej wysokosc byla jedna i sztywna: napis albo lezal na
+   koszulce, albo wchodzil w srodek sceny.
+
+   Przelaczamy styl linijkom, ktore wpadaja w okno pelnoekranowej nakladki.
+   Ktora nakladka jest pelnoekranowa, wiemy z realnej wysokosci pliku. */
+if (napisyDoWstawienia && fs.existsSync(plikNapisow)) {
+  const oknaPelnegoKadru = (plan.nakladki || [])
+    .map((n) => ({od: n.od, do: n.do, wys: wysokoscPliku(n.plik)}))
+    .filter((n) => n.wys && n.wys >= H * 0.9);
+
+  if (oknaPelnegoKadru.length) {
+    const linie = fs.readFileSync(plikNapisow, "utf8").split(/\r?\n/);
+    let przelaczone = 0;
+    const naSekundy = (t) => {
+      const [g, m, s2] = t.split(":");
+      return Number(g) * 3600 + Number(m) * 60 + Number(s2);
+    };
+    const wynik = linie.map((l) => {
+      if (!l.startsWith("Dialogue:")) return l;
+      const pola = l.split(",");
+      if (pola.length < 4) return l;
+      const start = naSekundy(pola[1]);
+      const koniec = naSekundy(pola[2]);
+      const wScenie = oknaPelnegoKadru.some((o) => koniec > o.od + 0.1 && start < o.do - 0.1);
+      if (!wScenie || pola[3].trim() !== "ECHO") return l;
+      pola[3] = "ECHO_NISKO";
+      przelaczone++;
+      return pola.join(",");
+    });
+    if (przelaczone) {
+      plikNapisow = path.join(katalogRoboczy, "napisy-dwie-wysokosci.ass");
+      fs.writeFileSync(plikNapisow, wynik.join("\n"), "utf8");
+      napisyDoWstawienia = `ass=${sciezkaDlaFiltra(plikNapisow)}${zCzcionkamiGlobalnie}`;
+      console.log(`Napisy: ${przelaczone} linijek zeszło niżej, bo w tym czasie leci pełnoekranowa scena.`);
+    }
+  }
+}
+
 
 /* ==================== 5b. NAPISY NA WIERZCHU ====================
    Dopiero teraz, gdy wszystkie nakladki i sceny sa juz w kadrze. Dzieki temu

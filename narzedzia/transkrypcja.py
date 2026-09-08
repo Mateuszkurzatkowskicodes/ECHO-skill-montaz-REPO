@@ -47,6 +47,16 @@ CACHE = os.path.join(tempfile.gettempdir(), "echo-transkrypcje")
 # ten folder przez `fontsdir`, wiec napisy wygladaja tak samo na kazdym
 # komputerze, nawet gdy nikt nie instalowal czcionki w systemie.
 CZCIONKA_DOMYSLNA = "Montserrat"
+
+# DWIE WYSOKOSCI NAPISOW, tak jak w skryptach autora (gen_ass2_r4.py).
+#   `ECHO`       -> 850 px od dolu: gdy w kadrze jest sama postac, napis siada
+#                   na klatce piersiowej i jest wygodny do czytania,
+#   `ECHO_NISKO` -> 520 px od dolu: gdy leci pelnoekranowa scena, napis schodzi
+#                   nisko, zeby nie wchodzil w jej tresc.
+# Przelaczaniem zajmuje sie buduj-filtr.mjs, ktory zna czasy scen z planu.
+# Wczesniej byla jedna sztywna wysokosc i napis albo leżał na koszulce, albo
+# wchodzil w srodek sceny.
+MARGINV_NISKO = 520
 CZCIONKI_ZAMIENNE = ["Montserrat", "Poppins", "Nunito", "Segoe UI", "Arial"]
 
 SZABLON_ASS = """[Script Info]
@@ -59,6 +69,7 @@ ScaledBorderAndShadow: yes
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: ECHO,{czcionka},{fontsize},&H00FFFFFF,&H000B4DFF,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,6,0,2,60,60,{marginv},1
+Style: ECHO_NISKO,{czcionka},{fontsize},&H00FFFFFF,&H000B4DFF,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,6,0,2,60,60,{marginv_nisko},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -340,11 +351,12 @@ def scal_migajace(grupy):
     return wynik
 
 
-def zbuduj_ass(segmenty, maks_slow=3, marginv=520, fontsize=86, kolorowanie=True):
+def zbuduj_ass(segmenty, maks_slow=3, marginv=850, fontsize=86, kolorowanie=True):
     """Napisy karaoke: 2-3 slowa na linijke, ciete na pauzach i na dlugosci."""
     linie = [
         SZABLON_ASS.format(
-            czcionka=dostepna_czcionka(), fontsize=fontsize, marginv=marginv
+            czcionka=dostepna_czcionka(), fontsize=fontsize, marginv=marginv,
+            marginv_nisko=MARGINV_NISKO
         )
     ]
     grupy = []          # linijki z podzialem na slowa
@@ -403,7 +415,7 @@ def main():
     ap.add_argument("--model", default="medium")
     ap.add_argument("--jezyk", default="pl")
     ap.add_argument("--ass", default=None, help="gdzie zapisac napisy .ass")
-    ap.add_argument("--marginv", type=int, default=520,
+    ap.add_argument("--marginv", type=int, default=850,
                     help="wysokosc napisow: 520 zwykle, 920 przy split-screenie")
     ap.add_argument("--fontsize", type=int, default=86)
     ap.add_argument("--slowa", type=int, default=3, help="ile slow na linijke")
