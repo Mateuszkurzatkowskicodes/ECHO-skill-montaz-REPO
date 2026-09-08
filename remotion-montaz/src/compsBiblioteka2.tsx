@@ -1,5 +1,6 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring, Easing} from 'remotion';
+import {SANS, MONO, zaladujCzcionki} from './czcionki';
 
 /**
  * Biblioteka 2 — efekty dobierane automatycznie przez narzedzie plan-efektow.
@@ -19,8 +20,9 @@ const AMBER = '#FFB13D';
 const GREEN = '#5CCB6A';
 const RED = '#FF3B30';
 const INK = 'rgba(11,15,22,.88)';
-const SANS = "Montserrat, 'Segoe UI', Arial, sans-serif";
-const MONO = "Consolas, 'Courier New', monospace";
+// Czcionki sa wbudowane w projekt (public/fonts), zeby efekt wygladal tak samo
+// na kazdym komputerze. Szczegoly i powod: src/czcionki.ts
+zaladujCzcionki();
 
 type Pozycja = 'gora' | 'srodek' | 'dol' | 'naNapisach';
 
@@ -476,9 +478,11 @@ export const PasekEtapow: React.FC<{etapy?: string[]; kolor?: string}> = ({
 /* ============================================================
    9. Stempel: wbijana pieczatka
    ============================================================ */
+// Kolor stempla: pomarancz ECHO, nie zielen. Zielen w kadrze rozjezdza sie
+// z reszta palety (biel, pomarancz, ciemne tla) i wyglada jak z innego zestawu.
 export const Stempel: React.FC<{tekst?: string; kolor?: string; pozycja?: Pozycja}> = ({
   tekst = 'FAKT',
-  kolor = GREEN,
+  kolor = ORANGE,
   pozycja = 'naNapisach',
 }) => {
   const frame = useCurrentFrame();

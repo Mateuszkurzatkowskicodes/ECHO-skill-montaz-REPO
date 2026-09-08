@@ -47,6 +47,7 @@ Zanim oddasz rolkę, każda z tych rzeczy ma być prawdziwa:
 | Co | Próg |
 |---|---|
 | Otwarcie | w pierwszych 2 s dzieje się coś mocnego, ale ZA KAŻDYM RAZEM INACZEJ |
+| Sceny pełnoekranowe | min. 2 na rolkę (dłuższa: co ~16 s). Zero scen = nagranie z napisami |
 | Gęstość efektów | średnio co 3-4 s. Powyżej 5 s to nagranie z napisami |
 | Powtórki | żaden efekt nie wraca w tej samej rolce; dwa podobne nie idą pod rząd |
 | Napisy | 2-3 słowa w linijce, każda stoi min. 0,7 s |
@@ -54,6 +55,35 @@ Zanim oddasz rolkę, każda z tych rzeczy ma być prawdziwa:
 | Głośność | -14 LUFS, muzyka z duckingiem pod głosem |
 | Zoom-punch | tylko na sklejkach, nigdy "co jakiś czas" |
 | Kontrola | `sprawdz.mjs` przeszedł, a `krytyk.mjs` ma komplet "tak" |
+
+## SCENY PEŁNOEKRANOWE (to jest ta różnica, o którą chodzi)
+
+Jeśli rolka wygląda "podstawowo" mimo gęstych efektów, to prawie zawsze dlatego,
+że wszystko dzieje się NA twarzy mówiącego: mały napis, mała karta, kreska.
+Kadr przez całą rolkę jest ten sam, więc widz czyta to jako nagranie z napisami.
+
+Scena pełnoekranowa zmienia CAŁY kadr na kilka sekund: tło z gradientem,
+siatka, poświata, warstwy, duża typografia. To ona daje wrażenie zmontowanego
+materiału. `plan-efektow.mjs` wstawia je sam i pilnuje, żeby ciemna nie szła
+zaraz po jasnej. Osiem scen: `scena-teza`, `scena-lista`, `scena-liczba`,
+`scena-problem`, `scena-kroki`, `scena-komentarz`, `scena-cta` (automat)
+oraz `scena-kontra` (tylko ręcznie, patrz niżej).
+
+**Teksty scen sprawdzasz ZAWSZE, zanim zrenderujesz.** Scena zajmuje cały ekran,
+więc urwana fraza z transkrypcji ("na zdobywanie klientów" jako przekreślony ból)
+rzuca się w oczy dziesięć razy bardziej niż w małej nakładce. Otwórz `efekty.json`,
+przeczytaj każdy tekst sceny na głos i popraw tak, żeby dało się go zrozumieć bez
+dźwięku. Nadal obowiązuje zasada: scena cytuje to, co NAPRAWDĘ padło, i nie
+dopisuje liczb ani obietnic.
+
+**`scena-kontra` jest poza automatem**, z tego samego powodu co `money-counter`.
+Potrzebuje czterech pól: co jest złe, co dobre i jak nazwać obie strony.
+Z transkrypcji nie da się tego rozdzielić uczciwie (w teście obie kolumny dostały
+to samo zdanie). Użyj jej ręcznie, gdy user faktycznie zestawia dwie rzeczy:
+
+```bash
+... render src/index.ts scena-kontra out.mov --props='{"zleTytul":"RĘCZNIE","zlePunkty":["godziny pracy"],"dobreTytul":"Z AI","dobrePunkty":["kilka minut"]}'
+```
 
 `plan-efektow.mjs` trzyma te progi sam, a `sprawdz.mjs` je weryfikuje na gotowym
 pliku. Nie obchodź ich "dla oszczędności czasu": rolka bez efektów jest gotowa
@@ -292,6 +322,9 @@ tanio. Jedno ciągłe ujęcie to zero punchów.
   a przy split-screenie posadź na szwie (`--marginv 920`).
 - **Zoom:** ciągły "oddychający" (ledwo wyczuwalny) przez cały czas, plus punch
   wyłącznie na sklejkach.
+- **Sceny pełnoekranowe:** min. 2 na rolkę, rozłożone w czasie, ciemne
+  przeplatane z jasnymi. Rolka bez ani jednej sceny wygląda jak nagranie
+  z napisami, choćby efektów było dużo i gęsto.
 - **Efekty:** gęsto, średnio co 3-4 s, za każdym razem inny zestaw. Karty, listy
   i mockupy siedzą NAD napisami; wielkie napisy-slamy siadają na miejscu napisów
   i wtedy napis jest wycinany.
@@ -335,6 +368,18 @@ tanio. Jedno ciągłe ujęcie to zero punchów.
 ## BIBLIOTEKA EFEKTÓW
 
 W `remotion-montaz/` są dwa rodzaje rzeczy i nie wolno ich mieszać:
+
+**Sceny pełnoekranowe: 8 kompozycji** (`compsSceny.tsx`): `scena-teza`,
+`scena-kontra`, `scena-lista`, `scena-liczba`, `scena-problem`, `scena-kroki`,
+`scena-komentarz`, `scena-cta`. Wypełniają cały kadr 1080x1920 i zasłaniają
+nagranie. To one robią różnicę między nagraniem z napisami a zmontowaną rolką.
+
+**Czcionki są WBUDOWANE w projekt** (`public/fonts/`, ładowane przez
+`src/czcionki.ts`). Nie zmieniaj `fontFamily` w komponentach na nazwę czcionki
+systemowej. Wcześniej komponenty prosiły o Montserrata, którego nikt nie ładował:
+na komputerze autora był zainstalowany w systemie, a u każdego innego render po
+cichu spadał na Segoe UI i te same efekty wyglądały o klasę gorzej. Żaden log
+tego nie pokazywał.
 
 **Do renderowania: 28 kompozycji sterowanych propsami.**
 `compsBiblioteka.tsx` (12): `chapter-label`, `multi-countup`, `light-sweep`,
@@ -445,6 +490,14 @@ napisać filtr ręcznie, i żeby rozumieć, dlaczego narzędzia robią to tak.
 - **Nakładka niższa niż kadr przykleja się do GÓRY.** `overlay` bez jawnego `y`
   kładzie warstwę w punkcie 0,0, czyli zwykle na czoło mówiącego. Kompozycja
   o wysokości mniejszej niż 1920 musi dostać `y` w planie.
+- **Klatki efektu liczy się z fps KOMPOZYCJI (60), nie z fps nagrania.**
+  Kompozycje w `Root.tsx` mają na sztywno 60 fps. Gdy liczba klatek szła z fps
+  nagrania, materiał 30 fps (czyli typowy z telefonu) dostawał połowę klatek:
+  animacja urywała się w połowie, a plan rezerwował jej pełny czas. Zmierzone:
+  scena 3,2 s wychodziła jako plik 1,6 s. Render kończył się sukcesem, więc nic
+  tego nie zgłaszało, a autor nagrywa w 60 fps i u niego problem nie istniał.
+  Naprawione w `plan-efektow.mjs` (`FPS_KOMPOZYCJI`). Nie wiąż tego z fps
+  nagrania z powrotem.
 - **`-r` przy zapisie wyrzuca klatki**, gdy warstwy mają różne tempo (w logu
   `drop=`). Ustaw `fps=` na końcu łańcucha filtrów, a nie `-r` przy zapisie.
 - **`zoompan` MUSI mieć jawne `x` i `y`**, inaczej powiększa od lewego górnego

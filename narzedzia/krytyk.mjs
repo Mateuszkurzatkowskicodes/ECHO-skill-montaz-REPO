@@ -156,6 +156,7 @@ const PYTANIA = [
   ["Kadr", "Czy coś wychodzi poza kadr albo jest ucięte przy krawędzi? Sprawdź zwłaszcza długie hasła i karty z dwiema kolumnami."],
   ["Sens bez dźwięku", "Czy teksty na efektach da się przeczytać i zrozumieć bez słuchania? Urwana fraza w stylu „BO MÓWISZ DO” albo pojedyncze „TĘ” to NIE. Popraw treść w efekty.json i zrenderuj ten efekt jeszcze raz."],
   ["Powtórki", "Czy dwa podobne wizualnie efekty nie stoją obok siebie (dwie kreski, dwie karty z liczbą, dwa stemple)? Widz czyta to jako jeden powtarzany trik."],
+  ["Sceny", "Czy w rolce wchodzą sceny pełnoekranowe, które zmieniają cały kadr, a nie tylko napisy na twarzy mówiącego? Rolka bez ani jednej takiej sceny wygląda jak nagranie z napisami, choćby efektów było dużo."],
   ["Tła", "Czy ciemne i jasne plansze się przeplatają? Trzy ciemne karty pod rząd zlewają się w jedno tło."],
   ["Rytm", "Czy jest w rolce moment dłuższy niż pięć sekund, w którym nie dzieje się kompletnie nic? Jeśli tak, dołóż tam efekt."],
   ["Końcówka", "Czy ostatnie sekundy mają puentę albo CTA? Rolka, która po prostu się urywa, wygląda jak przerwane zdanie."],

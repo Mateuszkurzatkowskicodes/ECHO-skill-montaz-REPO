@@ -116,7 +116,10 @@ const EFEKTY = [
   // etykiety i tło
   {id: "chapter-label", rola: "etykieta", rodzina: "etykieta", pola: ["numer", "tytul"], dlugosc: 3.0, sfx: "click", mocSfx: 2},
   {id: "badge-2kolory", rola: "etykieta", rodzina: "etykieta", pola: ["tekst"], dlugosc: 3.5, wys: 520, sfx: "pop", mocSfx: 3},
-  {id: "fx-ticker", rola: "etykieta", rodzina: "etykieta", pola: ["tekst"], dlugosc: 3.0, sfx: null, mocSfx: 0},
+  // `fx-ticker` wypadl z automatu 08.09.2026. Pasek przewija tekst w petli,
+  // wiec w kadrze staje "M CI TERAZPOWIEM CI TERAZPOWIEM CI TE": fraza urwana
+  // z obu stron i skleiona sama ze soba. Widz czyta to jako blad renderowania,
+  // nie jako efekt. Zostaje w bibliotece do recznego uzycia z krotkim haslem.
   {id: "strzalka", rola: "etykieta", rodzina: "etykieta", pola: [], dlugosc: 2.2, sfx: "swipe", mocSfx: 2},
   {id: "light-sweep", rola: "etykieta", rodzina: "etykieta", pola: [], dlugosc: 1.6, sfx: null, mocSfx: 0},
 
@@ -125,8 +128,48 @@ const EFEKTY = [
 
   // końcówka
   {id: "fx-komentarz", rola: "cta", rodzina: "karta", pola: ["nick", "tresc"], dlugosc: 3.6, sfx: "pop", mocSfx: 9},
-  {id: "emoji-burst", rola: "cta", rodzina: "etykieta", pola: [], dlugosc: 2.0, sfx: "pop", mocSfx: 7}
+  {id: "emoji-burst", rola: "cta", rodzina: "etykieta", pola: [], dlugosc: 2.0, sfx: "pop", mocSfx: 7},
+
+  /* SCENY PELNOEKRANOWE (dodane 08.09.2026).
+     Wszystko wyzej to NAKLADKI: maly element na tle nagrania. Rolka zlozona
+     z samych nakladek wyglada jak "nagranie z napisami", bo kadr caly czas
+     jest ten sam. Sceny zaslaniaja kadr w calosci i to one daja wrazenie
+     zmontowanego materialu. Kazda ma `scena: true`, wiec ukladanie nizej
+     pilnuje, ile ich wchodzi i zeby ciemna nie szla po ciemnej.
+     `naNapisach: true`, bo scena ma wlasny tekst i napisy karaoke musza
+     na ten czas zniknac. Dlugosci MUSZA zgadzac sie z Root.tsx. */
+  {scena: true, tlo: "ciemne", naNapisach: true, id: "scena-teza", rola: "akcent", rodzina: "scena", pola: ["tekst"], dlugosc: 3.2, sfx: "impact", mocSfx: 9},
+  // UWAGA: `scena-kontra` jest CELOWO poza automatem, z tego samego powodu co
+  // `money-counter`. Potrzebuje czterech pol: co jest zle, co dobre i jak
+  // nazwac obie strony. Z transkrypcji nie da sie tego rozdzielic uczciwie:
+  // przy tescie obie kolumny dostaly to samo zdanie, czyli porownanie czegos
+  // z samym soba. Uzywaj jej RECZNIE, gdy user faktycznie zestawia dwie rzeczy.
+  {scena: true, tlo: "jasne", naNapisach: true, id: "scena-lista", rola: "lista", rodzina: "scena", pola: ["punkty"], dlugosc: 3.8, sfx: "pop", mocSfx: 7},
+  {scena: true, tlo: "ciemne", naNapisach: true, id: "scena-liczba", rola: "liczba", rodzina: "scena", pola: ["liczba", "podpis"], dlugosc: 3.0, sfx: "ding", mocSfx: 9},
+  {scena: true, tlo: "jasne", naNapisach: true, id: "scena-problem", rola: "kontra", rodzina: "scena", pola: ["punkty"], dlugosc: 3.8, sfx: "swipe", mocSfx: 8},
+  {scena: true, tlo: "ciemne", naNapisach: true, id: "scena-kroki", rola: "lista", rodzina: "scena", pola: ["kroki"], dlugosc: 3.8, sfx: "pop", mocSfx: 7},
+  {scena: true, tlo: "jasne", naNapisach: true, id: "scena-komentarz", rola: "cta", rodzina: "scena", pola: ["nick", "tresc"], dlugosc: 3.4, sfx: "pop", mocSfx: 9},
+  {scena: true, tlo: "ciemne", naNapisach: true, id: "scena-cta", rola: "cta", rodzina: "scena", pola: ["haslo", "podpis"], dlugosc: 3.2, sfx: "impact", mocSfx: 9}
 ];
+
+/* Sceny sa wybierane osobno od reszty, bo maja pilnowac dwoch rzeczy naraz:
+   zeby w ogole byly (bez tego automat siegal wylacznie po male nakladki)
+   i zeby ciemna nie szla zaraz po ciemnej. */
+function wybierzScene(rola, uzyteTeraz, ostatnieTlo) {
+  const wolne = EFEKTY.filter((e) => e.scena && !uzyteTeraz.has(e.id));
+  if (!wolne.length) return null;
+  const kolejnosc = (lista) =>
+    lista.slice().sort((a, b) => (historia.efekty[a.id] || 0) - (historia.efekty[b.id] || 0));
+  // 1. scena pasujaca do tresci i z innym tlem niz poprzednia
+  let pula = kolejnosc(wolne.filter((e) => e.rola === rola && e.tlo !== ostatnieTlo));
+  // 2. cokolwiek z innym tlem, zeby nie robic dwoch ciemnych plansz pod rzad
+  if (!pula.length) pula = kolejnosc(wolne.filter((e) => e.tlo !== ostatnieTlo));
+  // 3. ostatecznie pasujaca do tresci, nawet z tym samym tlem
+  if (!pula.length) pula = kolejnosc(wolne.filter((e) => e.rola === rola));
+  if (!pula.length) pula = kolejnosc(wolne);
+  const trzy = pula.slice(0, Math.min(3, pula.length));
+  return trzy[Math.floor(Math.random() * trzy.length)];
+}
 
 /* ============================ OTWARCIE ROLKI ============================
    Nie ma czegos takiego jak "hook to zawsze wielki napis". Dobre otwarcia
@@ -397,6 +440,45 @@ function trescDlaEfektu(efekt, linijka, nastepna, napisy, indeks, numerRozdzialu
       const klucz = slowa.length ? slowa[slowa.length - 1] : tekst.split(/\s+/).slice(-1)[0] || "MONTAŻ";
       return {nick: "twoj.profil", tresc: klucz.replace(/[.,!?:]+$/, "").toUpperCase()};
     }
+    /* ---- SCENY PELNOEKRANOWE ----
+       Trzymaja sie tej samej zasady co reszta: cytuja to, co naprawde padlo
+       w nagraniu. Zadnych dopisanych liczb, obietnic ani wynikow. Scena jest
+       duza, wiec zle dobrany tekst rzuca sie w oczy bardziej niz w malej
+       nakladce: dlatego frazy sa dluzsze, ale przyciete do rozsadnej dlugosci. */
+    case "scena-teza":
+      return {tekst: scalone.slice(0, 46).toUpperCase(), etykieta: "", klucz: ""};
+    case "scena-problem":
+      return {
+        punkty: [tekst.toLowerCase(), dalej.toLowerCase()].filter(Boolean).slice(0, 3),
+        etykieta: "koniec z tym",
+      };
+    case "scena-lista":
+      return {
+        punkty: [tekst.toLowerCase(), dalej.toLowerCase()].filter(Boolean).slice(0, 3),
+        etykieta: "",
+      };
+    case "scena-kroki":
+      return {
+        kroki: [tekst.toLowerCase(), dalej.toLowerCase()].filter(Boolean).slice(0, 3),
+        etykieta: "",
+      };
+    case "scena-liczba": {
+      const podpisS = scalone
+        .split(/\s+/)
+        .filter((w) => !/\d/.test(w) && w.replace(/[^a-zA-Ząćęłńóśźż]/gi, "").length > 2)
+        .join(" ")
+        .slice(0, 24)
+        .trim();
+      return {liczba: liczba.toUpperCase(), podpis: podpisS.toLowerCase(), etykieta: ""};
+    }
+    case "scena-komentarz": {
+      const slowaK = tekst.split(/\s+/).filter((w) => w.replace(/[^a-zA-Ząćęłńóśźż]/gi, "").length > 3);
+      const kluczK = slowaK.length ? slowaK[slowaK.length - 1] : "komentarz";
+      return {nick: "twoj.profil", tresc: kluczK.replace(/[.,!?:]+$/, "").toLowerCase(), etykieta: ""};
+    }
+    case "scena-cta":
+      return {haslo: tekst.slice(0, 26).toUpperCase(), podpis: dalej.slice(0, 26).toLowerCase() || "napisz w komentarzu"};
+
     case "chapter-label":
       return {
         numer: String(numerRozdzialu).padStart(2, "0"),
@@ -490,6 +572,19 @@ function odstepDla(t) {
   return gestosc * 1.18;
 }
 
+/* ILE SCEN PELNOEKRANOWYCH ma miec rolka.
+   Bez tego licznika automat prawie nigdy po nie siegal: przy wyborze po roli
+   wygrywaly male nakladki, bo jest ich w puli kilka razy wiecej. Efekt byl taki,
+   ze kursant dostawal rolke zlozona z samych napisow na twarzy. Sceny sa
+   rozlozone rowno po dlugosci nagrania i nie wchodza na sam hook. */
+const docelowoScen = Math.min(5, Math.max(2, Math.round(dlugosc / 16)));
+const slotyScen = Array.from(
+  {length: docelowoScen},
+  (_, i) => (dlugosc * (i + 1)) / (docelowoScen + 1)
+);
+let scenZrobione = 0;
+let ostatnieTloSceny = null;
+
 let ostatniKoniec = -99;
 let ostatniStart = -99;
 let ostatniaRodzina = null;
@@ -516,7 +611,17 @@ for (const k of kandydaci) {
     : null;
   const rola = rolaOtwarcia || rolaZTresci;
   const iloscLiczb = (trescMomentu.match(/\d+/g) || []).length;
-  let efekt = wybierzEfekt(rola, uzyteTeraz, ostatniaRodzina, naHooku ? otwarcie.rodziny : null, iloscLiczb);
+
+  /* Czy w tym miejscu ma wejsc pelnoekranowa scena. Nie na hooku (otwarcie ma
+     swoja forme) i nie czesciej niz przewiduje slot. */
+  const chceScene =
+    !naHooku &&
+    scenZrobione < docelowoScen &&
+    k.t >= slotyScen[scenZrobione] - 1.5 &&
+    k.t < dlugosc - 4.2;
+
+  let efekt = chceScene ? wybierzScene(rola, uzyteTeraz, ostatnieTloSceny) : null;
+  if (!efekt) efekt = wybierzEfekt(rola, uzyteTeraz, ostatniaRodzina, naHooku ? otwarcie.rodziny : null, iloscLiczb);
   if (!efekt && naHooku) efekt = wybierzEfekt(rolaZTresci, uzyteTeraz, ostatniaRodzina, otwarcie.rodziny, iloscLiczb);
   // Forma otwarcia jest wazniejsza niz dopasowanie roli do tresci: rolka ma
   // zaczynac sie inaczej niz poprzednia, nawet jesli w pierwszym zdaniu padla
@@ -558,6 +663,10 @@ for (const k of kandydaci) {
     });
   }
 
+  if (efekt.scena) {
+    scenZrobione++;
+    ostatnieTloSceny = efekt.tlo || null;
+  }
   uzyteTeraz.add(efekt.id);
   ostatniaRodzina = efekt.rodzina || null;
   historia.efekty[efekt.id] = (historia.rolek || 0) + 1;
@@ -862,8 +971,18 @@ function znajdzRemotion(podany) {
 
 const folderRemotion = znajdzRemotion(remotionKatalog);
 const cliRemotion = sciezkaCli(folderRemotion);
+/* FPS KOMPOZYCJI, nie nagrania.
+   BLAD ZNALEZIONY 08.09.2026: liczba klatek do wyrenderowania byla liczona
+   z fps NAGRANIA. Kompozycje w Root.tsx maja na sztywno 60 fps, wiec przy
+   nagraniu 30 fps (czyli typowym z telefonu) kazdy efekt dostawal polowe
+   swoich klatek: animacja urywala sie w polowie, a plan rezerwowal jej pelny
+   czas. Zmierzone: scena 3,2 s wychodzila jako plik 1,6 s. Autor nagrywa
+   w 60 fps, wiec u niego wszystko bylo pelne i blad nie mial jak sie ujawnic.
+   Zadne narzedzie tego nie zglaszalo, bo render konczyl sie sukcesem. */
+const FPS_KOMPOZYCJI = 60;
+
 const polecenia = doRenderu.map((e) => {
-  const klatki = Math.round(e.dlugoscSekund * fps);
+  const klatki = Math.round(e.dlugoscSekund * FPS_KOMPOZYCJI);
   return [
     "node", cliRemotion || "MUSISZ-NAJPIERW-ZROBIC-NPM-INSTALL",
     "render", "src/index.ts", e.id, path.resolve(katalog, e.plik),

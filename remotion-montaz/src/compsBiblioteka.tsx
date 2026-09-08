@@ -1,5 +1,6 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring, Easing} from 'remotion';
+import {SANS, MONO, zaladujCzcionki} from './czcionki';
 
 /**
  * Biblioteka Premium.
@@ -16,8 +17,9 @@ import {AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring, Easi
 const ORANGE = '#FF4D2D';
 const AMBER = '#FFB13D';
 const GREEN = '#5CCB6A';
-const SANS = "Montserrat, 'Segoe UI', Arial, sans-serif";
-const MONO = "Consolas, 'Courier New', monospace";
+// Czcionki sa wbudowane w projekt (public/fonts), zeby efekt wygladal tak samo
+// na kazdym komputerze. Szczegoly i powod: src/czcionki.ts
+zaladujCzcionki();
 
 /* ============================================================
    1. Etykieta rozdzialu w rogu: "01 / PROBLEM"

@@ -199,6 +199,26 @@ if (fs.existsSync(plikPlanu)) {
       ok.push(`efekty gęsto (co ${coIle.toFixed(1)} s)`);
     }
 
+    /* SCENY PELNOEKRANOWE. Rolka zlozona z samych malych nakladek na twarzy
+       wyglada jak nagranie z napisami, nawet gdy efektow jest duzo i sa gesto.
+       Roznice robi kadr, ktory co kilkanascie sekund zmienia sie w calosci.
+       Dlatego to jest osobny prog, a nie uwaga na marginesie. */
+    const sceny = wszystkie.filter((n) => /scena-/.test(n.plik || ""));
+    const oczekiwaneSceny = Math.min(5, Math.max(2, Math.round(dlugosc / 16)));
+    if (!sceny.length) {
+      uwagi.push(
+        "W rolce nie ma ANI JEDNEJ sceny pełnoekranowej. Same nakładki na twarzy to " +
+        "nagranie z napisami. Przebuduj plan: node narzedzia/plan-efektow.mjs nagranie.mp4 --napisy napisy.ass"
+      );
+    } else if (sceny.length < oczekiwaneSceny) {
+      uwagi.push(
+        `Sceny pełnoekranowe: ${sceny.length}, a przy tej długości powinno być ${oczekiwaneSceny}. ` +
+        "Rolka jest przez to bardziej płaska, niż zakłada zestaw."
+      );
+    } else {
+      ok.push(`${sceny.length} sceny pełnoekranowe`);
+    }
+
     // Otwarcie bez nakladki jest OK, o ile w zamian jest mocniejszy najazd: to
     // jedna z form hooka, a nie brak montazu. Marudzimy dopiero, gdy na starcie
     // nie dzieje sie nic: ani efekt, ani wyrazny najazd.

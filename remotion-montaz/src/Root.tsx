@@ -29,6 +29,10 @@ import {
   DymekKomentarza, PasekEtapow, Stempel, CyfraKroku, PodkreslenieReczne,
   PytanieOdpowiedz, Ticker, Odliczanie, TrzyIkony, Cytat,
 } from './compsBiblioteka2';
+import {
+  ScenaTeza, ScenaKontra, ScenaLista, ScenaLiczba,
+  ScenaProblem, ScenaKroki, ScenaKomentarz, ScenaCta,
+} from './compsSceny';
 
 const FPS = 60;
 
@@ -336,6 +340,18 @@ export const Root: React.FC = () => {
       <Composition id="fx-odliczanie" component={Odliczanie} durationInFrames={Math.round(2.6 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{od: 3, podpis: 'TYLE TO ZAJMUJE'}} />
       <Composition id="fx-ikony" component={TrzyIkony} durationInFrames={Math.round(3.0 * FPS)} fps={FPS} width={1080} height={1920} />
       <Composition id="fx-cytat" component={Cytat} durationInFrames={Math.round(3.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{tekst: 'NIE MUSISZ TAŃCZYĆ, ŻEBY MIEĆ ZASIĘGI'}} />
+
+      {/* SCENY PELNOEKRANOWE (cutawaye). Wypelniaja caly kadr i zaslaniaja nagranie.
+          To one robia roznice miedzy "nagraniem z napisami" a zmontowana rolka.
+          Automat przeplata ciemne z jasnymi. Szczegoly: src/compsSceny.tsx */}
+      <Composition id="scena-teza" component={ScenaTeza} durationInFrames={Math.round(3.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{tekst: 'TO JEST NAJWAŻNIEJSZE ZDANIE', etykieta: 'zapamiętaj', klucz: ''}} />
+      <Composition id="scena-kontra" component={ScenaKontra} durationInFrames={Math.round(3.6 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{zleTytul: 'RĘCZNIE', zlePunkty: ['godziny pracy', 'ciągłe poprawki'], dobreTytul: 'Z AI', dobrePunkty: ['kilka minut', 'jedna komenda']}} />
+      <Composition id="scena-lista" component={ScenaLista} durationInFrames={Math.round(3.8 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{punkty: ['nagrywasz', 'wrzucasz plik', 'gotowe'], etykieta: 'jak to działa'}} />
+      <Composition id="scena-liczba" component={ScenaLiczba} durationInFrames={Math.round(3.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{liczba: '4 MINUTY', podpis: 'tyle to zajmuje', etykieta: ''}} />
+      <Composition id="scena-problem" component={ScenaProblem} durationInFrames={Math.round(3.8 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{punkty: ['ręczne cięcie', 'szukanie muzyki', 'poprawki w kółko'], etykieta: 'koniec z tym'}} />
+      <Composition id="scena-kroki" component={ScenaKroki} durationInFrames={Math.round(3.8 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{kroki: ['wrzucasz nagranie', 'wpisujesz komendę', 'odbierasz gotowe'], etykieta: 'trzy kroki'}} />
+      <Composition id="scena-komentarz" component={ScenaKomentarz} durationInFrames={Math.round(3.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nick: 'ktos_z_komentarzy', tresc: 'napisz w komentarzu', etykieta: ''}} />
+      <Composition id="scena-cta" component={ScenaCta} durationInFrames={Math.round(3.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{haslo: 'ZRÓB TO DZISIAJ', podpis: 'napisz w komentarzu'}} />
     </>
   );
 };
