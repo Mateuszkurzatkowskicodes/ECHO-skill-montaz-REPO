@@ -203,7 +203,23 @@ if (fs.existsSync(plikPlanu)) {
        wyglada jak nagranie z napisami, nawet gdy efektow jest duzo i sa gesto.
        Roznice robi kadr, ktory co kilkanascie sekund zmienia sie w calosci.
        Dlatego to jest osobny prog, a nie uwaga na marginesie. */
-    const sceny = wszystkie.filter((n) => /scena-/.test(n.plik || ""));
+    /* Scena pelnoekranowa to taka, ktorej PLIK ma wysokosc kadru. Wczesniej
+       rozpoznawalismy je po nazwie zaczynajacej sie od "scena-", ale doszly
+       animacje i grafiki (anim-*, graf-*, sekw-*), wiec kontrola przestala je
+       widziec i milczala nawet wtedy, gdy rolka nie miala ani jednej. */
+    const sceny = wszystkie.filter((n) => {
+      try {
+        const out = execFileSync(
+          "ffprobe",
+          ["-v", "error", "-select_streams", "v:0", "-show_entries", "stream=height",
+           "-of", "csv=p=0", n.plik],
+          {encoding: "utf8"}
+        );
+        return parseInt(out.trim(), 10) >= 1700;
+      } catch {
+        return /scena-|sekw-pelna|sekw-przekreslona|sekw-checklista|anim-|graf-/.test(n.plik || "");
+      }
+    });
     const oczekiwaneSceny = Math.min(5, Math.max(2, Math.round(dlugosc / 16)));
     if (!sceny.length) {
       uwagi.push(
