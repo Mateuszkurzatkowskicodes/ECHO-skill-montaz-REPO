@@ -263,18 +263,29 @@ WEJSCIE_LINIJKI = "{FAD(70,60)FSCX90FSCY90T(0,130,FSCX100FSCY100)}".replace(
 
 
 def linia_karaoke(grupa, kolorowanie=True, koniec_wymuszony=None):
+    """
+    Linijka karaoke: kolor plynie przez slowa w rytm mowy i po kolei znika.
+
+    ZMIANA 08.09.2026. Wczesniej dzialaly tu DWA mechanizmy koloru naraz:
+    plynny sweep (kf) oraz jedno slowo pomalowane na pomaranczowo NA STALE
+    (przez \\c i powrot do bieli). Sweep robil swoje, a obok niego wisiala
+    druga, nieruchoma plama koloru, czesto w slowie, do ktorego sweep jeszcze
+    nie dotarl. W kadrze wygladalo to jak usterka: caly czas zostawal jakis
+    element pomaranczowy, w losowym miejscu linijki.
+
+    Zostaje sam sweep, czyli to, co widac w rolkach autora: linijka wchodzi
+    w kolorze drugorzednym (pomarancz ECHO) i bieleje slowo po slowie, dokladnie
+    tak, jak sa wypowiadane. Na koniec linijki nie zostaje zadna plama.
+    `kolorowanie=False` wylacza sweep i daje napisy jednolicie biale.
+    """
     start = grupa[0]["start"]
     koniec = koniec_wymuszony if koniec_wymuszony is not None else grupa[-1]["end"]
-    klucz = wybierz_klucz(grupa) if kolorowanie else None
     tekst = WEJSCIE_LINIJKI
-    for i, w in enumerate(grupa):
+    znacznik = chr(92) + "kf"
+    for w in grupa:
         trwanie = max(1, int((w["end"] - w["start"]) * 100))  # setne sekundy
         slowo = w["word"].strip().upper()
-        if i == klucz:
-            # kolor tylko na tym jednym slowie, potem powrot do bialego
-            tekst += "{\\kf%d\\c%s}%s{\\c&H00FFFFFF&} " % (trwanie, KOLOR_KLUCZA + "&", slowo)
-        else:
-            tekst += "{\\kf%d}%s " % (trwanie, slowo)
+        tekst += "{%s%d}%s " % (znacznik, trwanie if kolorowanie else 0, slowo)
     return f"Dialogue: 0,{czas_ass(start)},{czas_ass(koniec)},ECHO,,0,0,0,,{tekst.strip()}"
 
 

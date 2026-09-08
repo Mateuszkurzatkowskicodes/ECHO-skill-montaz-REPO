@@ -103,13 +103,13 @@ const EFEKTY = [
 
   // akcent: podstawowa forma efektu
   {id: "karta-teza", rola: "akcent", rodzina: "karta", pola: ["nadtytul", "tekst"], dlugosc: 2.8, wys: 280, sfx: "impact", mocSfx: 9},
-  {id: "badge-ikona", rola: "akcent", rodzina: "etykieta", pola: ["ikona", "tekst"], dlugosc: 2.6, wys: 280, sfx: "pop", mocSfx: 6},
+  {id: "badge-ikona", rola: "akcent", rodzina: "etykieta", pola: ["ikona", "tekst"], dlugosc: 2.6, wys: 280, sfx: "pop", mocSfx: 6, limit: 1},
 
   // liczby i wyniki
   {id: "karta-liczba", rola: "liczba", rodzina: "karta", pola: ["ikona", "liczba", "podpis"], dlugosc: 2.8, wys: 280, sfx: "ding", mocSfx: 9},
 
   // kontrast, "nie tak, a tak"
-  {id: "pigulki-nie", rola: "kontra", rodzina: "lista", pola: ["punkty"], dlugosc: 3.0, wys: 280, sfx: "swipe", mocSfx: 8},
+  {id: "pigulki-nie", rola: "kontra", rodzina: "lista", pola: ["punkty"], dlugosc: 3.0, wys: 280, sfx: "swipe", mocSfx: 8, limit: 1},
   {id: "karta-zamiana", rola: "kontra", rodzina: "karta", pola: ["nadtytul", "stare", "nowe"], dlugosc: 3.4, wys: 280, sfx: "whoosh", mocSfx: 9},
 
   // proces: pokazuje, zamiast opisywac
@@ -326,10 +326,23 @@ const historia = czytajHistorie();
  * a `ostatniaRodzina` żeby dwa podobne wizualnie nie poszły jeden po drugim
  * (dwa zakreślenia pod rząd widz czyta jako "znowu to samo").
  */
+/* Ile razy dany efekt juz wszedl w TEJ rolce. "Tabletki" (mala pigulka z ikona
+   i pigulki z krzyzykiem) czytaja sie jako jeden trik, wiec licza sie wspolnie:
+   dwie w jednej rolce to juz powtorka, nawet gdy tekst jest inny. */
+const TABLETKI = ["badge-ikona", "pigulki-nie"];
+const iloscUzyc = {};
+function ponadLimit(e) {
+  if (!e.limit) return false;
+  const grupa = TABLETKI.includes(e.id) ? TABLETKI : [e.id];
+  const razem = grupa.reduce((suma, id) => suma + (iloscUzyc[id] || 0), 0);
+  return razem >= e.limit;
+}
+
 function wybierzEfekt(rola, uzyteTeraz, ostatniaRodzina = null, tylkoRodziny = null, iloscLiczb = 0) {
   const pasuje = (e) =>
     e.rola === rola &&
     !uzyteTeraz.has(e.id) &&
+    !ponadLimit(e) &&
     (e.wymagaLiczb || 0) <= iloscLiczb &&
     (!tylkoRodziny || tylkoRodziny.includes(e.rodzina));
 
@@ -768,6 +781,22 @@ for (const k of kandydaci) {
   if (!efekt && naHooku) efekt = wybierzZRodzin(otwarcie.rodziny, uzyteTeraz);
   // rola wyczerpana w tej rolce: bierzemy cokolwiek, czego jeszcze nie było
   if (!efekt) efekt = wybierzEfekt("akcent", uzyteTeraz, ostatniaRodzina, null, iloscLiczb) || wybierzEfekt("etykieta", uzyteTeraz, ostatniaRodzina, null, iloscLiczb);
+  /* Rola sie wyczerpala, ale pula NIE. Wczesniej w tym miejscu automat od razu
+     czyscil liste uzytych i powtarzal efekt, ktory byl przed chwila: przy jednym
+     nagraniu wyszly trzy te same sceny i dwie te same karty w 26 sekundach.
+     Najpierw wiec bierzemy cokolwiek, czego w tej rolce jeszcze nie bylo,
+     nawet jesli rola nie pasuje idealnie do zdania. Roznorodnosc jest wazniejsza
+     niz dopasowanie roli: widz nie wie, jaka role mial fragment, ale od razu
+     widzi, ze ten sam efekt wraca. */
+  if (!efekt) {
+    const wolne = EFEKTY.filter((e) => !uzyteTeraz.has(e.id) && !ponadLimit(e));
+    const inneNizPoprzednia = wolne.filter((e) => e.rodzina !== ostatniaRodzina);
+    const pula = (inneNizPoprzednia.length ? inneNizPoprzednia : wolne).sort(
+      (a, b) => (historia.efekty[a.id] || 0) - (historia.efekty[b.id] || 0)
+    );
+    if (pula.length) efekt = pula[Math.floor(Math.random() * Math.min(3, pula.length))];
+  }
+
   // cała pula wyczerpana (długie nagranie, gęsty rytm): zaczynamy drugą turę,
   // bo lepszy powtórzony efekt po trzydziestu sekundach niż płaski kawałek rolki
   if (!efekt) {
@@ -809,6 +838,7 @@ for (const k of kandydaci) {
     });
   }
 
+  iloscUzyc[efekt.id] = (iloscUzyc[efekt.id] || 0) + 1;
   if (efekt.scena) {
     scenZrobione++;
     ostatnieTloSceny = efekt.tlo || null;
@@ -1032,6 +1062,12 @@ const plan = {
   ...(plikNapisow ? {napisy: plikNapisow} : {}),
   ...(napisyPrzerwy.length ? {napisyPrzerwy} : {}),
   ...(muzyka ? {muzyka} : {}),
+  /* Oddychajacy zoom i podbity glos. Wartosci wziete z planu rolki, ktora autor
+     zatwierdzil: amplituda 0.018 i okres 11 s daja ruch, ktorego widz nie nazwie,
+     ale ktory odroznia montaz od nagrania na statywie. Wczesniej plan tego pola
+     nie mial wcale i szly wartosci domyslne (0.014 / 7 s), czyli slabsze. */
+  zoom: {amplituda: 0.018, okres: 11},
+  glos: 1.35,
   hook: {sila: otwarcie.sila},
   punche,
   nakladki,

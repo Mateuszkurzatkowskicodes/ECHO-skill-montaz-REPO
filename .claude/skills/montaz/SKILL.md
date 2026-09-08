@@ -117,9 +117,19 @@ w `compsKarty.tsx`:
 | `karta-teza` | nadtytuł kursywą + hasło w ramce. Podstawowy akcent |
 | `karta-liczba` | ikona + liczba + podpis ("⏳ 2h+ / DZIENNIE NA MONTAŻ") |
 | `pigulki-nie` | 2-3 pigułki z krzyżykiem, wjeżdżają kolejno |
-| `badge-ikona` | jedna pigułka z ikoną. Najczęstszy efekt we wzorcu |
+| `badge-ikona` | jedna pigułka z ikoną. **Maks. jedna tabletka na rolkę** |
 | `mockup-plik` | plik + pasek postępu. Pokazuje proces, zamiast go opisywać |
 | `karta-zamiana` | przekreślone stare, pod spodem nowe |
+
+**Tabletki mają limit.** `badge-ikona` i `pigulki-nie` czytają się jako jeden
+trik, więc liczą się wspólnie i wchodzą najwyżej raz na rolkę. Dwie w jednym
+materiale to już powtórka, nawet gdy tekst jest inny.
+
+**Efekt ma WCHODZIĆ, nie pojawiać się.** Karty wjeżdżają z rozmycia, z lekkim
+przestrzeleniem skali i z dołu, a poświata wokół ramki pulsuje. Samo `opacity`
+od zera do jedynki wygląda jak slajd w prezentacji. Jeśli piszesz własny
+komponent, użyj helpera `wjazd()` z `compsKarty.tsx`: zwraca komplet wartości
+(krycie, przesunięcie, skalę, rozmycie) na jeden `style`.
 
 **Nadtytuł kursywą to sygnatura tego stylu.** Mały, przygaszony tekst nad
 hasłem: "cały montaż zajmuje", "a teraz", "montażysta co miesiąc", "ta rolka,
@@ -390,12 +400,20 @@ tanio. Jedno ciągłe ujęcie to zero punchów.
   sam. Przy materiale z kilku ujęć dochodzi hypercut, czyli seria bardzo krótkich
   cięć zamiast jednego spokojnego ujęcia. Płaskie otwarcie to utracona rolka,
   ale płaskie nie znaczy "bez napisu": znaczy "nic się nie dzieje".
-- **Napisy karaoke:** 2-3 słowa na linijkę, cięte na naturalnych pauzach, jedno
-  słowo-klucz w kolorze, na wysokości szyi (`--marginv 520`). Gdy postać jest
+- **Napisy karaoke:** 2-3 słowa na linijkę, cięte na naturalnych pauzach, na
+  wysokości szyi (`--marginv 520`). Kolor **płynie przez linijkę w rytm mowy**
+  i po kolei znika: linijka wchodzi pomarańczowa i bieleje słowo po słowie.
+  Nie ma czegoś takiego jak jedno słowo pomalowane na stałe. Do 08.09.2026
+  działały tu dwa mechanizmy naraz (sweep plus statyczny klucz) i w kadrze
+  cały czas wisiała nieruchoma pomarańczowa plama, często w słowie, do którego
+  sweep jeszcze nie dotarł. Wyglądało to jak usterka. Gdy postać jest
   nisko w kadrze i napis ląduje na brzuchu, podnieś je (`--marginv 1070`),
   a przy split-screenie posadź na szwie (`--marginv 920`).
-- **Zoom:** ciągły "oddychający" (ledwo wyczuwalny) przez cały czas, plus punch
-  wyłącznie na sklejkach.
+- **Zoom:** ciągły "oddychający" przez cały czas, plus punch wyłącznie na
+  sklejkach. Plan ustawia `zoom: {amplituda: 0.018, okres: 11}` i `glos: 1.35`,
+  czyli wartości z rolek, które autor zatwierdził. Wcześniej pola nie było
+  wcale i szły domyślne, słabsze (0.014 / 7 s): rolka wyglądała jak nagranie
+  ze statywu.
 - **Sceny pełnoekranowe:** min. 2 na rolkę, rozłożone w czasie, ciemne
   przeplatane z jasnymi. Rolka bez ani jednej sceny wygląda jak nagranie
   z napisami, choćby efektów było dużo i gęsto.

@@ -63,14 +63,43 @@ const Nadtytul: React.FC<{tekst?: string; post: number; jasny?: boolean}> = ({te
     </div>
   ) : null;
 
-/** Wspolny wjazd: sprezynka na wejsciu, zjazd na ostatnich klatkach. */
+/**
+ * Wspolny ruch karty.
+ *
+ * Karta nie ma sie "pojawiac", tylko WCHODZIC: z rozmycia, z lekkim
+ * przestrzeleniem skali i z dolu. Samo `opacity` od 0 do 1 wyglada jak slajd
+ * w prezentacji i to byl jeden z zarzutow do poprzedniej wersji.
+ *
+ * Zwraca komplet wartosci na jeden `style`:
+ *   post     - krycie (wejscie razy wyjscie),
+ *   wjechal  - 0..1 samego wejscia, do animacji elementow w srodku karty,
+ *   rozmycie - piksele blura, znika w trakcie wjazdu,
+ *   przesun  - przesuniecie w pionie: z dolu na wejsciu, w dol na wyjsciu,
+ *   skala    - lekkie przestrzelenie ponad 1, potem powrot.
+ */
 function wjazd(frame: number, fps: number, durationInFrames: number, opoznienie = 0) {
-  const w = spring({frame: frame - opoznienie, fps, config: {damping: 15, mass: 0.7, stiffness: 150}});
-  const z = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], {
+  const w = spring({
+    frame: frame - opoznienie,
+    fps,
+    config: {damping: 11, mass: 0.55, stiffness: 190},
+  });
+  const z = interpolate(frame, [durationInFrames - 12, durationInFrames], [1, 0], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
-  return {post: w * z, wjechal: w};
+  return {
+    post: w * z,
+    wjechal: w,
+    rozmycie: interpolate(w, [0, 0.55], [16, 0], {extrapolateRight: 'clamp'}),
+    przesun: interpolate(w, [0, 1], [58, 0]) + interpolate(z, [0, 1], [30, 0]),
+    skala: interpolate(w, [0, 1], [0.86, 1]),
+  };
+}
+
+/** Puls poswiaty wokol ramki. Karta zyje, zamiast stac jak wklejony obrazek. */
+function poswiata(frame: number, kolor: string, sila = 1) {
+  const p = 0.5 + Math.sin(frame / 11) * 0.5;
+  return `0 22px 60px rgba(0,0,0,0.55), 0 0 ${Math.round((26 + p * 26) * sila)}px ${kolor}${p > 0.5 ? '55' : '33'}`;
 }
 
 /** Kadr karty: tresc siedzi u dolu kompozycji, czyli nad napisami karaoke. */
@@ -96,12 +125,18 @@ export const KartaTeza: React.FC<{nadtytul?: string; tekst?: string}> = ({
 }) => {
   const frame = useCurrentFrame();
   const {fps, durationInFrames} = useVideoConfig();
-  const {post} = wjazd(frame, fps, durationInFrames);
+  const {post, przesun, skala, rozmycie} = wjazd(frame, fps, durationInFrames);
   const fs = stopien(tekst, 52, 34, 1500);
 
   return (
     <AbsoluteFill style={ramkaKarty}>
-      <div style={{opacity: post, transform: `translateY(${interpolate(post, [0, 1], [46, 0])}px)`}}>
+      <div
+        style={{
+          opacity: post,
+          transform: `translateY(${przesun}px) scale(${skala})`,
+          filter: `blur(${rozmycie}px)`,
+        }}
+      >
         <Nadtytul tekst={nadtytul} post={post} />
         <div
           style={{
@@ -110,7 +145,7 @@ export const KartaTeza: React.FC<{nadtytul?: string; tekst?: string}> = ({
             borderRadius: 22,
             padding: '20px 32px',
             maxWidth: 900,
-            boxShadow: `0 22px 60px rgba(0,0,0,0.55), 0 0 40px ${ORANGE}33`,
+            boxShadow: poswiata(frame, ORANGE),
           }}
         >
           <div
@@ -142,8 +177,10 @@ export const KartaLiczba: React.FC<{ikona?: string; liczba?: string; podpis?: st
 }) => {
   const frame = useCurrentFrame();
   const {fps, durationInFrames} = useVideoConfig();
-  const {post} = wjazd(frame, fps, durationInFrames);
+  const {post, przesun, skala, rozmycie, wjechal} = wjazd(frame, fps, durationInFrames);
   const puls = 1 + Math.sin(frame / 8) * 0.015;
+  // Liczba wskakuje osobno, chwile po ramce: oko najpierw widzi karte, potem liczbe.
+  const liczbaP = spring({frame: frame - 7, fps, config: {damping: 9, mass: 0.5}});
 
   return (
     <AbsoluteFill style={ramkaKarty}>
@@ -158,13 +195,33 @@ export const KartaLiczba: React.FC<{ikona?: string; liczba?: string; podpis?: st
           padding: '18px 28px',
           maxWidth: 940,
           opacity: post,
-          transform: `translateY(${interpolate(post, [0, 1], [46, 0])}px) scale(${puls})`,
-          boxShadow: `0 22px 60px rgba(0,0,0,0.55), 0 0 40px ${ORANGE}33`,
+          transform: `translateY(${przesun}px) scale(${skala * puls})`,
+          filter: `blur(${rozmycie}px)`,
+          boxShadow: poswiata(frame, ORANGE),
         }}
       >
-        <div style={{fontSize: 50, lineHeight: 1, flexShrink: 0}}>{ikona}</div>
+        <div
+          style={{
+            fontSize: 50,
+            lineHeight: 1,
+            flexShrink: 0,
+            transform: `rotate(${interpolate(wjechal, [0, 1], [-25, 0])}deg)`,
+          }}
+        >
+          {ikona}
+        </div>
         <div style={{display: 'flex', flexDirection: 'column', gap: 4}}>
-          <div style={{fontFamily: SANS, fontSize: 54, fontWeight: 900, color: '#fff', lineHeight: 1}}>
+          <div
+            style={{
+              fontFamily: SANS,
+              fontSize: 54,
+              fontWeight: 900,
+              color: '#fff',
+              lineHeight: 1,
+              transform: `scale(${interpolate(liczbaP, [0, 1], [0.6, 1])})`,
+              transformOrigin: 'left center',
+            }}
+          >
             {liczba}
           </div>
           <div
@@ -239,7 +296,7 @@ export const BadgeIkona: React.FC<{ikona?: string; tekst?: string; kolor?: strin
 }) => {
   const frame = useCurrentFrame();
   const {fps, durationInFrames} = useVideoConfig();
-  const {post, wjechal} = wjazd(frame, fps, durationInFrames);
+  const {post, wjechal, przesun, skala, rozmycie} = wjazd(frame, fps, durationInFrames);
   const fs = stopien(tekst, 36, 25, 950);
 
   return (
@@ -255,8 +312,9 @@ export const BadgeIkona: React.FC<{ikona?: string; tekst?: string; kolor?: strin
           padding: '13px 26px',
           maxWidth: 900,
           opacity: post,
-          transform: `translateY(${interpolate(wjechal, [0, 1], [40, 0])}px)`,
-          boxShadow: `0 18px 46px rgba(0,0,0,0.5), 0 0 30px ${kolor}2a`,
+          transform: `translateY(${przesun}px) scale(${skala})`,
+          filter: `blur(${rozmycie}px)`,
+          boxShadow: poswiata(frame, kolor, 0.8),
         }}
       >
         <div style={{fontSize: 40, lineHeight: 1, flexShrink: 0}}>{ikona}</div>
@@ -287,7 +345,7 @@ export const MockupPlik: React.FC<{nazwa?: string; podpis?: string; etykieta?: s
 }) => {
   const frame = useCurrentFrame();
   const {fps, durationInFrames} = useVideoConfig();
-  const {post, wjechal} = wjazd(frame, fps, durationInFrames);
+  const {post, wjechal, przesun, rozmycie} = wjazd(frame, fps, durationInFrames);
   const postepP = interpolate(frame, [14, durationInFrames - 14], [0, 1], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
@@ -303,7 +361,8 @@ export const MockupPlik: React.FC<{nazwa?: string; podpis?: string; etykieta?: s
           width: '100%',
           maxWidth: 860,
           opacity: post,
-          transform: `translateY(${interpolate(wjechal, [0, 1], [46, 0])}px)`,
+          transform: `translateY(${przesun}px)`,
+          filter: `blur(${rozmycie}px)`,
         }}
       >
         {/* Wiersz pliku */}
@@ -387,7 +446,7 @@ export const KartaZamiana: React.FC<{nadtytul?: string; stare?: string; nowe?: s
 }) => {
   const frame = useCurrentFrame();
   const {fps, durationInFrames} = useVideoConfig();
-  const {post} = wjazd(frame, fps, durationInFrames);
+  const {post, przesun, skala, rozmycie} = wjazd(frame, fps, durationInFrames);
   const kreska = interpolate(frame, [12, 26], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
   const noweP = spring({frame: frame - 28, fps, config: {damping: 12, mass: 0.7}});
 
@@ -400,7 +459,8 @@ export const KartaZamiana: React.FC<{nadtytul?: string; stare?: string; nowe?: s
           alignItems: 'center',
           gap: 10,
           opacity: post,
-          transform: `translateY(${interpolate(post, [0, 1], [46, 0])}px)`,
+          transform: `translateY(${przesun}px) scale(${skala})`,
+          filter: `blur(${rozmycie}px)`,
         }}
       >
         <Nadtytul tekst={nadtytul} post={post} />
