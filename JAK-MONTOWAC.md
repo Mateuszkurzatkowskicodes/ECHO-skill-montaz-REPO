@@ -36,6 +36,21 @@ Na koniec pokaż mi gotowy plik i napisz w dwóch zdaniach, co się w rolce dzie
 
 ---
 
+## Droga na skróty jest zablokowana i to jest celowe
+
+`--renderuj-efekty` (czyli render tekstów, które wymyślił automat) **zatrzyma
+się i nie wyrenderuje niczego**. Zobaczysz komunikat "STOP. Nie renderuje
+tekstow wymyslonych przez automat." i instrukcję, co zrobić.
+
+Powód jest prosty: cała różnica między rolką, która wygląda jak montaż, a taką,
+która wygląda jak nagranie z nalepkami, siedzi w kroku 4. Automat dobiera formę
+losowo i wkleja frazę wyciętą regułami. Nie rozumie treści i nigdy nie będzie.
+Gdy ten krok się pomija, efekty mówią o czym innym niż mówiący i widz to widzi.
+
+Normalna droga to: plan → poprawiasz `efekty.json` → `--renderuj-z-pliku`.
+Flaga `--i-tak-renderuj` istnieje tylko po to, żeby móc zobaczyć, co wymyślił
+automat. Nie używaj jej do oddawania rolki.
+
 ## Co Claude ma zrobić w kroku 4 (najważniejszym)
 
 To jest krok, który odróżnia dobry montaż od losowego. Narzędzie wypisuje coś takiego:

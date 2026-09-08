@@ -1476,6 +1476,46 @@ const polecenia = doRenderu.map((e) => {
   ];
 });
 
+
+/* BLOKADA RENDERU Z TEKSTAMI AUTOMATU.
+   Tu lezal caly problem "u autora rolka wychodzi swietnie, u kursanta slabo".
+   Ten sam zestaw daje dwa zupelnie rozne wyniki:
+     - gdy ktos przeczyta transkrypcje i DOBIERZE efekt do zdania, ktore leci
+       pod nim, rolka wyglada jak montaz,
+     - gdy pojdzie prosto w `--renderuj-efekty`, automat wkleja losowa forme
+       i fraze wycieta regulami. Wychodzi rolka, w ktorej efekty mowia o czym
+       innym niz mowiacy.
+   Automat nie rozumie tresci i nigdy nie bedzie. Dlatego droga na skroty jest
+   teraz zablokowana: zeby wyrenderowac teksty wymyslone przez narzedzie, trzeba
+   swiadomie dopisac `--i-tak-renderuj`. Normalna droga to poprawic efekty.json
+   i uzyc `--renderuj-z-pliku`. */
+if (renderujEfekty && !flaga("--i-tak-renderuj")) {
+  const kreska = "=".repeat(70);
+  console.log([
+    "",
+    kreska,
+    "STOP. Nie renderuje tekstow wymyslonych przez automat.",
+    kreska,
+    "",
+    "Powyzej masz liste TEKSTY DO PRZEPISANIA, a przy kazdym efekcie zdanie,",
+    "ktore leci w jego oknie czasowym. Automat dobral FORME losowo i wkleil",
+    "fraze wycieta regulami: czesc z tego mowi o czym innym niz mowiacy.",
+    "",
+    "Zrob to teraz, to jest cala roznica miedzy montazem a nagraniem z nalepkami:",
+    "  1. Przeczytaj cala transkrypcje ze zrozumieniem.",
+    "  2. Dla kazdego efektu sprawdz, czy jego forma ILUSTRUJE to zdanie.",
+    "     Jesli nie, podmien pole id w " + path.basename(plikEfektow) + " na taka, ktora ilustruje",
+    "     (sciaga: JAK-MONTOWAC.md, tabela co czym ilustrowac).",
+    "  3. Przepisz hasla na krotkie i zrozumiale bez dzwieku.",
+    "  4. Wyrenderuj SWOJE teksty:",
+    "     node narzedzia/plan-efektow.mjs " + path.basename(nagranie) + " --napisy " + path.basename(plikNapisow || "napisy.ass") + " --renderuj-z-pliku",
+    "",
+    "Jesli naprawde chcesz zobaczyc, co wymyslil automat, dodaj --i-tak-renderuj.",
+    "Rolka bedzie wtedy slabsza i to jest normalne: narzedzie nie rozumie tresci.",
+  ].join(String.fromCharCode(10)));
+  process.exit(0);
+}
+
 if (renderujEfekty || tylkoRender) {
   const remotion = folderRemotion;
   if (!cliRemotion) {
