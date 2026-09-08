@@ -5,6 +5,15 @@ description: Montaż wideo w stylu ECHO — rolki (9:16, do 60s) i długie forma
 
 # Montaż wideo — ECHO
 
+> **Zaczynasz montaż? Otwórz `JAK-MONTOWAC.md` w repo.** Jest tam gotowa komenda
+> do wklejenia i ściąga "co czym ilustrować". Ten plik opisuje zasady, tamten
+> prowadzi za rękę przez konkretny montaż.
+>
+> **Piszesz własny komponent? Zacznij od `budulce.tsx`.** Są tam tła z ziarnem,
+> etykieta, nadtytuł, puenta, brand bug i helper `wejscie()`. To z tych klocków
+> zbudowane są wszystkie rolki autora i to one dają im spójny wygląd. Komponent
+> napisany bez nich będzie wyglądał jak z innej bajki, choćby był poprawny.
+
 Montujesz nagrania w stylu "AI business": talking head, szybkie tempo, napisy
 karaoke, gęste animowane efekty, muzyka pod głosem.
 

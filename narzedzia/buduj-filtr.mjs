@@ -470,6 +470,12 @@ const cutAudio = [];
   if (wysNakladki && wysNakladki < H * 0.9 && y < H * 0.2) {
     y = Math.max(0, H - 520 - 95 - wysNakladki);
     console.log(`Nakładka ${path.basename(n.plik)}: podniosłem z ${n.y || 0} na ${y}, bo plik ma ${wysNakladki} px i leżałby na twarzy.`);
+  } else if (wysNakladki && wysNakladki >= H * 0.9 && y > 0) {
+    /* Odwrotny przypadek: plik jest pelnoekranowy, a plan kaze go zsunac w dol.
+       Scena zaslaniala wtedy tylko dolna czesc kadru i wygladalo to jak usterka,
+       a nie jak cutaway. Pelny kadr zawsze siada na zerze. */
+    console.log(`Scena ${path.basename(n.plik)}: zsunąłem z ${y} na 0, bo plik jest pełnoekranowy (${wysNakladki} px).`);
+    y = 0;
   }
   // -2 zamiast -1: nieparzysta wysokość psuje część koderów
   const skala = n.szerokosc ? `scale=${n.szerokosc}:-2,` : "";

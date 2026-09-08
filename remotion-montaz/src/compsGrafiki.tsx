@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring} from 'remotion';
 import {SANS, MONO, zaladujCzcionki} from './czcionki';
+import {TloCiemne as TloCiemneECHO, TloJasne as TloJasneECHO, BrandBug} from './budulce';
 
 zaladujCzcionki();
 
@@ -99,7 +100,11 @@ const Nadtytul: React.FC<{tekst?: string; jasne: boolean; post: number}> = ({tek
 /** Wspolna ramka: tresc w gornej polowie kadru, bo pod spodem leca napisy. */
 const Kadr: React.FC<{jasne: boolean; children: React.ReactNode}> = ({jasne, children}) => (
   <>
-    {jasne ? <TloJasne /> : <TloCiemne />}
+    {/* Tla z budulcow: maja ZIARNO (feTurbulence), ktorego brakowalo w zestawie
+        i przez ktore gradienty wygladaly jak tapeta z edytora, a nie jak
+        material filmowy. Do tego logo w rogu, jak w kazdej rolce autora. */}
+    {jasne ? <TloJasneECHO /> : <TloCiemneECHO />}
+    <BrandBug jasne={jasne} />
     <AbsoluteFill
       style={{
         justifyContent: 'center',
