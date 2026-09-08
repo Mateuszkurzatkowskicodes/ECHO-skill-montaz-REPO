@@ -1,18 +1,64 @@
 # ECHO — Skill montażu z AI
 
 To jest zestaw, dzięki któremu AI montuje krótkie i długie filmy w stylu ECHO:
-napisy karaoke, gęste animowane efekty, muzyka ściszana pod głosem, efekty
+napisy karaoke, animowane ilustracje, muzyka ściszana pod głosem, efekty
 dźwiękowe i kontrola jakości przed publikacją.
 
 **Dostęp tylko dla kursantów.** Nie udostępniaj dalej.
 
+## Zacznij tutaj
+
+**`JAK-MONTOWAC.md`** — gotowa komenda do wklejenia i ściąga "co czym
+ilustrować". Wklejasz jedną komendę, AI przechodzi całą drogę samo.
+
 ## Co jest w środku
 
-- `.claude/skills/montaz/SKILL.md` — autorski skill montażu (serce zestawu).
-- `narzedzia/` — narzędzia, których AI używa zamiast pisać ffmpeg z ręki.
-- `remotion-montaz/` — biblioteka efektów: 28 kompozycji sterowanych Twoim
-  tekstem plus kilkadziesiąt gotowych wzorców do czytania.
-- `wiedza-styl/` — analizy stylu montażu, na których uczył się skill.
+- `JAK-MONTOWAC.md` — instrukcja montażu z gotową komendą.
+- `.claude/skills/montaz/SKILL.md` — skill montażu, serce zestawu.
+- `narzedzia/` — narzędzia, których AI używa zamiast pisać ffmpeg z ręki:
+  transkrypcja, pomiar twarzy, plan efektów, sklejanie, kontrola, krytyk.
+- `remotion-montaz/src/` — biblioteka efektów. Najważniejsze pliki:
+  - `compsAnimacje.tsx` — animowane ilustracje (wykres, kalendarz, zegar,
+    oś czasu montażu, orbita, fala),
+  - `compsGrafiki.tsx` — pierścień, suwak, słupki, powiadomienia, mockup konta,
+  - `compsNakladki.tsx` — rzeczy grające NA nagraniu: licznik, pasek, ikony,
+    equalizer, porównanie,
+  - `budulce.tsx` — klocki, od których zaczynasz, pisząc własny efekt: tła
+    z ziarnem, etykieta, nadtytuł, puenta, brand bug, animacja wejścia.
+- `muzyka-startowa/` — jedenaście podkładów CC0, AI dobiera je samo.
+- `wiedza-styl/` — analizy stylu montażu.
+
+## Aktualizacja 4 (8 września 2026): rolka ma być dobra od pierwszej
+
+Największa przebudowa od premiery. Powstała po tym, jak pierwsza rolka
+montowana przez kursanta wypadła wyraźnie słabiej niż rolki autora, mimo tych
+samych narzędzi.
+
+**Co było nie tak**
+- Przy nagraniu 30 fps każdy efekt dostawał połowę klatek i urywał się
+  w połowie animacji. Autor nagrywa w 60 fps, więc u niego tego nie było widać.
+- Czcionka nie ładowała się i system podstawiał zastępczą, bez komunikatu.
+- Napisy znikały pod efektami i migały.
+- Efekty potrafiły wylądować na twarzy.
+- Efekty były napisami w ramce, a nie ilustracją.
+- Rolka wyglądała jak seria plansz przedzielonych mówiącym.
+
+**Co jest teraz**
+- **Animowane ilustracje zamiast napisów w ramkach.** Wykres, który sam się
+  rysuje i załamuje, kalendarz gubiący kartki, zegar, oś czasu montażu, orbita
+  ikon, fala zasięgów, licznik, pasek postępu, mockup konta.
+- **Większość efektów gra NA nagraniu**, nad napisami. Pełny kadr wchodzi
+  najwyżej dwa razy: na puencie i na końcu.
+- **Napisy lecą przez całą rolkę** i mają dwie wysokości: wyżej, gdy widać samą
+  postać, niżej pod pełnoekranową sceną. Kolor płynie po nich w rytm mowy.
+- **Nic nie ląduje na twarzy** — `gdzie-twarz.py` mierzy, gdzie ona jest.
+- **Efekt pasuje do zdania, które leci pod nim.** Narzędzie wypisuje przy
+  każdym efekcie fragment transkrypcji z jego okna czasowego.
+- **Droga na skróty jest zablokowana.** `--renderuj-efekty` zatrzymuje się
+  i każe najpierw dobrać efekty do treści. To jest ten jeden krok, który
+  odróżnia montaż od nagrania z nalepkami.
+
+---
 
 ## Aktualizacja 2 (28 sierpnia 2026): rolka ma wyglądać dobrze BEZ proszenia
 
