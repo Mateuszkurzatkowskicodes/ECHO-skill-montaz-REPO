@@ -106,6 +106,41 @@ wstawisz ją do rolki.
 Gdy w kadrze nie ma miejsca na kartę, **użyj sceny pełnoekranowej**: ona zasłania
 wszystko i problem znika.
 
+## SEKWENCJE: EFEKT MA NARASTAĆ, NIE POJAWIAĆ SIĘ
+
+To jest największa różnica między automatem a montażem, który autor uznaje za
+dobry, i wyszła dopiero z przeglądu klatka po klatce wszystkich jego rolek.
+
+Automat wstawiał **karty**: jeden gotowy element na 2,8 s, potem znikał.
+W rolkach autora takich efektów prawie nie ma. Tam efekt **żyje przez 5-7 sekund
+i dokłada elementy w rytm mowy**. Przykłady wprost z gotowych rolek:
+
+```
+"RĘCZNIE = STRATA"  →  ⏰ dużo czasu  →  💸 sporo kasy  →  "z AI: lepiej i szybciej"
+"ZERO ROBOTY"       →  ~~uczenia się montażu~~ ✗  →  ~~robienia efektów~~ ✗
+"CO ROBIĘ"          →  CIĘCIA → EFEKTY → ANIMACJE → MUZYKA
+```
+
+Statyczna karta zawsze będzie wyglądać na doklejoną, bo nie ma związku z rytmem
+zdania. Sekwencja wygląda na zmontowaną, bo rośnie razem z tym, co słychać.
+
+Pięć sztuk w `compsSekwencje.tsx`:
+
+| Kompozycja | Do czego | Gdzie |
+|---|---|---|
+| `sekw-nakladka` | 2 pozycje z ikoną, dochodzą po kolei | nad napisami |
+| `sekw-terminal` | "AI MONTUJE" + odhaczane kroki + pasek | nad napisami |
+| `sekw-pelna` | lista z ikonami, opcjonalna puenta | pełny ekran |
+| `sekw-przekreslona` | pozycje przekreślane po kolei | pełny ekran |
+| `sekw-checklista` | punkty odhaczane, schodzą po skosie | pełny ekran |
+
+**Ikona niesie połowę przekazu** i dobiera się ją do treści: zegar przy czasie,
+banknoty przy pieniądzach, dyplom przy nauce. Robi to `ikonaDla()`.
+
+**Rytm.** Skoro efekty trwają 5-6 s, jest ich MNIEJ: domyślny odstęp to 4,6 s
+(było 2,6). Na rolce 26 s wychodzi 5 efektów zamiast 7, a kadr i tak cały czas
+żyje, bo każdy z nich się rozbudowuje.
+
 ## KARTY NAD NAPISAMI (podstawowa forma efektu)
 
 To jest forma, która dominuje w rolkach uznanych za dobre: mała karta z ramką,

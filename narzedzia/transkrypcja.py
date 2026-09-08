@@ -38,11 +38,16 @@ import tempfile
 
 CACHE = os.path.join(tempfile.gettempdir(), "echo-transkrypcje")
 
-# Styl napisow ECHO. Bahnschrift to czcionka Windows; na macOS i Linuksie
-# podmieniamy ja na najblizsza dostepna, inaczej system wstawia domyslna
-# szeryfowa i napisy wygladaja zupelnie inaczej niz w kursie.
-CZCIONKA_DOMYSLNA = "Bahnschrift"
-CZCIONKI_ZAMIENNE = ["Bahnschrift", "DIN Alternate", "Oswald", "Arial Narrow", "Arial Black", "Arial"]
+# Styl napisow ECHO.
+#
+# ZMIANA 08.09.2026: z Bahnschrift na Montserrat. Bahnschrift jest waski
+# i kondensowany, przez co napisy wygladaly technicznie, jak podpis pod wykresem.
+# Rolki, ktore autor uznal za dobre, maja napisy okragle i geste. Montserrat
+# lezy w repo (remotion-montaz/public/fonts), a buduj-filtr wskazuje ffmpegowi
+# ten folder przez `fontsdir`, wiec napisy wygladaja tak samo na kazdym
+# komputerze, nawet gdy nikt nie instalowal czcionki w systemie.
+CZCIONKA_DOMYSLNA = "Montserrat"
+CZCIONKI_ZAMIENNE = ["Montserrat", "Poppins", "Nunito", "Segoe UI", "Arial"]
 
 SZABLON_ASS = """[Script Info]
 ScriptType: v4.00+
@@ -109,7 +114,23 @@ def czas_ass(sek):
 
 
 def dostepna_czcionka():
-    """Pierwsza czcionka z listy, ktora jest w systemie."""
+    """Czcionka napisow.
+
+    Montserrat jest dolaczony do repo (remotion-montaz/public/fonts), a
+    buduj-filtr.mjs wskazuje ten folder ffmpegowi przez `fontsdir`. Nie musi
+    wiec byc zainstalowany w systemie i sprawdzanie systemu tylko szkodzilo:
+    na komputerze, gdzie Montserrata nie ma w Windows\Fonts, napisy cicho
+    spadaly na Segoe UI, mimo ze plik czcionki lezal w repo obok.
+    """
+    repo_fonts = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "remotion-montaz", "public", "fonts",
+    )
+    if os.path.isdir(repo_fonts) and any(
+        p.lower().startswith("montserrat") for p in os.listdir(repo_fonts)
+    ):
+        return "Montserrat"
+
     katalogi = [
         os.path.join(os.environ.get("WINDIR", "C:/Windows"), "Fonts"),
         "/System/Library/Fonts", "/Library/Fonts",

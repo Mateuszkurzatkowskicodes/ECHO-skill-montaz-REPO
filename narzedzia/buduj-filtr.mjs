@@ -35,6 +35,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import {execFileSync, spawnSync} from "node:child_process";
+import {fileURLToPath} from "node:url";
 import {stanCzasu} from "./wspolne.mjs";
 
 /* ============================== argumenty ============================== */
@@ -363,7 +364,18 @@ if (plan.napisy) {
     fs.writeFileSync(plikNapisow, wynik.join("\n"), "utf8");
     console.log(`Napisy: wyciąłem ${wyciete} linijek pod wielkimi napisami-efektami.`);
   }
-  czesci.push(`[${biezacy}]ass=${sciezkaDlaFiltra(plikNapisow)}[z_napisami]`);
+  /* `fontsdir` wskazuje folder z czcionkami dolaczonymi do repo. Bez tego libass
+     bierze czcionke z systemu, a gdy jej tam nie ma, po cichu podstawia inna
+     i napisy u kursanta wygladaja zupelnie inaczej niz u autora. Z fontsdir
+     wynik jest ten sam na kazdym komputerze. */
+  const folderCzcionek = [
+    path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "remotion-montaz", "public", "fonts"),
+    path.resolve("remotion-montaz", "public", "fonts"),
+  ].find((k) => fs.existsSync(k));
+  const zCzcionkami = folderCzcionek
+    ? `:fontsdir=${sciezkaDlaFiltra(folderCzcionek)}`
+    : "";
+  czesci.push(`[${biezacy}]ass=${sciezkaDlaFiltra(plikNapisow)}${zCzcionkami}[z_napisami]`);
   biezacy = "z_napisami";
 }
 

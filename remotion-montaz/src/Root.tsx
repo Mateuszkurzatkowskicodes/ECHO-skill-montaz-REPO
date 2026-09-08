@@ -36,6 +36,9 @@ import {
 import {
   KartaTeza, KartaLiczba, PigulkiNie, BadgeIkona, MockupPlik, KartaZamiana, WYS_KARTY,
 } from './compsKarty';
+import {
+  SekwencjaPelna, SekwencjaNakladka, SekwencjaChecklista, SekwencjaTerminal,
+} from './compsSekwencje';
 
 const FPS = 60;
 
@@ -378,6 +381,16 @@ export const Root: React.FC = () => {
       <Composition id="k-wynik" component={KartaWyniku} durationInFrames={Math.round(2.8 * FPS)} fps={FPS} width={1080} height={WYS_KARTY} defaultProps={{liczba: '24 ZŁ', podpis: 'KOSZT JEDNEGO LEADA', pozycja: 'srodek'}} />
       <Composition id="k-lista" component={ListaCheck} durationInFrames={Math.round(3.4 * FPS)} fps={FPS} width={1080} height={WYS_KARTY} defaultProps={{punkty: ['NAGRYWASZ', 'GOTOWE'], pozycja: 'srodek'}} />
       <Composition id="k-komentarz" component={DymekKomentarza} durationInFrames={Math.round(3.4 * FPS)} fps={FPS} width={1080} height={WYS_KARTY} defaultProps={{nick: 'twoj.profil', tresc: 'NAPISZ', pozycja: 'srodek'}} />
+
+      {/* SEKWENCJE: efekty, ktore NARASTAJA przez 5-7 sekund, dokladajac
+          elementy w rytm mowy. To jest forma, ktora dominuje w rolkach uznanych
+          przez autora za dobre, i ktorej automat w ogole nie mial. Szczegoly
+          i przyklady z gotowych rolek: src/compsSekwencje.tsx */}
+      <Composition id="sekw-pelna" component={SekwencjaPelna} durationInFrames={Math.round(6.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{etykieta: 'ręcznie = strata', pozycje: [{ikona: '⏰', tekst: 'dużo czasu'}, {ikona: '💸', tekst: 'sporo kasy'}], puenta: '', jasne: true}} />
+      <Composition id="sekw-przekreslona" component={SekwencjaPelna} durationInFrames={Math.round(6.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{etykieta: 'koniec z tym', pozycje: [{ikona: '🎓', tekst: 'uczenia się montażu', przekreslone: true}, {ikona: '🎬', tekst: 'robienia efektów', przekreslone: true}], puenta: '', jasne: true}} />
+      <Composition id="sekw-checklista" component={SekwencjaChecklista} durationInFrames={Math.round(6.5 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{etykieta: 'co robię', punkty: ['CIĘCIA', 'EFEKTY', 'ANIMACJE', 'MUZYKA'], jasne: false}} />
+      <Composition id="sekw-nakladka" component={SekwencjaNakladka} durationInFrames={Math.round(5.0 * FPS)} fps={FPS} width={1080} height={420} defaultProps={{pozycje: [{ikona: '✅', tekst: 'montaż to dobra umiejętność'}, {ikona: '⏳', tekst: 'ale nie za cenę 3 godzin'}], etykieta: ''}} />
+      <Composition id="sekw-terminal" component={SekwencjaTerminal} durationInFrames={Math.round(5.5 * FPS)} fps={FPS} width={1080} height={420} defaultProps={{tytul: 'AI MONTUJE', kroki: ['analizuję nagranie', 'wycinam ciszę i wpadki', 'dokładam napisy']}} />
     </>
   );
 };

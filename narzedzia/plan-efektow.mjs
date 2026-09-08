@@ -60,7 +60,9 @@ const flaga = (n) => args.includes(n);
 const plikNapisow = wartosc("--napisy");
 const folderMuzyki = wartosc("--muzyka");
 const folderSfx = wartosc("--sfx", "sfx");
-const gestosc = Number(wartosc("--gestosc", "2.6"));
+/* Odstep miedzy POCZATKAMI efektow. Wieksza wartosc niz kiedys (2.6),
+   bo sekwencje trwaja 5-6 s: przy starej gestosci wchodzilyby jedna na druga. */
+const gestosc = Number(wartosc("--gestosc", "4.6"));
 const plikPlanu = wartosc("--zapisz", "plan.json");
 const remotionKatalog = wartosc("--remotion", "remotion-montaz");
 const renderujEfekty = flaga("--renderuj-efekty");
@@ -100,6 +102,16 @@ const EFEKTY = [
      Karty maja wlasna wysokosc (`wys`), wiec plan kladzie je co do piksela:
      ponizej twarzy i nad napisami. Reszta zostaje w bibliotece do RECZNEGO
      uzycia, gdy sam wybierzesz moment i napiszesz haslo. */
+
+  /* SEKWENCJE. Podstawowa forma efektu w rolkach autora: nie jedna karta na
+     2,8 s, tylko cos, co narasta przez 5-6 sekund i dokłada elementy w rytm
+     mowy. Dlatego stoja na poczatku puli i maja najdluzszy czas trwania.
+     Statyczne karty nizej sa uzupelnieniem, nie trzonem. */
+  {id: "sekw-nakladka", rola: "akcent", rodzina: "sekwencja", pola: ["pozycje"], dlugosc: 5.0, wys: 420, sfx: "pop", mocSfx: 8},
+  {id: "sekw-terminal", rola: "lista", rodzina: "sekwencja", pola: ["kroki"], dlugosc: 5.5, wys: 420, sfx: "click", mocSfx: 8},
+  {scena: true, tlo: "jasne", naNapisach: true, id: "sekw-pelna", rola: "kontra", rodzina: "sekwencja", pola: ["pozycje"], dlugosc: 6.0, sfx: "whoosh", mocSfx: 9},
+  {scena: true, tlo: "jasne", naNapisach: true, id: "sekw-przekreslona", rola: "kontra", rodzina: "sekwencja", pola: ["pozycje"], dlugosc: 6.0, sfx: "swipe", mocSfx: 9},
+  {scena: true, tlo: "ciemne", naNapisach: true, id: "sekw-checklista", rola: "lista", rodzina: "sekwencja", pola: ["punkty"], dlugosc: 6.5, sfx: "pop", mocSfx: 8},
 
   // akcent: podstawowa forma efektu
   {id: "karta-teza", rola: "akcent", rodzina: "karta", pola: ["nadtytul", "tekst"], dlugosc: 2.8, wys: 280, sfx: "impact", mocSfx: 9},
@@ -460,6 +472,50 @@ function krotkieHaslo(napisy, indeks, maksSlow = 4) {
   return haslo.length >= 6 ? haslo : null;
 }
 
+
+/* IKONY DO SEKWENCJI.
+   W rolkach autora kazda pozycja listy ma ikone i to ona niesie polowe przekazu:
+   zegar przy czasie, banknoty przy pieniadzach, dyplom przy nauce. Dobieramy ja
+   po tresci frazy, a gdy nic nie pasuje, bierzemy neutralna kropke z listy
+   rotacyjnej, zeby dwie pozycje obok siebie nie mialy tej samej. */
+const IKONY = [
+  {slowa: ["godzin", "czas", "minut", "dzien", "dni", "tydzien", "szybko", "dlugo", "wieczn"], ikona: "⏰"},
+  {slowa: ["zloty", "zl", "kasa", "pieniadz", "koszt", "cena", "darmo", "platn", "budzet", "drog", "tani"], ikona: "💸"},
+  {slowa: ["ucz", "nauk", "kurs", "szkol", "wiedz", "umiejetnosc"], ikona: "🎓"},
+  {slowa: ["montaz", "edycj", "ciec", "efekt", "wideo", "nagran", "rolk", "film"], ikona: "🎬"},
+  {slowa: ["klient", "ludzi", "widz", "obserwuj", "zasieg", "publik"], ikona: "👥"},
+  {slowa: ["biznes", "firm", "sprzedaz", "oferta", "usluga"], ikona: "💼"},
+  {slowa: ["problem", "blad", "strat", "traci", "ryzyk", "kryzys", "zamkn"], ikona: "⚠️"},
+  {slowa: ["ai", "sztuczn", "automat", "komput", "program", "narzedzi"], ikona: "🤖"},
+  {slowa: ["wynik", "efekt", "wzrost", "lepiej", "sukces", "zysk"], ikona: "📈"},
+  {slowa: ["telefon", "komork", "instagram", "facebook", "social", "media"], ikona: "📱"},
+];
+const IKONY_ZAPASOWE = ["🔸", "✅", "⚡", "🔥", "💡"];
+
+function ikonaDla(fraza, numer) {
+  const t = (fraza || "").toLowerCase();
+  for (const {slowa, ikona} of IKONY) {
+    if (slowa.some((s) => t.includes(s))) return ikona;
+  }
+  return IKONY_ZAPASOWE[numer % IKONY_ZAPASOWE.length];
+}
+
+/* Kilka kolejnych, KOMPLETNYCH fraz z nagrania, po jednej na pozycje listy.
+   Bierzemy je z roznych miejsc (co druga linijka napisow), zeby dwie pozycje
+   nie byly tym samym zdaniem przycietym w dwoch miejscach. */
+function frazyDoListy(napisy, indeks, ile, maksSlow) {
+  const wynik = [];
+  let i = indeks;
+  let prob = 0;
+  while (wynik.length < ile && prob < 8 && napisy && i < napisy.length) {
+    const h = krotkieHaslo(napisy, i, maksSlow);
+    if (h && !wynik.includes(h)) wynik.push(h);
+    i += 2;
+    prob++;
+  }
+  return wynik;
+}
+
 function trescDlaEfektu(efekt, linijka, nastepna, napisy, indeks, numerRozdzialu = 1, szeroki = "") {
   const tekst = napisy && napisy.length ? fraza(napisy, indeks) : linijka.tekst.replace(/[.,!?:]+$/, "");
   const dalej = napisy && napisy.length
@@ -499,6 +555,47 @@ function trescDlaEfektu(efekt, linijka, nastepna, napisy, indeks, numerRozdzialu
       const slowa = tekst.split(/\s+/).filter((w) => w.replace(/[^a-ząćęłńóśźż]/gi, "").length > 3);
       const klucz = slowa.length ? slowa[slowa.length - 1] : tekst.split(/\s+/).slice(-1)[0] || "MONTAŻ";
       return {nick: "twoj.profil", tresc: klucz.replace(/[.,!?:]+$/, "").toUpperCase()};
+    }
+    /* ---- SEKWENCJE ----
+       Kazda dostaje kilka OSOBNYCH fraz z nagrania, po jednej na pozycje, plus
+       ikone dobrana do tresci. Gdy nie da sie zebrac przynajmniej dwoch
+       sensownych fraz, pole jest null i ukladanie pomija ten moment: pusta
+       sekwencja wyglada gorzej niz jej brak. */
+    case "sekw-nakladka": {
+      const f2 = frazyDoListy(napisy, indeks, 2, 4);
+      return f2.length >= 2
+        ? {pozycje: f2.map((t, i) => ({ikona: ikonaDla(t, i), tekst: t.toLowerCase()})), etykieta: ""}
+        : {pozycje: null};
+    }
+    case "sekw-pelna": {
+      const f3 = frazyDoListy(napisy, indeks, 2, 3);
+      return f3.length >= 2
+        ? {
+            etykieta: "",
+            pozycje: f3.map((t, i) => ({ikona: ikonaDla(t, i), tekst: t.toLowerCase()})),
+            puenta: "",
+            jasne: true,
+          }
+        : {pozycje: null};
+    }
+    case "sekw-przekreslona": {
+      const f4 = frazyDoListy(napisy, indeks, 2, 3);
+      return f4.length >= 2
+        ? {
+            etykieta: "koniec z tym",
+            pozycje: f4.map((t, i) => ({ikona: ikonaDla(t, i), tekst: t.toLowerCase(), przekreslone: true})),
+            puenta: "",
+            jasne: true,
+          }
+        : {pozycje: null};
+    }
+    case "sekw-checklista": {
+      const f5 = frazyDoListy(napisy, indeks, 3, 2);
+      return f5.length >= 2 ? {etykieta: "", punkty: f5.map((t) => t.toUpperCase()), jasne: false} : {punkty: null};
+    }
+    case "sekw-terminal": {
+      const f6 = frazyDoListy(napisy, indeks, 3, 4);
+      return f6.length >= 2 ? {tytul: "AI MONTUJE", kroki: f6.map((t) => t.toLowerCase())} : {kroki: null};
     }
     /* ---- KARTY NAD NAPISAMI ----
        Haslo jest krotkie i kompletne albo nie ma go wcale (patrz krotkieHaslo).
