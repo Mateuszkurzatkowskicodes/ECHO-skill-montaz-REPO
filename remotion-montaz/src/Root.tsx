@@ -39,6 +39,9 @@ import {
 import {
   SekwencjaPelna, SekwencjaNakladka, SekwencjaChecklista, SekwencjaTerminal,
 } from './compsSekwencje';
+import {
+  GrafPierscien, GrafSuwak, GrafSlupki, GrafPowiadomienia, GrafKonto,
+} from './compsGrafiki';
 
 const FPS = 60;
 
@@ -391,6 +394,16 @@ export const Root: React.FC = () => {
       <Composition id="sekw-checklista" component={SekwencjaChecklista} durationInFrames={Math.round(6.5 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{etykieta: 'co robię', punkty: ['CIĘCIA', 'EFEKTY', 'ANIMACJE', 'MUZYKA'], jasne: false}} />
       <Composition id="sekw-nakladka" component={SekwencjaNakladka} durationInFrames={Math.round(4.0 * FPS)} fps={FPS} width={1080} height={300} defaultProps={{pozycje: [{ikona: '✅', tekst: 'montaż to dobra umiejętność'}, {ikona: '⏳', tekst: 'ale nie za cenę 3 godzin'}], etykieta: ''}} />
       <Composition id="sekw-terminal" component={SekwencjaTerminal} durationInFrames={Math.round(4.4 * FPS)} fps={FPS} width={1080} height={300} defaultProps={{tytul: 'AI MONTUJE', kroki: ['analizuję nagranie', 'wycinam ciszę i wpadki', 'dokładam napisy']}} />
+
+      {/* GRAFIKI, KTORE ILUSTRUJA. Nie tekst w ramce, tylko rysunek pokazujacy
+          to, o czym mowi mowiacy: pierscien dobiegajacy do wartosci, suwak na
+          skali, rosnace slupki, wpadajace wiadomosci, mockup konta.
+          Szczegoly: src/compsGrafiki.tsx */}
+      <Composition id="graf-pierscien" component={GrafPierscien} durationInFrames={Math.round(4.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nadtytul: 'cały montaż zajmuje', wartosc: '4 MIN', podpis: '', jasne: false}} />
+      <Composition id="graf-suwak" component={GrafSuwak} durationInFrames={Math.round(4.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nadtytul: 'czas realizacji', wartosc: '48 H', opis: 'maksymalnie', skala: ['0 h', '12 h', '24 h', '36 h', '48 h'], jasne: true}} />
+      <Composition id="graf-slupki" component={GrafSlupki} durationInFrames={Math.round(4.6 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nadtytul: 'zasięgi miesiąc po miesiącu', jasne: false}} />
+      <Composition id="graf-powiadomienia" component={GrafPowiadomienia} durationInFrames={Math.round(4.6 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nadtytul: 'a potem to wygląda tak', jasne: false}} />
+      <Composition id="graf-konto" component={GrafKonto} durationInFrames={Math.round(4.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nadtytul: 'twoje konto', nick: 'twoja.firma', obserwujacy: 4870, jasne: true}} />
     </>
   );
 };

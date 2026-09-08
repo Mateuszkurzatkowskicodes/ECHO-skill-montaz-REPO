@@ -62,7 +62,7 @@ const folderMuzyki = wartosc("--muzyka");
 const folderSfx = wartosc("--sfx", "sfx");
 /* Odstep miedzy POCZATKAMI efektow. Wieksza wartosc niz kiedys (2.6),
    bo sekwencje trwaja 5-6 s: przy starej gestosci wchodzilyby jedna na druga. */
-const gestosc = Number(wartosc("--gestosc", "3.8"));
+const gestosc = Number(wartosc("--gestosc", "3.2"));
 const plikPlanu = wartosc("--zapisz", "plan.json");
 const remotionKatalog = wartosc("--remotion", "remotion-montaz");
 const renderujEfekty = flaga("--renderuj-efekty");
@@ -133,6 +133,17 @@ const EFEKTY = [
   {id: "k-wynik", rola: "liczba", rodzina: "karta", pola: ["liczba", "podpis"], dlugosc: 2.8, wys: 280, sfx: "ding", mocSfx: 8},
   {id: "k-lista", rola: "lista", rodzina: "lista", pola: ["punkty"], dlugosc: 3.4, wys: 280, sfx: "pop", mocSfx: 6},
   {id: "k-komentarz", rola: "cta", rodzina: "karta", pola: ["nick", "tresc"], dlugosc: 3.4, wys: 280, sfx: "pop", mocSfx: 9},
+
+  /* GRAFIKI, KTORE ILUSTRUJA. Najmocniejsze momenty w rolkach autora nie sa
+     napisami, tylko rysunkami: pierscien dobiegajacy do wartosci, suwak na
+     skali, rosnace slupki, wpadajace wiadomosci, mockup konta. Widz ich nie
+     czyta, tylko oglada. `wymagaLiczb` przy pierscieniu i suwaku pilnuje, zeby
+     nie wchodzily tam, gdzie nie padla zadna liczba. */
+  {scena: true, tlo: "ciemne", id: "graf-pierscien", rola: "liczba", rodzina: "grafika", pola: ["wartosc"], dlugosc: 4.2, wymagaLiczb: 1, sfx: "ding", mocSfx: 9},
+  {scena: true, tlo: "jasne", id: "graf-suwak", rola: "liczba", rodzina: "grafika", pola: ["wartosc"], dlugosc: 4.2, wymagaLiczb: 1, sfx: "click", mocSfx: 8},
+  {scena: true, tlo: "ciemne", id: "graf-slupki", rola: "lista", rodzina: "grafika", pola: [], dlugosc: 4.6, sfx: "pop", mocSfx: 8},
+  {scena: true, tlo: "ciemne", id: "graf-powiadomienia", rola: "cta", rodzina: "grafika", pola: [], dlugosc: 4.6, sfx: "pop", mocSfx: 9},
+  {scena: true, tlo: "jasne", id: "graf-konto", rola: "akcent", rodzina: "grafika", pola: [], dlugosc: 4.4, sfx: "whoosh", mocSfx: 8},
 
   /* SCENY PELNOEKRANOWE. Jedyne, co ma prawo zaslonic napisy i twarz, bo
      zmieniaja caly kadr i maja wlasny tekst. Automat przeplata ciemne z jasnymi. */
@@ -563,6 +574,19 @@ function trescDlaEfektu(efekt, linijka, nastepna, napisy, indeks, numerRozdzialu
        ikone dobrana do tresci. Gdy nie da sie zebrac przynajmniej dwoch
        sensownych fraz, pole jest null i ukladanie pomija ten moment: pusta
        sekwencja wyglada gorzej niz jej brak. */
+    case "graf-pierscien":
+      return {nadtytul: "", wartosc: liczba.toUpperCase(), podpis: "", jasne: false};
+    case "graf-suwak":
+      return {nadtytul: "", wartosc: liczba.toUpperCase(), opis: "", skala: ["0", "", "", "", liczba.toUpperCase()], jasne: true};
+    case "graf-slupki":
+      return {nadtytul: "", jasne: false};
+    case "graf-powiadomienia":
+      // Mockup wiadomosci, nie cytat: tresci sa neutralne i nie udaja niczego,
+      // czego user nie powiedzial.
+      return {nadtytul: "", jasne: false};
+    case "graf-konto":
+      return {nadtytul: "", nick: "twoja.firma", jasne: true};
+
     case "sekw-nakladka": {
       const f2 = frazyDoListy(napisy, indeks, 2, 4);
       return f2.length >= 2
@@ -1231,6 +1255,25 @@ doRenderu.forEach((e, i) => {
 });
 console.log(`\nZapisane: ${plikPlanu} oraz ${plikEfektow}`);
 
+/* CO NAPRAWDE PADA W OKNIE EFEKTU.
+   Blad, ktory kosztowal kilka odrzuconych wersji: efekt dostawal haslo pasujace
+   do OGOLNEGO tematu rolki, a nie do zdania, ktore leci dokladnie pod nim.
+   W kadrze wygladalo to absurdalnie: mowiacy mowi "nie jest za pozno", a nad
+   napisem stoi "czekac na klientow, liczyc na szczescie". Efekt ma ILUSTROWAC
+   to, co slychac w tej sekundzie, wiec narzedzie musi to zdanie pokazac. */
+function coPadaWOknie(od, doKiedy) {
+  if (!napisy || !napisy.length) return "";
+  const slowa = napisy
+    .filter((l) => l.do > od + 0.15 && l.od < doKiedy - 0.15)
+    .map((l) => (l.tekst || "").trim())
+    .filter(Boolean)
+    .join(" ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  return slowa.length > 120 ? slowa.slice(0, 117) + "..." : slowa;
+}
+
+
 /* TEKSTY DO PRZEPISANIA.
    Narzedzie wycina hasla z transkrypcji regulami, a mowa nie dzieli sie na
    naglowki: nawet po filtrach wychodzi czasem srodek zdania ("PRZYSZLOSCI
@@ -1243,9 +1286,14 @@ const doPrzepisania = doRenderu
     const teksty = Object.entries(e.props)
       .filter(([pole, w]) => typeof w === "string" && w.length > 1 && !["ikona", "nick", "pozycja", "klucz"].includes(pole))
       .map(([pole, w]) => pole + ': "' + w + '"');
-    return teksty.length
-      ? "  " + String(i + 1).padStart(2, " ") + ". " + e.id.padEnd(18) + " " + teksty.join("  |  ")
-      : null;
+    if (!teksty.length) return null;
+    const n = nakladki[i] || {};
+    const slychac = coPadaWOknie(n.od || 0, n.do || 0);
+    return [
+      "  " + String(i + 1).padStart(2, " ") + ". " + e.id + "   [" + (n.od || 0) + "s - " + (n.do || 0) + "s]",
+      "      W TYM MOMENCIE SLYCHAC:  " + (slychac || "(cisza)"),
+      "      teraz w efekcie:         " + teksty.join("  |  "),
+    ].join(String.fromCharCode(10));
   })
   .filter(Boolean);
 
@@ -1258,8 +1306,12 @@ if (doPrzepisania.length) {
     kreska,
     doPrzepisania.join("\n"),
     "",
-    "To sa hasla wyciete z transkrypcji regulami, wiec czesc urywa sie w zlym",
-    "miejscu. Otworz " + path.basename(plikEfektow) + ", przeczytaj kazde i przepisz",
+    "PRZY KAZDYM EFEKCIE MASZ NAPISANE, CO SLYCHAC W JEGO OKNIE CZASOWYM.",
+    "Haslo ma ILUSTROWAC dokladnie to zdanie, a nie ogolny temat rolki. Efekt,",
+    "ktory mowi o czym innym niz mowiacy w tej sekundzie, jest gorszy niz brak",
+    "efektu: widz widzi, ze cos tu nie gra, nawet jesli nie umie tego nazwac.",
+    "",
+    "Otworz " + path.basename(plikEfektow) + ", przeczytaj kazde i przepisz",
     "na krotkie haslo, ktore da sie zrozumiec bez dzwieku (2-4 slowa).",
     "Zasada bez zmian: haslo mowi to, co PADLO w nagraniu, i nie dopisuje",
     "liczb ani obietnic, ktorych nikt nie zlozyl.",

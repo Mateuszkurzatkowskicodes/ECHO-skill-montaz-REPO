@@ -111,6 +111,44 @@ wstawisz ją do rolki.
 Gdy w kadrze nie ma miejsca na kartę, **użyj sceny pełnoekranowej**: ona zasłania
 wszystko i problem znika.
 
+## EFEKT MUSI PASOWAĆ DO TEGO, CO SŁYCHAĆ W TEJ SEKUNDZIE
+
+Najgorszy błąd, jaki można tu zrobić, i najłatwiejszy: napisać hasło pasujące do
+OGÓLNEGO tematu rolki zamiast do zdania, które leci dokładnie pod nim. W kadrze
+wygląda to absurdalnie: mówiący mówi "nie jest za późno", a nad napisem stoi
+"czekać na klientów, liczyć na szczęście". Widz od razu czuje, że coś nie gra,
+nawet jeśli nie umie tego nazwać.
+
+Dlatego `plan-efektow.mjs` wypisuje przy KAŻDYM efekcie, co pada w jego oknie
+czasowym:
+
+```
+   2. sekw-przekreslona   [3.72s - 7.92s]
+      W TYM MOMENCIE SLYCHAC:  NIE JEST ZA PÓŹNO. IDZIE CI TERAZ DOBRZE, ALE TO
+                               NIE ZNACZY, ŻE W PRZYSZŁOŚCI BĘDZIE TAK SAMO.
+      teraz w efekcie:         etykieta: "koniec z tym"
+```
+
+**Hasło ma ilustrować to zdanie.** Nie temat rolki, nie to, co pada dziesięć
+sekund dalej. Efekt mówiący o czym innym niż mówiący jest gorszy niż brak efektu.
+
+## GRAFIKI, KTÓRE ILUSTRUJĄ (nie napis w ramce)
+
+Najmocniejsze momenty w rolkach autora nie są napisami, tylko rysunkami. Widz ich
+nie czyta, tylko ogląda, i dlatego zatrzymują kciuk. Pięć w `compsGrafiki.tsx`:
+
+| Kompozycja | Co pokazuje |
+|---|---|
+| `graf-pierscien` | pierścień dobiegający do wartości ("4 MIN") |
+| `graf-suwak` | suwak na skali z uchwytem jadącym do wartości ("48 H") |
+| `graf-slupki` | słupki rosnące jeden po drugim, ostatni wyróżniony |
+| `graf-powiadomienia` | wiadomości wpadające jedna po drugiej |
+| `graf-konto` | mockup profilu z licznikiem obserwujących i siatką postów |
+
+`graf-pierscien` i `graf-suwak` wchodzą tylko tam, gdzie w nagraniu padła liczba
+(`wymagaLiczb`). Jeśli treść da się POKAZAĆ, pokaż ją: tekstowa karta jest planem
+awaryjnym, nie pierwszym wyborem.
+
 ## SEKWENCJE: EFEKT MA NARASTAĆ, NIE POJAWIAĆ SIĘ
 
 To jest największa różnica między automatem a montażem, który autor uznaje za
