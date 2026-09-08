@@ -662,7 +662,21 @@ To normalna droga, nie ostateczność: skopiuj najbliższy komponent
 z `compsBiblioteka2.tsx`, zmień zawartość, zarejestruj w `Root.tsx` i wyrenderuj.
 Kompozycja pełnoekranowa ma 1080x1920, mniejsza dostaje własne `y` w planie.
 
-**Logo w rogu:** `remotion-montaz/public/brand-bug.png` jest pusty. Wrzuć tam
+**Logo w rogu:** jeśli user nie ma gotowego logo, zrób mu je z samej nazwy:
+
+```bash
+python narzedzia/zrob-logo.py "nazwa marki"
+python narzedzia/zrob-logo.py "nazwa marki" --kolor "#1E88E5" --jasne
+```
+
+Powstaje znaczek w stylu zestawu (ciemna pigułka, akcent, jasny tekst) i od razu
+ląduje w `remotion-montaz/public/brand-bug.png`, więc wchodzi sam we wszystkie
+sceny pełnoekranowe. Żeby stał w rogu przez CAŁĄ rolkę, skopiuj ten plik do
+folderu montażowego jako `logo.png`. W rolkach autora ten znaczek jest zawsze
+i to jedna z rzeczy, które sprawiają, że profil wygląda jak kanał, a nie jak
+przypadkowe nagrania.
+
+`remotion-montaz/public/brand-bug.png` jest pusty, dopóki go nie zrobisz. Wrzuć tam
 swoje logo pod tą samą nazwą, albo połóż `logo.png` w folderze montażowym,
 a plan weźmie je sam.
 
