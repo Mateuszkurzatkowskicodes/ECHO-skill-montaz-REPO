@@ -551,15 +551,13 @@ tanio. Jedno ciągłe ujęcie to zero punchów.
   sam. Przy materiale z kilku ujęć dochodzi hypercut, czyli seria bardzo krótkich
   cięć zamiast jednego spokojnego ujęcia. Płaskie otwarcie to utracona rolka,
   ale płaskie nie znaczy "bez napisu": znaczy "nic się nie dzieje".
-- **Napisy karaoke:** 2-3 słowa na linijkę, cięte na naturalnych pauzach, na
-  wysokości szyi (`--marginv 520`). Kolor **płynie przez linijkę w rytm mowy**
-  i po kolei znika: linijka wchodzi pomarańczowa i bieleje słowo po słowie.
-  Nie ma czegoś takiego jak jedno słowo pomalowane na stałe. Do 08.09.2026
-  działały tu dwa mechanizmy naraz (sweep plus statyczny klucz) i w kadrze
-  cały czas wisiała nieruchoma pomarańczowa plama, często w słowie, do którego
-  sweep jeszcze nie dotarł. Wyglądało to jak usterka. Gdy postać jest
-  nisko w kadrze i napis ląduje na brzuchu, podnieś je (`--marginv 1070`),
-  a przy split-screenie posadź na szwie (`--marginv 920`).
+- **Napisy karaoke mają DWIE wysokości** i przełączają się same, dokładnie jak
+  w skryptach autora (`gen_ass2_r4.py`): **850 px** od dołu, gdy w kadrze jest
+  sama postać (napis siada na klatce piersiowej), i **520 px**, gdy leci
+  pełnoekranowa scena (schodzi nisko, żeby nie wchodzić w jej treść).
+  `transkrypcja.py` wypisuje oba style, a `buduj-filtr.mjs` przełącza linijki
+  po czasach scen z planu i mówi, ile ich zeszło. Jedna sztywna wysokość zawsze
+  była kompromisem: napis albo leżał na koszulce, albo wchodził w środek sceny.
 - **Zoom:** ciągły "oddychający" przez cały czas, plus punch wyłącznie na
   sklejkach. Plan ustawia `zoom: {amplituda: 0.018, okres: 11}` i `glos: 1.35`,
   czyli wartości z rolek, które autor zatwierdził. Wcześniej pola nie było
