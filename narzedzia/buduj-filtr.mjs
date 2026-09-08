@@ -91,6 +91,24 @@ const POLA = {
   logo: ["plik", "szerokosc", "pozycja", "margines", "od", "do"]
 };
 
+const cacheWysokosci = {};
+/** Realna wysokosc pliku nakladki w pikselach albo null, gdy nie da sie odczytac. */
+function wysokoscPliku(plik) {
+  if (plik in cacheWysokosci) return cacheWysokosci[plik];
+  try {
+    const out = execFileSync(
+      "ffprobe",
+      ["-v", "error", "-select_streams", "v:0", "-show_entries", "stream=height", "-of", "csv=p=0", plik],
+      {encoding: "utf8"}
+    );
+    const h = parseInt(out.trim(), 10);
+    cacheWysokosci[plik] = Number.isFinite(h) ? h : null;
+  } catch {
+    cacheWysokosci[plik] = null;
+  }
+  return cacheWysokosci[plik];
+}
+
 function odleglosc(a, b) {
   const m = Array.from({length: a.length + 1}, (_, i) => [i, ...Array(b.length).fill(0)]);
   for (let j = 0; j <= b.length; j++) m[0][j] = j;
@@ -438,7 +456,21 @@ const cutAudio = [];
   const idx = dodajWejscie(n.plik, czyObrazek(n.plik) ? flagiObrazka() : []);
   const et = `nak${i}`;
   const x = n.x !== undefined ? n.x : 0;
-  const y = n.y !== undefined ? n.y : 0;
+  /* KOREKTA WYSOKOSCI NAKLADKI.
+     Plan zapisuje `y` na podstawie kompozycji, ktora byla w nim pierwotnie.
+     Gdy przy poprawianiu tekstow podmieni sie efekt na inny (a to jest normalna
+     robota: automat losuje forme, czlowiek dobiera ja do tresci), plik moze miec
+     zupelnie inna wysokosc niz ta, dla ktorej policzono `y`. Zdarzylo sie tak,
+     ze niska nakladka dostala `y = 0` po pelnoekranowej scenie i wyladowala
+     mowiacemu nad glowa. Dlatego sprawdzamy realna wysokosc pliku: jesli jest
+     wyraznie nizszy od kadru, a plan kaze go postawic na samej gorze, kladziemy
+     go tam, gdzie naklada­ki naleza, czyli tuz nad napisami. */
+  let y = n.y !== undefined ? n.y : 0;
+  const wysNakladki = wysokoscPliku(n.plik);
+  if (wysNakladki && wysNakladki < H * 0.9 && y < H * 0.2) {
+    y = Math.max(0, H - 520 - 95 - wysNakladki);
+    console.log(`Nakładka ${path.basename(n.plik)}: podniosłem z ${n.y || 0} na ${y}, bo plik ma ${wysNakladki} px i leżałby na twarzy.`);
+  }
   // -2 zamiast -1: nieparzysta wysokość psuje część koderów
   const skala = n.szerokosc ? `scale=${n.szerokosc}:-2,` : "";
   // przesunięcie przezroczyste, żeby doklejone klatki nie były czarnym prostokątem

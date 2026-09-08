@@ -45,6 +45,9 @@ import {
 import {
   AnimWykres, AnimKalendarz, AnimZegar, AnimTimeline, AnimOrbita, AnimFala,
 } from './compsAnimacje';
+import {
+  NakLicznik, NakPasek, NakIkony, NakEqualizer, NakPorownanie, WYS_NAKLADKI,
+} from './compsNakladki';
 
 const FPS = 60;
 
@@ -356,14 +359,14 @@ export const Root: React.FC = () => {
       {/* SCENY PELNOEKRANOWE (cutawaye). Wypelniaja caly kadr i zaslaniaja nagranie.
           To one robia roznice miedzy "nagraniem z napisami" a zmontowana rolka.
           Automat przeplata ciemne z jasnymi. Szczegoly: src/compsSceny.tsx */}
-      <Composition id="scena-teza" component={ScenaTeza} durationInFrames={Math.round(3.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{tekst: 'TO JEST NAJWAŻNIEJSZE ZDANIE', etykieta: 'zapamiętaj', klucz: ''}} />
-      <Composition id="scena-kontra" component={ScenaKontra} durationInFrames={Math.round(3.6 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{zleTytul: 'RĘCZNIE', zlePunkty: ['godziny pracy', 'ciągłe poprawki'], dobreTytul: 'Z AI', dobrePunkty: ['kilka minut', 'jedna komenda']}} />
+      <Composition id="scena-teza" component={ScenaTeza} durationInFrames={Math.round(2.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{tekst: 'TO JEST NAJWAŻNIEJSZE ZDANIE', etykieta: 'zapamiętaj', klucz: ''}} />
+      <Composition id="scena-kontra" component={ScenaKontra} durationInFrames={Math.round(2.6 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{zleTytul: 'RĘCZNIE', zlePunkty: ['godziny pracy', 'ciągłe poprawki'], dobreTytul: 'Z AI', dobrePunkty: ['kilka minut', 'jedna komenda']}} />
       <Composition id="scena-lista" component={ScenaLista} durationInFrames={Math.round(3.8 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{punkty: ['nagrywasz', 'wrzucasz plik', 'gotowe'], etykieta: 'jak to działa'}} />
-      <Composition id="scena-liczba" component={ScenaLiczba} durationInFrames={Math.round(3.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{liczba: '4 MINUTY', podpis: 'tyle to zajmuje', etykieta: ''}} />
+      <Composition id="scena-liczba" component={ScenaLiczba} durationInFrames={Math.round(2.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{liczba: '4 MINUTY', podpis: 'tyle to zajmuje', etykieta: ''}} />
       <Composition id="scena-problem" component={ScenaProblem} durationInFrames={Math.round(3.8 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{punkty: ['ręczne cięcie', 'szukanie muzyki', 'poprawki w kółko'], etykieta: 'koniec z tym'}} />
       <Composition id="scena-kroki" component={ScenaKroki} durationInFrames={Math.round(3.8 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{kroki: ['wrzucasz nagranie', 'wpisujesz komendę', 'odbierasz gotowe'], etykieta: 'trzy kroki'}} />
-      <Composition id="scena-komentarz" component={ScenaKomentarz} durationInFrames={Math.round(3.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nick: 'ktos_z_komentarzy', tresc: 'napisz w komentarzu', etykieta: ''}} />
-      <Composition id="scena-cta" component={ScenaCta} durationInFrames={Math.round(3.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{haslo: 'ZRÓB TO DZISIAJ', podpis: 'napisz w komentarzu'}} />
+      <Composition id="scena-komentarz" component={ScenaKomentarz} durationInFrames={Math.round(2.6 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nick: 'ktos_z_komentarzy', tresc: 'napisz w komentarzu', etykieta: ''}} />
+      <Composition id="scena-cta" component={ScenaCta} durationInFrames={Math.round(2.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{haslo: 'ZRÓB TO DZISIAJ', podpis: 'napisz w komentarzu'}} />
 
       {/* KARTY NAD NAPISAMI. Niska kompozycja (620 px), ktora plan klaadzie nad
           napisami karaoke, wiec napisy NIE musza znikac na czas efektu.
@@ -395,31 +398,41 @@ export const Root: React.FC = () => {
       <Composition id="sekw-pelna" component={SekwencjaPelna} durationInFrames={Math.round(6.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{etykieta: 'ręcznie = strata', pozycje: [{ikona: '⏰', tekst: 'dużo czasu'}, {ikona: '💸', tekst: 'sporo kasy'}], puenta: '', jasne: true}} />
       <Composition id="sekw-przekreslona" component={SekwencjaPelna} durationInFrames={Math.round(6.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{etykieta: 'koniec z tym', pozycje: [{ikona: '🎓', tekst: 'uczenia się montażu', przekreslone: true}, {ikona: '🎬', tekst: 'robienia efektów', przekreslone: true}], puenta: '', jasne: true}} />
       <Composition id="sekw-checklista" component={SekwencjaChecklista} durationInFrames={Math.round(6.5 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{etykieta: 'co robię', punkty: ['CIĘCIA', 'EFEKTY', 'ANIMACJE', 'MUZYKA'], jasne: false}} />
-      <Composition id="sekw-nakladka" component={SekwencjaNakladka} durationInFrames={Math.round(4.0 * FPS)} fps={FPS} width={1080} height={300} defaultProps={{pozycje: [{ikona: '✅', tekst: 'montaż to dobra umiejętność'}, {ikona: '⏳', tekst: 'ale nie za cenę 3 godzin'}], etykieta: ''}} />
-      <Composition id="sekw-terminal" component={SekwencjaTerminal} durationInFrames={Math.round(4.4 * FPS)} fps={FPS} width={1080} height={300} defaultProps={{tytul: 'AI MONTUJE', kroki: ['analizuję nagranie', 'wycinam ciszę i wpadki', 'dokładam napisy']}} />
+      <Composition id="sekw-nakladka" component={SekwencjaNakladka} durationInFrames={Math.round(2.8 * FPS)} fps={FPS} width={1080} height={300} defaultProps={{pozycje: [{ikona: '✅', tekst: 'montaż to dobra umiejętność'}, {ikona: '⏳', tekst: 'ale nie za cenę 3 godzin'}], etykieta: ''}} />
+      <Composition id="sekw-terminal" component={SekwencjaTerminal} durationInFrames={Math.round(3.2 * FPS)} fps={FPS} width={1080} height={300} defaultProps={{tytul: 'AI MONTUJE', kroki: ['analizuję nagranie', 'wycinam ciszę i wpadki', 'dokładam napisy']}} />
 
       {/* GRAFIKI, KTORE ILUSTRUJA. Nie tekst w ramce, tylko rysunek pokazujacy
           to, o czym mowi mowiacy: pierscien dobiegajacy do wartosci, suwak na
           skali, rosnace slupki, wpadajace wiadomosci, mockup konta.
           Szczegoly: src/compsGrafiki.tsx */}
-      <Composition id="graf-pierscien" component={GrafPierscien} durationInFrames={Math.round(4.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nadtytul: 'cały montaż zajmuje', wartosc: '4 MIN', podpis: '', jasne: false}} />
-      <Composition id="graf-suwak" component={GrafSuwak} durationInFrames={Math.round(4.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nadtytul: 'czas realizacji', wartosc: '48 H', opis: 'maksymalnie', skala: ['0 h', '12 h', '24 h', '36 h', '48 h'], jasne: true}} />
-      <Composition id="graf-slupki" component={GrafSlupki} durationInFrames={Math.round(4.6 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nadtytul: 'zasięgi miesiąc po miesiącu', jasne: false}} />
-      <Composition id="graf-powiadomienia" component={GrafPowiadomienia} durationInFrames={Math.round(4.6 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nadtytul: 'a potem to wygląda tak', jasne: false}} />
-      <Composition id="graf-konto" component={GrafKonto} durationInFrames={Math.round(4.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nadtytul: 'twoje konto', nick: 'twoja.firma', obserwujacy: 4870, jasne: true}} />
+      <Composition id="graf-pierscien" component={GrafPierscien} durationInFrames={Math.round(3.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nadtytul: 'cały montaż zajmuje', wartosc: '4 MIN', podpis: '', jasne: false}} />
+      <Composition id="graf-suwak" component={GrafSuwak} durationInFrames={Math.round(3.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nadtytul: 'czas realizacji', wartosc: '48 H', opis: 'maksymalnie', skala: ['0 h', '12 h', '24 h', '36 h', '48 h'], jasne: true}} />
+      <Composition id="graf-slupki" component={GrafSlupki} durationInFrames={Math.round(3.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nadtytul: 'zasięgi miesiąc po miesiącu', jasne: false}} />
+      <Composition id="graf-powiadomienia" component={GrafPowiadomienia} durationInFrames={Math.round(3.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nadtytul: 'a potem to wygląda tak', jasne: false}} />
+      <Composition id="graf-konto" component={GrafKonto} durationInFrames={Math.round(3.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nadtytul: 'twoje konto', nick: 'twoja.firma', obserwujacy: 4870, jasne: true}} />
 
       {/* ANIMOWANE ILUSTRACJE. Rysuja to, o czym mowi mowiacy, i sa w ruchu przez
           caly swoj czas: linia wykresu sie rysuje i zalamuje, kartki kalendarza
           odrywaja sie, wskazowki pedza, sciezki montazu ukladaja sie na osi,
           ikony sciagaja do srodka, fala rosnie. Zadnych ramek z napisem.
           Szczegoly: src/compsAnimacje.tsx */}
-      <Composition id="anim-wykres" component={AnimWykres} durationInFrames={Math.round(4.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'i nagle', puenta: '', wDol: true, jasne: false}} />
-      <Composition id="anim-wzrost" component={AnimWykres} durationInFrames={Math.round(4.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'i wtedy', puenta: '', wDol: false, jasne: false}} />
-      <Composition id="anim-kalendarz" component={AnimKalendarz} durationInFrames={Math.round(4.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'mijają miesiące', puenta: '', jasne: false}} />
-      <Composition id="anim-zegar" component={AnimZegar} durationInFrames={Math.round(4.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'a czas leci', puenta: '', jasne: false}} />
-      <Composition id="anim-timeline" component={AnimTimeline} durationInFrames={Math.round(4.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'tak to wygląda w środku', puenta: '', etykieta: 'MONTAŻ'}} />
-      <Composition id="anim-orbita" component={AnimOrbita} durationInFrames={Math.round(4.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'wszystko naraz', srodek: '🤯', puenta: '', jasne: false}} />
-      <Composition id="anim-fala" component={AnimFala} durationInFrames={Math.round(4.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'i wtedy zaczyna się dziać', puenta: '', jasne: false}} />
+      <Composition id="anim-wykres" component={AnimWykres} durationInFrames={Math.round(2.8 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'i nagle', puenta: '', wDol: true, jasne: false}} />
+      <Composition id="anim-wzrost" component={AnimWykres} durationInFrames={Math.round(2.8 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'i wtedy', puenta: '', wDol: false, jasne: false}} />
+      <Composition id="anim-kalendarz" component={AnimKalendarz} durationInFrames={Math.round(3.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'mijają miesiące', puenta: '', jasne: false}} />
+      <Composition id="anim-zegar" component={AnimZegar} durationInFrames={Math.round(2.8 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'a czas leci', puenta: '', jasne: false}} />
+      <Composition id="anim-timeline" component={AnimTimeline} durationInFrames={Math.round(3.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'tak to wygląda w środku', puenta: '', etykieta: 'MONTAŻ'}} />
+      <Composition id="anim-orbita" component={AnimOrbita} durationInFrames={Math.round(3.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'wszystko naraz', srodek: '🤯', puenta: '', jasne: false}} />
+      <Composition id="anim-fala" component={AnimFala} durationInFrames={Math.round(3.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{podpis: 'i wtedy zaczyna się dziać', puenta: '', jasne: false}} />
+
+      {/* ANIMOWANE NAKLADKI, ktore NIE zaslaniaja kadru. Bez nich rolka miala
+          rytm: mowiacy, pelna plansza, mowiacy, pelna plansza. W rolkach autora
+          wiekszosc efektow gra NA nagraniu, a pelny kadr wchodzi rzadziej.
+          Szczegoly: src/compsNakladki.tsx */}
+      <Composition id="nak-licznik" component={NakLicznik} durationInFrames={Math.round(2.4 * FPS)} fps={FPS} width={1080} height={WYS_NAKLADKI} defaultProps={{do: 100, jednostka: '', podpis: '', wDol: false}} />
+      <Composition id="nak-pasek" component={NakPasek} durationInFrames={Math.round(2.6 * FPS)} fps={FPS} width={1080} height={WYS_NAKLADKI} defaultProps={{etykieta: 'PRACUJE', kroki: []}} />
+      <Composition id="nak-ikony" component={NakIkony} durationInFrames={Math.round(2.6 * FPS)} fps={FPS} width={1080} height={WYS_NAKLADKI} defaultProps={{ikony: ['🎬', '✂️', '🎵', '📤'], podpisy: []}} />
+      <Composition id="nak-equalizer" component={NakEqualizer} durationInFrames={Math.round(2.4 * FPS)} fps={FPS} width={1080} height={WYS_NAKLADKI} defaultProps={{podpis: ''}} />
+      <Composition id="nak-porownanie" component={NakPorownanie} durationInFrames={Math.round(2.6 * FPS)} fps={FPS} width={1080} height={WYS_NAKLADKI} defaultProps={{lewaEtykieta: 'RĘCZNIE', lewaWartosc: '3 h', prawaEtykieta: 'Z AI', prawaWartosc: '4 min'}} />
     </>
   );
 };

@@ -62,7 +62,7 @@ const folderMuzyki = wartosc("--muzyka");
 const folderSfx = wartosc("--sfx", "sfx");
 /* Odstep miedzy POCZATKAMI efektow. Wieksza wartosc niz kiedys (2.6),
    bo sekwencje trwaja 5-6 s: przy starej gestosci wchodzilyby jedna na druga. */
-const gestosc = Number(wartosc("--gestosc", "3.2"));
+const gestosc = Number(wartosc("--gestosc", "2.9"));
 const plikPlanu = wartosc("--zapisz", "plan.json");
 const remotionKatalog = wartosc("--remotion", "remotion-montaz");
 const renderujEfekty = flaga("--renderuj-efekty");
@@ -107,10 +107,10 @@ const EFEKTY = [
      2,8 s, tylko cos, co narasta przez 5-6 sekund i dokłada elementy w rytm
      mowy. Dlatego stoja na poczatku puli i maja najdluzszy czas trwania.
      Statyczne karty nizej sa uzupelnieniem, nie trzonem. */
-  {id: "sekw-terminal", rola: "lista", rodzina: "sekwencja", pola: ["kroki"], dlugosc: 4.4, wys: 300, sfx: "click", mocSfx: 8},
-  {scena: true, tlo: "jasne", id: "sekw-pelna", rola: "kontra", rodzina: "sekwencja", pola: ["pozycje"], dlugosc: 4.2, sfx: "whoosh", mocSfx: 9},
-  {scena: true, tlo: "jasne", id: "sekw-przekreslona", rola: "kontra", rodzina: "sekwencja", pola: ["pozycje"], dlugosc: 4.2, sfx: "swipe", mocSfx: 9},
-  {scena: true, tlo: "ciemne", id: "sekw-checklista", rola: "lista", rodzina: "sekwencja", pola: ["punkty"], dlugosc: 4.6, sfx: "pop", mocSfx: 8},
+  {id: "sekw-terminal", rola: "lista", rodzina: "sekwencja", pola: ["kroki"], dlugosc: 3.2, wys: 300, sfx: "click", mocSfx: 8},
+  {scena: true, tlo: "jasne", id: "sekw-pelna", rola: "kontra", rodzina: "sekwencja", pola: ["pozycje"], dlugosc: 3.0, sfx: "whoosh", mocSfx: 9},
+  {scena: true, tlo: "jasne", id: "sekw-przekreslona", rola: "kontra", rodzina: "sekwencja", pola: ["pozycje"], dlugosc: 3.0, sfx: "swipe", mocSfx: 9},
+  {scena: true, tlo: "ciemne", id: "sekw-checklista", rola: "lista", rodzina: "sekwencja", pola: ["punkty"], dlugosc: 3.4, sfx: "pop", mocSfx: 8},
 
   // akcent: podstawowa forma efektu
 
@@ -124,39 +124,51 @@ const EFEKTY = [
      kompozycji. Bez nich automat wyczerpywal pule w polowie rolki i powtarzal
      ten sam efekt dwa razy. */
 
+  /* NAKLADKI, KTORE GRAJA NA NAGRANIU. To jest TRZON rolki: mowiacy jest
+     widoczny, napisy leca, a nad nimi cos sie dzieje. Pelnoekranowe plansze
+     wchodza rzadko, dla odetchniecia. Gdy zostaly same plansze, rolka miala
+     rytm "mowiacy, czarna plansza, mowiacy, czarna plansza" i autor odrzucil
+     to od razu. Wszystkie sa animacjami, nie ramkami z napisem: licznik
+     przewija sie, pasek rosnie, ikony wlatuja, equalizer gra. */
+  {id: "nak-licznik", rola: "liczba", rodzina: "nakladka", pola: ["do"], dlugosc: 2.4, wys: 300, wymagaLiczb: 1, sfx: "ding", mocSfx: 9},
+  {id: "nak-pasek", rola: "lista", rodzina: "nakladka", pola: ["kroki"], dlugosc: 2.6, wys: 300, sfx: "click", mocSfx: 7},
+  {id: "nak-ikony", rola: "akcent", rodzina: "nakladka", pola: ["ikony"], dlugosc: 2.6, wys: 300, sfx: "pop", mocSfx: 7},
+  {id: "nak-equalizer", rola: "cta", rodzina: "nakladka", pola: [], dlugosc: 2.4, wys: 300, sfx: "riser", mocSfx: 8},
+  {id: "nak-porownanie", rola: "kontra", rodzina: "nakladka", pola: ["lewaWartosc", "prawaWartosc"], dlugosc: 2.6, wys: 300, sfx: "whoosh", mocSfx: 9},
+
   /* ANIMOWANE ILUSTRACJE. Trzon zestawu od 08.09.2026: rysuja to, o czym mowi
      mowiacy, i sa w ruchu przez caly swoj czas. Wszystkie "ramki z napisem"
      wylecialy z puli, bo autor odrzucal je konsekwentnie: "takie cos zrobi
      kazdy w Canvie". `wymagaLiczb` nie jest tu potrzebne, bo zaden z tych
      efektow nie cytuje liczby, tylko pokazuje zjawisko. */
-  {scena: true, tlo: "ciemne", id: "anim-wykres", rola: "kontra", rodzina: "animacja", pola: ["podpis"], dlugosc: 4.0, sfx: "sub-drop", mocSfx: 9},
-  {scena: true, tlo: "ciemne", id: "anim-wzrost", rola: "lista", rodzina: "animacja", pola: ["podpis"], dlugosc: 4.0, sfx: "riser", mocSfx: 9},
-  {scena: true, tlo: "ciemne", id: "anim-kalendarz", rola: "akcent", rodzina: "animacja", pola: ["podpis"], dlugosc: 4.2, sfx: "swipe", mocSfx: 8},
-  {scena: true, tlo: "ciemne", id: "anim-zegar", rola: "liczba", rodzina: "animacja", pola: ["podpis"], dlugosc: 4.0, sfx: "click", mocSfx: 8},
-  {scena: true, tlo: "ciemne", id: "anim-timeline", rola: "lista", rodzina: "animacja", pola: ["podpis"], dlugosc: 4.4, sfx: "click", mocSfx: 8},
-  {scena: true, tlo: "ciemne", id: "anim-orbita", rola: "kontra", rodzina: "animacja", pola: ["podpis"], dlugosc: 4.4, sfx: "whoosh", mocSfx: 9},
-  {scena: true, tlo: "ciemne", id: "anim-fala", rola: "cta", rodzina: "animacja", pola: ["podpis"], dlugosc: 4.2, sfx: "riser", mocSfx: 9},
+  {scena: true, tlo: "ciemne", id: "anim-wykres", rola: "kontra", rodzina: "animacja", pola: ["podpis"], dlugosc: 2.8, sfx: "sub-drop", mocSfx: 9},
+  {scena: true, tlo: "ciemne", id: "anim-wzrost", rola: "lista", rodzina: "animacja", pola: ["podpis"], dlugosc: 2.8, sfx: "riser", mocSfx: 9},
+  {scena: true, tlo: "ciemne", id: "anim-kalendarz", rola: "akcent", rodzina: "animacja", pola: ["podpis"], dlugosc: 3.0, sfx: "swipe", mocSfx: 8},
+  {scena: true, tlo: "ciemne", id: "anim-zegar", rola: "liczba", rodzina: "animacja", pola: ["podpis"], dlugosc: 2.8, sfx: "click", mocSfx: 8},
+  {scena: true, tlo: "ciemne", id: "anim-timeline", rola: "lista", rodzina: "animacja", pola: ["podpis"], dlugosc: 3.2, sfx: "click", mocSfx: 8},
+  {scena: true, tlo: "ciemne", id: "anim-orbita", rola: "kontra", rodzina: "animacja", pola: ["podpis"], dlugosc: 3.2, sfx: "whoosh", mocSfx: 9},
+  {scena: true, tlo: "ciemne", id: "anim-fala", rola: "cta", rodzina: "animacja", pola: ["podpis"], dlugosc: 3.0, sfx: "riser", mocSfx: 9},
 
   /* GRAFIKI, KTORE ILUSTRUJA. Najmocniejsze momenty w rolkach autora nie sa
      napisami, tylko rysunkami: pierscien dobiegajacy do wartosci, suwak na
      skali, rosnace slupki, wpadajace wiadomosci, mockup konta. Widz ich nie
      czyta, tylko oglada. `wymagaLiczb` przy pierscieniu i suwaku pilnuje, zeby
      nie wchodzily tam, gdzie nie padla zadna liczba. */
-  {scena: true, tlo: "ciemne", id: "graf-pierscien", rola: "liczba", rodzina: "grafika", pola: ["wartosc"], dlugosc: 4.2, wymagaLiczb: 1, sfx: "ding", mocSfx: 9},
-  {scena: true, tlo: "jasne", id: "graf-suwak", rola: "liczba", rodzina: "grafika", pola: ["wartosc"], dlugosc: 4.2, wymagaLiczb: 1, sfx: "click", mocSfx: 8},
-  {scena: true, tlo: "ciemne", id: "graf-slupki", rola: "lista", rodzina: "grafika", pola: [], dlugosc: 4.6, sfx: "pop", mocSfx: 8},
-  {scena: true, tlo: "ciemne", id: "graf-powiadomienia", rola: "cta", rodzina: "grafika", pola: [], dlugosc: 4.6, sfx: "pop", mocSfx: 9},
-  {scena: true, tlo: "jasne", id: "graf-konto", rola: "akcent", rodzina: "grafika", pola: [], dlugosc: 4.4, sfx: "whoosh", mocSfx: 8},
+  {scena: true, tlo: "ciemne", id: "graf-pierscien", rola: "liczba", rodzina: "grafika", pola: ["wartosc"], dlugosc: 3.0, wymagaLiczb: 1, sfx: "ding", mocSfx: 9},
+  {scena: true, tlo: "jasne", id: "graf-suwak", rola: "liczba", rodzina: "grafika", pola: ["wartosc"], dlugosc: 3.0, wymagaLiczb: 1, sfx: "click", mocSfx: 8},
+  {scena: true, tlo: "ciemne", id: "graf-slupki", rola: "lista", rodzina: "grafika", pola: [], dlugosc: 3.4, sfx: "pop", mocSfx: 8},
+  {scena: true, tlo: "ciemne", id: "graf-powiadomienia", rola: "cta", rodzina: "grafika", pola: [], dlugosc: 3.4, sfx: "pop", mocSfx: 9},
+  {scena: true, tlo: "jasne", id: "graf-konto", rola: "akcent", rodzina: "grafika", pola: [], dlugosc: 3.2, sfx: "whoosh", mocSfx: 8},
 
   /* SCENY PELNOEKRANOWE. Jedyne, co ma prawo zaslonic napisy i twarz, bo
      zmieniaja caly kadr i maja wlasny tekst. Automat przeplata ciemne z jasnymi. */
-  {scena: true, tlo: "ciemne", id: "scena-teza", rola: "akcent", rodzina: "scena", pola: ["tekst"], dlugosc: 3.2, sfx: "impact", mocSfx: 9},
-  {scena: true, tlo: "jasne", id: "scena-lista", rola: "lista", rodzina: "scena", pola: ["punkty"], dlugosc: 3.4, sfx: "pop", mocSfx: 7},
-  {scena: true, tlo: "ciemne", id: "scena-liczba", rola: "liczba", rodzina: "scena", pola: ["liczba", "podpis"], dlugosc: 3.0, sfx: "ding", mocSfx: 9},
-  {scena: true, tlo: "jasne", id: "scena-problem", rola: "kontra", rodzina: "scena", pola: ["punkty"], dlugosc: 3.4, sfx: "swipe", mocSfx: 8},
-  {scena: true, tlo: "ciemne", id: "scena-kroki", rola: "lista", rodzina: "scena", pola: ["kroki"], dlugosc: 3.4, sfx: "pop", mocSfx: 7},
-  {scena: true, tlo: "jasne", id: "scena-komentarz", rola: "cta", rodzina: "scena", pola: ["nick", "tresc"], dlugosc: 3.4, sfx: "pop", mocSfx: 9},
-  {scena: true, tlo: "ciemne", id: "scena-cta", rola: "cta", rodzina: "scena", pola: ["haslo", "podpis"], dlugosc: 3.2, sfx: "impact", mocSfx: 9}
+  {scena: true, tlo: "ciemne", id: "scena-teza", rola: "akcent", rodzina: "scena", pola: ["tekst"], dlugosc: 2.4, sfx: "impact", mocSfx: 9},
+  {scena: true, tlo: "jasne", id: "scena-lista", rola: "lista", rodzina: "scena", pola: ["punkty"], dlugosc: 2.6, sfx: "pop", mocSfx: 7},
+  {scena: true, tlo: "ciemne", id: "scena-liczba", rola: "liczba", rodzina: "scena", pola: ["liczba", "podpis"], dlugosc: 2.4, sfx: "ding", mocSfx: 9},
+  {scena: true, tlo: "jasne", id: "scena-problem", rola: "kontra", rodzina: "scena", pola: ["punkty"], dlugosc: 2.6, sfx: "swipe", mocSfx: 8},
+  {scena: true, tlo: "ciemne", id: "scena-kroki", rola: "lista", rodzina: "scena", pola: ["kroki"], dlugosc: 2.6, sfx: "pop", mocSfx: 7},
+  {scena: true, tlo: "jasne", id: "scena-komentarz", rola: "cta", rodzina: "scena", pola: ["nick", "tresc"], dlugosc: 2.6, sfx: "pop", mocSfx: 9},
+  {scena: true, tlo: "ciemne", id: "scena-cta", rola: "cta", rodzina: "scena", pola: ["haslo", "podpis"], dlugosc: 2.4, sfx: "impact", mocSfx: 9}
 
   // `scena-kontra` i `money-counter`: poza automatem, wymagaja danych, ktorych
   // nie da sie uczciwie wyciac z transkrypcji. Patrz SKILL.md.
@@ -371,6 +383,10 @@ function wybierzEfekt(rola, uzyteTeraz, ostatniaRodzina = null, tylkoRodziny = n
     e.rola === rola &&
     !uzyteTeraz.has(e.id) &&
     !ponadLimit(e) &&
+    // Limit plansz pelnoekranowych obowiazuje takze przy zwyklym doborze po roli,
+    // nie tylko przy ich wymuszaniu. Bez tego automat braly je "przy okazji"
+    // i rolka znowu skladala sie z samych slajdow.
+    (!e.scena || scenZrobione < docelowoScen) &&
     (e.wymagaLiczb || 0) <= iloscLiczb &&
     (!tylkoRodziny || tylkoRodziny.includes(e.rodzina));
 
@@ -577,6 +593,19 @@ function trescDlaEfektu(efekt, linijka, nastepna, napisy, indeks, numerRozdzialu
        ikone dobrana do tresci. Gdy nie da sie zebrac przynajmniej dwoch
        sensownych fraz, pole jest null i ukladanie pomija ten moment: pusta
        sekwencja wyglada gorzej niz jej brak. */
+    case "nak-licznik": {
+      const lb = (liczba.match(/[\d\s.,]+/) || ["0"])[0].replace(/[\s.,]/g, "");
+      return {do: Number(lb) || 0, jednostka: "", podpis: "", wDol: false};
+    }
+    case "nak-pasek":
+      return {etykieta: "", kroki: []};
+    case "nak-ikony":
+      return {ikony: ["🎬", "✂️", "🎵", "📤"], podpisy: []};
+    case "nak-equalizer":
+      return {podpis: ""};
+    case "nak-porownanie":
+      return {lewaEtykieta: "", lewaWartosc: "", prawaEtykieta: "", prawaWartosc: ""};
+
     case "anim-wykres":
     case "anim-wzrost":
     case "anim-kalendarz":
@@ -867,7 +896,10 @@ function odstepDla(t) {
    wygrywaly male nakladki, bo jest ich w puli kilka razy wiecej. Efekt byl taki,
    ze kursant dostawal rolke zlozona z samych napisow na twarzy. Sceny sa
    rozlozone rowno po dlugosci nagrania i nie wchodza na sam hook. */
-const docelowoScen = Math.min(5, Math.max(2, Math.round(dlugosc / 16)));
+/* ILE PELNOEKRANOWYCH PLANSZ. Maks dwie na rolke do minuty i nigdy dwie pod
+   rzad: reszta efektow gra NA nagraniu. Wczesniej plansz bylo tyle, ile efektow,
+   i rolka wygladala jak seria slajdow przedzielonych mowiacym. */
+const docelowoScen = Math.min(3, Math.max(1, Math.round(dlugosc / 22)));
 const slotyScen = Array.from(
   {length: docelowoScen},
   (_, i) => (dlugosc * (i + 1)) / (docelowoScen + 1)
@@ -927,7 +959,9 @@ for (const k of kandydaci) {
      niz dopasowanie roli: widz nie wie, jaka role mial fragment, ale od razu
      widzi, ze ten sam efekt wraca. */
   if (!efekt) {
-    const wolne = EFEKTY.filter((e) => !uzyteTeraz.has(e.id) && !ponadLimit(e));
+    const wolne = EFEKTY.filter(
+      (e) => !uzyteTeraz.has(e.id) && !ponadLimit(e) && (!e.scena || scenZrobione < docelowoScen)
+    );
     const inneNizPoprzednia = wolne.filter((e) => e.rodzina !== ostatniaRodzina);
     const pula = (inneNizPoprzednia.length ? inneNizPoprzednia : wolne).sort(
       (a, b) => (historia.efekty[a.id] || 0) - (historia.efekty[b.id] || 0)

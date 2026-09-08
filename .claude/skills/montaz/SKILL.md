@@ -74,6 +74,25 @@ miał czego czytać, mimo że plik z napisami był kompletny.
 Nakładki siedzą NAD napisami, na wysokości klatki piersiowej (`pozycja: "dol"`
 w propsach, a przy niskich kompozycjach plan liczy `y` sam, z pomiaru twarzy).
 
+## CZYM TEN ZESTAW RÓŻNI SIĘ OD WARSZTATU AUTORA (i co z tego wynika)
+
+Policzone 08.09.2026, bo to pytanie wracało: warsztat autora ma **342
+kompozycje w 59 plikach**, ten zestaw **około 150**. Ale liczba nie jest
+sednem. Sednem jest to, że pliki `compsS1`-`S6`, `compsR1`-`R6`, `compsK1`-`K8`
+i te nazwane od klientów to komponenty pisane **pod jedną konkretną rolkę**,
+po kilka na każdą. Żaden nie przyjmuje propsów: mają treść wpisaną na sztywno.
+
+**Autor montując pisze nowe komponenty pod nagranie. Automat losuje z puli.**
+Dlatego rolka z automatu nigdy nie będzie identyczna, i dlatego Twoja robota
+przy montażu to nie jest tylko przepisanie haseł:
+
+1. Przeczytaj transkrypcję i **zdecyduj, co ma być pokazane** w każdym momencie.
+2. Dobierz formę do treści: nie bierz tego, co automat wylosował, jeśli mówi
+   o czym innym. Podmień `id` w `efekty.json` na to, co pasuje.
+3. Gdy nic w bibliotece nie pokazuje tej treści, **napisz własny komponent**
+   na wzór `compsAnimacje.tsx` i zarejestruj go w `Root.tsx`. To jest normalna
+   droga, nie ostateczność.
+
 ## CO W OGÓLE MOŻE WEJŚĆ DO ROLKI (pula automatu)
 
 Automat losuje **wyłącznie** z dwóch rodzin: kart nad napisami i scen
@@ -131,6 +150,27 @@ czasowym:
 
 **Hasło ma ilustrować to zdanie.** Nie temat rolki, nie to, co pada dziesięć
 sekund dalej. Efekt mówiący o czym innym niż mówiący jest gorszy niż brak efektu.
+
+## RYTM: EFEKTY GRAJĄ NA NAGRANIU, PLANSZE WCHODZĄ RZADKO
+
+Najczęstszy sposób, w jaki rolka wychodzi nudna mimo dobrych efektów: wszystkie
+są pełnoekranowe. Powstaje wtedy rytm **mówiący, plansza, mówiący, plansza**,
+czyli karuzela slajdów, a nie montaż. Autor odrzuca to natychmiast.
+
+Ma być tak: **mówiący jest widoczny, napisy lecą, a nad nimi coś się dzieje.**
+Pełny kadr wchodzi najwyżej dwa razy na rolkę do minuty, na puencie i na końcu.
+Plan pilnuje tego sam (`docelowoScen`), także przy zwykłym doborze po roli.
+
+Nakładki, które grają NA nagraniu (`compsNakladki.tsx`), są animacjami, nie
+ramkami z napisem: licznik przewija się do wartości, pasek postępu rośnie
+z listą kroków, ikony wlatują z boku i kołyszą się, equalizer gra, porównanie
+"dziś → jutro" wjeżdża z dwóch stron.
+
+**Podmieniasz efekt na inny? Sprawdź wysokość.** Plan zapisuje `y` dla
+kompozycji, która była w nim pierwotnie. Gdy przy dobieraniu efektu do treści
+wstawisz coś o innej wysokości, `buduj-filtr.mjs` sam to wykryje i podniesie
+nakładkę nad napisy (wypisze wtedy komunikat). Nie licz na to w ciemno:
+przy planie i efektach z różnych przebiegów i tak obejrzyj klatki.
 
 ## ZERO RAMEK Z NAPISEM. TYLKO ANIMOWANE ILUSTRACJE
 
