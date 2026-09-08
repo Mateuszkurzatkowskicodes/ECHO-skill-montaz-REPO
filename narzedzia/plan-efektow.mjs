@@ -62,7 +62,7 @@ const folderMuzyki = wartosc("--muzyka");
 const folderSfx = wartosc("--sfx", "sfx");
 /* Odstep miedzy POCZATKAMI efektow. Wieksza wartosc niz kiedys (2.6),
    bo sekwencje trwaja 5-6 s: przy starej gestosci wchodzilyby jedna na druga. */
-const gestosc = Number(wartosc("--gestosc", "4.6"));
+const gestosc = Number(wartosc("--gestosc", "3.8"));
 const plikPlanu = wartosc("--zapisz", "plan.json");
 const remotionKatalog = wartosc("--remotion", "remotion-montaz");
 const renderujEfekty = flaga("--renderuj-efekty");
@@ -107,11 +107,11 @@ const EFEKTY = [
      2,8 s, tylko cos, co narasta przez 5-6 sekund i dokłada elementy w rytm
      mowy. Dlatego stoja na poczatku puli i maja najdluzszy czas trwania.
      Statyczne karty nizej sa uzupelnieniem, nie trzonem. */
-  {id: "sekw-nakladka", rola: "akcent", rodzina: "sekwencja", pola: ["pozycje"], dlugosc: 5.0, wys: 420, sfx: "pop", mocSfx: 8},
-  {id: "sekw-terminal", rola: "lista", rodzina: "sekwencja", pola: ["kroki"], dlugosc: 5.5, wys: 420, sfx: "click", mocSfx: 8},
-  {scena: true, tlo: "jasne", naNapisach: true, id: "sekw-pelna", rola: "kontra", rodzina: "sekwencja", pola: ["pozycje"], dlugosc: 6.0, sfx: "whoosh", mocSfx: 9},
-  {scena: true, tlo: "jasne", naNapisach: true, id: "sekw-przekreslona", rola: "kontra", rodzina: "sekwencja", pola: ["pozycje"], dlugosc: 6.0, sfx: "swipe", mocSfx: 9},
-  {scena: true, tlo: "ciemne", naNapisach: true, id: "sekw-checklista", rola: "lista", rodzina: "sekwencja", pola: ["punkty"], dlugosc: 6.5, sfx: "pop", mocSfx: 8},
+  {id: "sekw-nakladka", rola: "akcent", rodzina: "sekwencja", pola: ["pozycje"], dlugosc: 4.0, wys: 300, sfx: "pop", mocSfx: 8},
+  {id: "sekw-terminal", rola: "lista", rodzina: "sekwencja", pola: ["kroki"], dlugosc: 4.4, wys: 300, sfx: "click", mocSfx: 8},
+  {scena: true, tlo: "jasne", id: "sekw-pelna", rola: "kontra", rodzina: "sekwencja", pola: ["pozycje"], dlugosc: 4.2, sfx: "whoosh", mocSfx: 9},
+  {scena: true, tlo: "jasne", id: "sekw-przekreslona", rola: "kontra", rodzina: "sekwencja", pola: ["pozycje"], dlugosc: 4.2, sfx: "swipe", mocSfx: 9},
+  {scena: true, tlo: "ciemne", id: "sekw-checklista", rola: "lista", rodzina: "sekwencja", pola: ["punkty"], dlugosc: 4.6, sfx: "pop", mocSfx: 8},
 
   // akcent: podstawowa forma efektu
   {id: "karta-teza", rola: "akcent", rodzina: "karta", pola: ["nadtytul", "tekst"], dlugosc: 2.8, wys: 280, sfx: "impact", mocSfx: 9},
@@ -136,13 +136,13 @@ const EFEKTY = [
 
   /* SCENY PELNOEKRANOWE. Jedyne, co ma prawo zaslonic napisy i twarz, bo
      zmieniaja caly kadr i maja wlasny tekst. Automat przeplata ciemne z jasnymi. */
-  {scena: true, tlo: "ciemne", naNapisach: true, id: "scena-teza", rola: "akcent", rodzina: "scena", pola: ["tekst"], dlugosc: 3.2, sfx: "impact", mocSfx: 9},
-  {scena: true, tlo: "jasne", naNapisach: true, id: "scena-lista", rola: "lista", rodzina: "scena", pola: ["punkty"], dlugosc: 3.8, sfx: "pop", mocSfx: 7},
-  {scena: true, tlo: "ciemne", naNapisach: true, id: "scena-liczba", rola: "liczba", rodzina: "scena", pola: ["liczba", "podpis"], dlugosc: 3.0, sfx: "ding", mocSfx: 9},
-  {scena: true, tlo: "jasne", naNapisach: true, id: "scena-problem", rola: "kontra", rodzina: "scena", pola: ["punkty"], dlugosc: 3.8, sfx: "swipe", mocSfx: 8},
-  {scena: true, tlo: "ciemne", naNapisach: true, id: "scena-kroki", rola: "lista", rodzina: "scena", pola: ["kroki"], dlugosc: 3.8, sfx: "pop", mocSfx: 7},
-  {scena: true, tlo: "jasne", naNapisach: true, id: "scena-komentarz", rola: "cta", rodzina: "scena", pola: ["nick", "tresc"], dlugosc: 3.4, sfx: "pop", mocSfx: 9},
-  {scena: true, tlo: "ciemne", naNapisach: true, id: "scena-cta", rola: "cta", rodzina: "scena", pola: ["haslo", "podpis"], dlugosc: 3.2, sfx: "impact", mocSfx: 9}
+  {scena: true, tlo: "ciemne", id: "scena-teza", rola: "akcent", rodzina: "scena", pola: ["tekst"], dlugosc: 3.2, sfx: "impact", mocSfx: 9},
+  {scena: true, tlo: "jasne", id: "scena-lista", rola: "lista", rodzina: "scena", pola: ["punkty"], dlugosc: 3.4, sfx: "pop", mocSfx: 7},
+  {scena: true, tlo: "ciemne", id: "scena-liczba", rola: "liczba", rodzina: "scena", pola: ["liczba", "podpis"], dlugosc: 3.0, sfx: "ding", mocSfx: 9},
+  {scena: true, tlo: "jasne", id: "scena-problem", rola: "kontra", rodzina: "scena", pola: ["punkty"], dlugosc: 3.4, sfx: "swipe", mocSfx: 8},
+  {scena: true, tlo: "ciemne", id: "scena-kroki", rola: "lista", rodzina: "scena", pola: ["kroki"], dlugosc: 3.4, sfx: "pop", mocSfx: 7},
+  {scena: true, tlo: "jasne", id: "scena-komentarz", rola: "cta", rodzina: "scena", pola: ["nick", "tresc"], dlugosc: 3.4, sfx: "pop", mocSfx: 9},
+  {scena: true, tlo: "ciemne", id: "scena-cta", rola: "cta", rodzina: "scena", pola: ["haslo", "podpis"], dlugosc: 3.2, sfx: "impact", mocSfx: 9}
 
   // `scena-kontra` i `money-counter`: poza automatem, wymagaja danych, ktorych
   // nie da sie uczciwie wyciac z transkrypcji. Patrz SKILL.md.
@@ -282,7 +282,9 @@ function pozycjaY(efekt, bezpieczneOd, dolNapisow) {
   let y = dolKarty - wys;
   // Gdy karta siegnelaby na twarz, spychamy ja nizej, ale nie na napisy.
   if (bezpieczneOd && y < bezpieczneOd - wys * 0.15) {
-    y = Math.round(bezpieczneOd - wys * 0.15);
+    // Odsuwamy od twarzy, ale NIGDY ponizej linii, na ktorej stoja napisy:
+    // inaczej nakladka schodzila prosto na nie i dwa teksty lezaly na sobie.
+    y = Math.min(Math.round(bezpieczneOd - wys * 0.15), dolKarty - wys);
   }
   return Math.max(0, Math.min(y, WYSOKOSC_KADRU - wys));
 }
@@ -1211,9 +1213,18 @@ if (coIle > 5) {
 }
 console.log("");
 doRenderu.forEach((e, i) => {
-  const opis = Object.values(e.props)
-    .flat()
-    .map((v) => (v && typeof v === "object" ? Object.values(v).join(" ") : String(v)))
+  /* Pokazujemy TYLKO teksty. Wczesniej szly tu wszystkie wartosci propsow,
+     wiec w podsumowaniu ladowaly "true" i "false" z pol technicznych
+     (przekreslone, jasne) i wygladalo to jak tresc efektu. */
+  const tekstyZ = (v) => {
+    if (typeof v === "string") return v.length > 1 ? [v] : [];
+    if (Array.isArray(v)) return v.flatMap(tekstyZ);
+    if (v && typeof v === "object") return Object.entries(v).flatMap(([k, w]) => (k === "ikona" ? [] : tekstyZ(w)));
+    return [];
+  };
+  const opis = Object.entries(e.props)
+    .filter(([k]) => !["jasne", "pozycja", "klucz", "nick"].includes(k))
+    .flatMap(([, v]) => tekstyZ(v))
     .join(" / ")
     .slice(0, 46);
   console.log(`  ${String(i + 1).padStart(2)}. ${String(nakladki[i].od).padStart(6)} s  ${e.id.padEnd(17)} ${opis}`);

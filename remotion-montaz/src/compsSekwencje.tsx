@@ -130,6 +130,67 @@ const Etykieta: React.FC<{tekst: string; jasne: boolean; post: number}> = ({teks
   </div>
 );
 
+/**
+ * Kafelek: kwadratowa karta z DUZA ikona nad tekstem.
+ *
+ * Tak wygladaja pozycje w rolkach autora: dwa kafelki obok siebie, ikona u gory,
+ * krotki podpis pod nia. Wczesniej byly to poziome paski uklada­ne w kolumnie
+ * i to jest jedna z rzeczy, ktore sprawialy, ze scena wygladala jak lista
+ * w dokumencie, a nie jak grafika w rolce.
+ */
+const Kafelek: React.FC<{poz: Pozycja; r: ReturnType<typeof ruch>; kreska: number}> = ({
+  poz,
+  r,
+  kreska,
+}) => (
+  <div
+    style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 10,
+      minWidth: 230,
+      padding: '26px 26px 22px',
+      borderRadius: 24,
+      background: '#fff',
+      boxShadow: '0 18px 44px rgba(120,90,60,0.18)',
+      opacity: r.krycie,
+      transform: `translateY(${-r.x * 0.35}px) scale(${r.skala})`,
+      filter: `blur(${r.rozmycie}px)`,
+    }}
+  >
+    <div style={{fontSize: 64, lineHeight: 1}}>{poz.ikona || '🔸'}</div>
+    <div style={{position: 'relative'}}>
+      <div
+        style={{
+          fontFamily: SANS,
+          fontSize: 34,
+          fontWeight: 800,
+          color: '#22201D',
+          whiteSpace: 'nowrap',
+          opacity: poz.przekreslone ? interpolate(kreska, [0, 1], [1, 0.5]) : 1,
+        }}
+      >
+        {poz.tekst}
+      </div>
+      {poz.przekreslone ? (
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: '52%',
+            height: 5,
+            width: `${kreska * 100}%`,
+            borderRadius: 3,
+            background: RED,
+          }}
+        />
+      ) : null}
+    </div>
+  </div>
+);
+
 /** Jeden wiersz sekwencji: ikona, tekst, opcjonalne przekreslenie i krzyzyk. */
 const Wiersz: React.FC<{
   poz: Pozycja;
@@ -248,23 +309,23 @@ export const SekwencjaPelna: React.FC<{
   return (
     <AbsoluteFill style={{opacity: wyjscie}}>
       {jasne ? <TloJasne /> : <TloCiemne />}
-      <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', padding: 70}}>
+      {/* paddingBottom podnosi tresc nad pas napisow karaoke, ktore teraz leca
+          takze pod scenami pelnoekranowymi. */}
+      <AbsoluteFill
+        style={{justifyContent: 'center', alignItems: 'center', padding: 70, paddingBottom: 620}}
+      >
         {etykieta ? <Etykieta tekst={etykieta} jasne={jasne} post={post} /> : null}
-        <div style={{display: 'flex', flexDirection: 'column', gap: 22, alignItems: 'center'}}>
+        {/* Kafelki stoja OBOK SIEBIE, tak jak w rolkach autora. */}
+        <div style={{display: 'flex', flexDirection: 'row', gap: 22, justifyContent: 'center'}}>
           {lista.map((p, i) => {
             const op = wejscie(i, lista.length, durationInFrames, fps);
-            return (
-              <Wiersz
-                key={i}
-                poz={p}
-                jasne={jasne}
-                r={ruch(frame, fps, op, i % 2 === 0)}
-                frame={frame}
-                opoznienie={op}
-                fps={fps}
-                duzy
-              />
+            const kreska = interpolate(
+              frame,
+              [op + fps * 0.35, op + fps * 0.75],
+              [0, 1],
+              {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}
             );
+            return <Kafelek key={i} poz={p} r={ruch(frame, fps, op, true)} kreska={kreska} />;
           })}
         </div>
         {puenta ? (

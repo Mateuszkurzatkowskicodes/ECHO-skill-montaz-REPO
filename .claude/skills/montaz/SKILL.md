@@ -64,10 +64,15 @@ napisy wycina. Widz dostaje to samo zdanie dwa razy, raz małe i raz duże,
 urwane w losowym miejscu ("WŁAŚCIWIE NO DARMOWA"), a napisy w kółko znikają
 i wracają. Tak to wyglądało do 08.09.2026 i tak wyglądać nie ma.
 
-Zasada: **napisy karaoke lecą przez całą rolkę.** Jedyne, co ma prawo je
-zasłonić, to scena pełnoekranowa, bo ona zmienia cały kadr i ma własny tekst.
-Wszystko inne siedzi NAD napisami, na wysokości klatki piersiowej
-(`pozycja: "dol"` w propsach, a przy niskich kompozycjach plan robi to sam).
+Zasada: **napisy karaoke lecą przez całą rolkę i nic ich nie zasłania**, nawet
+scena pełnoekranowa. Tak jest w każdej rolce autora: scena trzyma treść w środku
+kadru, a napis leci pod nią jak zwykle. Dlatego `buduj-filtr.mjs` wstawia filtr
+`ass` na SAMYM KOŃCU łańcucha, już po nakładkach. Gdy szedł przed nimi, każda
+pełnoekranowa scena po prostu przykrywała napisy i przez cztery sekundy widz nie
+miał czego czytać, mimo że plik z napisami był kompletny.
+
+Nakładki siedzą NAD napisami, na wysokości klatki piersiowej (`pozycja: "dol"`
+w propsach, a przy niskich kompozycjach plan liczy `y` sam, z pomiaru twarzy).
 
 ## CO W OGÓLE MOŻE WEJŚĆ DO ROLKI (pula automatu)
 

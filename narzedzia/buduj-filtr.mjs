@@ -330,6 +330,8 @@ czesci.push(
   `scale=${W}:${H}:flags=lanczos,setsar=1[baza]`
 );
 let biezacy = "baza";
+/** Filtr napisow, wstawiany na koncu lancucha (patrz uwaga o kolejnosci nizej). */
+let napisyDoWstawienia = null;
 
 /* ==================== 2. napisy (POD interludiami) ====================
    Napisy idą zaraz po bazie, żeby pełnoekranowe interludium je zakryło.
@@ -375,8 +377,12 @@ if (plan.napisy) {
   const zCzcionkami = folderCzcionek
     ? `:fontsdir=${sciezkaDlaFiltra(folderCzcionek)}`
     : "";
-  czesci.push(`[${biezacy}]ass=${sciezkaDlaFiltra(plikNapisow)}${zCzcionkami}[z_napisami]`);
-  biezacy = "z_napisami";
+  /* UWAGA NA KOLEJNOSC. Napisy wstawiamy na SAMYM KONCU lancucha, juz po
+     nakladkach, a nie tutaj. Wczesniej szly przed nimi i kazda pelnoekranowa
+     scena po prostu je zakrywala: przez cztery sekundy widz nie mial czego
+     czytac, mimo ze plik z napisami byl kompletny. W rolkach autora napisy
+     leca ZAWSZE, takze pod scena. Tu tylko zapamietujemy, co wstawic. */
+  napisyDoWstawienia = `ass=${sciezkaDlaFiltra(plikNapisow)}${zCzcionkami}`;
 }
 
 /* ==================== 3. split-screen: dowód u góry, twarz pod nim ====================
@@ -443,6 +449,15 @@ const cutAudio = [];
   );
   biezacy = `po_${et}`;
 });
+
+/* ==================== 5b. NAPISY NA WIERZCHU ====================
+   Dopiero teraz, gdy wszystkie nakladki i sceny sa juz w kadrze. Dzieki temu
+   napisy karaoke widac przez cala rolke, takze pod pelnoekranowa scena.
+   Jedyne, co je przykrywa, to logo w rogu, ktore i tak stoi gdzie indziej. */
+if (napisyDoWstawienia) {
+  czesci.push(`[${biezacy}]${napisyDoWstawienia}[z_napisami]`);
+  biezacy = "z_napisami";
+}
 
 /* ==================== 6. logo w rogu (brand bug) ==================== */
 if (plan.logo && plan.logo.plik) {

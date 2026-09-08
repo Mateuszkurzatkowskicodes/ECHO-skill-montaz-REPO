@@ -389,8 +389,8 @@ export const Root: React.FC = () => {
       <Composition id="sekw-pelna" component={SekwencjaPelna} durationInFrames={Math.round(6.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{etykieta: 'ręcznie = strata', pozycje: [{ikona: '⏰', tekst: 'dużo czasu'}, {ikona: '💸', tekst: 'sporo kasy'}], puenta: '', jasne: true}} />
       <Composition id="sekw-przekreslona" component={SekwencjaPelna} durationInFrames={Math.round(6.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{etykieta: 'koniec z tym', pozycje: [{ikona: '🎓', tekst: 'uczenia się montażu', przekreslone: true}, {ikona: '🎬', tekst: 'robienia efektów', przekreslone: true}], puenta: '', jasne: true}} />
       <Composition id="sekw-checklista" component={SekwencjaChecklista} durationInFrames={Math.round(6.5 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{etykieta: 'co robię', punkty: ['CIĘCIA', 'EFEKTY', 'ANIMACJE', 'MUZYKA'], jasne: false}} />
-      <Composition id="sekw-nakladka" component={SekwencjaNakladka} durationInFrames={Math.round(5.0 * FPS)} fps={FPS} width={1080} height={420} defaultProps={{pozycje: [{ikona: '✅', tekst: 'montaż to dobra umiejętność'}, {ikona: '⏳', tekst: 'ale nie za cenę 3 godzin'}], etykieta: ''}} />
-      <Composition id="sekw-terminal" component={SekwencjaTerminal} durationInFrames={Math.round(5.5 * FPS)} fps={FPS} width={1080} height={420} defaultProps={{tytul: 'AI MONTUJE', kroki: ['analizuję nagranie', 'wycinam ciszę i wpadki', 'dokładam napisy']}} />
+      <Composition id="sekw-nakladka" component={SekwencjaNakladka} durationInFrames={Math.round(4.0 * FPS)} fps={FPS} width={1080} height={300} defaultProps={{pozycje: [{ikona: '✅', tekst: 'montaż to dobra umiejętność'}, {ikona: '⏳', tekst: 'ale nie za cenę 3 godzin'}], etykieta: ''}} />
+      <Composition id="sekw-terminal" component={SekwencjaTerminal} durationInFrames={Math.round(4.4 * FPS)} fps={FPS} width={1080} height={300} defaultProps={{tytul: 'AI MONTUJE', kroki: ['analizuję nagranie', 'wycinam ciszę i wpadki', 'dokładam napisy']}} />
     </>
   );
 };
