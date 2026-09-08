@@ -1294,7 +1294,29 @@ zapiszHistorie(historia);
 console.log(`Nagranie:    ${path.basename(nagranie)}  (${dlugosc.toFixed(1)} s, ${fps} fps)`);
 console.log(`Napisy:      ${napisy.length ? napisy.length + " linijek" : "brak"}`);
 console.log(`Sklejki:     ${punche.length} (tylko tam idą zoom-punche)`);
+
+/* WZMIANKA O LICENCJI PODKLADU.
+   W folderze z muzyka sa dwie grupy: jedenascie utworow na CC0 (domena
+   publiczna, wolno wszystko) oraz osiem dodanych przez autora zestawu, z nazwa
+   zaczynajaca sie od `music-`. Te drugie brzmia dokladnie tak, jak w rolkach
+   autora, i o to prosili kursanci, ale ich licencja nie przechodzi na kursanta.
+   Gdy automat wybierze taki utwor, wspominamy o tym jednym zdaniem: bez alarmu,
+   ale zeby nikt nie wrzucil rolki na profil firmowy, nie wiedzac o tym. */
+function ostrzezOLicencji(plikMuzyki) {
+  if (!plikMuzyki) return;
+  const nazwa = path.basename(plikMuzyki);
+  if (!nazwa.startsWith("music-")) return;
+  console.log(
+    "\nUwaga: " + nazwa + " to podklad z prywatnej biblioteki autora zestawu, " +
+    "wiec licencja nie przechodzi na Ciebie.\nNa wlasnym profilu zwykle nie ma " +
+    "z tym problemu, a jesli wolisz miec spokoj, podmien go na dowolny utwor " +
+    "bez przedrostka `music-`\n(te sa na CC0, czyli w domenie publicznej): " +
+    "wpisz inna sciezke w polu muzyka.plik w plan.json."
+  );
+}
+
 console.log(`Muzyka:      ${muzyka ? path.basename(muzyka.plik) + (muzykaPowod ? "  (" + muzykaPowod + ")" : "") : "brak (podaj --muzyka folder)"}`);
+if (muzyka) ostrzezOLicencji(muzyka.plik);
 console.log(`Otwarcie:    ${otwarcie.opis} (rotuje miedzy rolkami)`);
 const coIle = dlugosc / Math.max(1, doRenderu.length);
 console.log(`Efekty:      ${doRenderu.length} różnych, średnio co ${coIle.toFixed(1)} s`);

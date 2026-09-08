@@ -73,3 +73,31 @@ AI będzie brało to pod uwagę przy kolejnych montażach.
 Czego NIE wrzucać: piosenek z radia, ze Spotify i z YouTube.
 Instagram albo YouTube potrafi za to wyciszyć albo
 zablokować film.
+
+--------------------------------------------------------
+DRUGA GRUPA: podklady autora zestawu (nazwy `music-*`)
+--------------------------------------------------------
+
+Osiem utworow o nazwach zaczynajacych sie od `music-` to podklady,
+ktorych autor zestawu uzywa w swoich rolkach. Sa tutaj, bo kursanci
+prosili o "te same brzmienia co u Ciebie".
+
+Wazne i bez owijania: ich licencja NIE przechodzi na Ciebie.
+Autor ma je na wlasnych warunkach, Ty nie.
+
+Co to znaczy w praktyce:
+- na wlasnym profilu zwykle nie ma z tym problemu; jesli platforma
+  cos zglosi, konczy sie to wyciszeniem albo przekierowaniem
+  przychodow z tej jednej rolki, nie kara,
+- przy materiale dla klienta albo w platnej reklamie lepiej wziac
+  utwor z pierwszej grupy (CC0), gdzie nie ma zadnego ryzyka.
+
+Zestaw sam Ci o tym przypomni: gdy automat wybierze podklad z tej
+grupy, napisze o tym jednym zdaniem przy planie efektow.
+
+Zeby podmienic utwor, wpisz inna sciezke w polu `muzyka.plik`
+w pliku plan.json i uruchom ponownie buduj-filtr.mjs.
+
+Lista: music-good-times, music-kurs-lofi-chill-alt,
+music-kurs-motivational-alt, music-kurs-smart-tech, music-metric-skies,
+music-stomps-and-claps, music-upbeat-funk-pop, music-upbeat-party.
