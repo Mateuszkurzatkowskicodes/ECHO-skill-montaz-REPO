@@ -78,17 +78,25 @@ const PLIK_HISTORII = path.join(katalog, ".echo-historia-efektow.json");
    ffmpeg przykleja to do górnej krawędzi. `dlugosc` w sekundach musi zgadzać
    się z tym, co jest zarejestrowane w Remotion (Root.tsx). */
 
+/* KARTY NAD NAPISAMI zamiast wielkich napisow-cytatow (zmiana 08.09.2026).
+   Wczesniej rola "akcent" oznaczala: wez fraze z transkrypcji i pokaz ja wielka
+   czcionka na wysokosci napisow, a napisy na ten czas wytnij. Dawalo to jedno
+   zdanie pokazane dwa razy, raz male i raz duze, urwane w losowym miejscu
+   ("WLASCIWIE NO DARMOWA"), przy migajacych napisach. W rolkach uznanych za
+   dobre tak to nie wyglada: napisy leca caly czas, a nad nimi siedzi mala karta
+   z ramka, ikona i wlasnym haslem. `wys` ponizej 1920 sprawia, ze plan sam
+   kladzie efekt nad napisami. Gole napisy-slamy zostaja w bibliotece do recznego
+   uzycia, patrz SKILL.md. */
 const EFEKTY = [
-  // mocne akcenty na zdaniu
-  {naNapisach: true, id: "fx-slam", rola: "akcent", rodzina: "napis", pola: ["tekst"], dlugosc: 1.9, sfx: "impact", mocSfx: 9},
-  {naNapisach: true, id: "fx-stempel", rola: "akcent", rodzina: "napis", pola: ["tekst"], dlugosc: 1.8, sfx: "impact", mocSfx: 8},
-  {naNapisach: true, id: "fx-podkreslenie", rola: "akcent", rodzina: "kreska", pola: ["tekst"], dlugosc: 2.4, sfx: "swipe", mocSfx: 4},
-  {naNapisach: true, id: "fx-kolo", rola: "akcent", rodzina: "kreska", pola: ["tekst"], dlugosc: 2.4, sfx: "swipe", mocSfx: 4},
-  {naNapisach: true, id: "marker", rola: "akcent", rodzina: "kreska", pola: ["tekst"], dlugosc: 2.6, sfx: "swipe", mocSfx: 3},
-  {naNapisach: true, id: "glitch", rola: "akcent", rodzina: "napis", pola: ["tekst"], dlugosc: 1.4, sfx: "click", mocSfx: 6},
-  {naNapisach: true, id: "scramble", rola: "akcent", rodzina: "napis", pola: ["tekst"], dlugosc: 2.4, sfx: "typing", mocSfx: 5},
+  // mocne akcenty na zdaniu: karty nad napisami, napisy zostaja widoczne
+  {id: "karta-teza", rola: "akcent", rodzina: "karta", pola: ["nadtytul", "tekst"], dlugosc: 2.8, wys: 620, sfx: "impact", mocSfx: 9},
+  {id: "badge-ikona", rola: "akcent", rodzina: "etykieta", pola: ["ikona", "tekst"], dlugosc: 2.6, wys: 620, sfx: "pop", mocSfx: 6},
+  {id: "fx-stempel", rola: "akcent", rodzina: "napis", pola: ["tekst"], dlugosc: 1.8, pozycja: "dol", sfx: "impact", mocSfx: 8},
+  {id: "fx-podkreslenie", rola: "akcent", rodzina: "kreska", pola: ["tekst"], dlugosc: 2.4, pozycja: "dol", sfx: "swipe", mocSfx: 4},
+  {id: "fx-kolo", rola: "akcent", rodzina: "kreska", pola: ["tekst"], dlugosc: 2.4, pozycja: "dol", sfx: "swipe", mocSfx: 4},
 
   // liczby i wyniki
+  {id: "karta-liczba", rola: "liczba", rodzina: "karta", pola: ["ikona", "liczba", "podpis"], dlugosc: 2.8, wys: 620, sfx: "ding", mocSfx: 9},
   {id: "fx-wynik", rola: "liczba", rodzina: "karta", pola: ["liczba", "podpis"], dlugosc: 2.8, sfx: "ding", mocSfx: 9},
   // UWAGA: `money-counter` i `multi-countup` są CELOWO poza automatem.
   // Oba animują liczbę, która rośnie, więc muszą dostać konkretną wartość.
@@ -99,10 +107,13 @@ const EFEKTY = [
   {id: "fx-odliczanie", rola: "liczba", rodzina: "karta", pola: ["podpis"], dlugosc: 2.6, sfx: "click", mocSfx: 6},
 
   // kontrast, "nie tak, a tak"
-  {naNapisach: true, id: "fx-przekreslenie", rola: "kontra", rodzina: "kreska", pola: ["tekst"], dlugosc: 2.2, sfx: "swipe", mocSfx: 7},
+  {id: "pigulki-nie", rola: "kontra", rodzina: "lista", pola: ["punkty"], dlugosc: 3.0, wys: 620, sfx: "swipe", mocSfx: 8},
+  {id: "karta-zamiana", rola: "kontra", rodzina: "karta", pola: ["nadtytul", "stare", "nowe"], dlugosc: 3.4, wys: 620, sfx: "whoosh", mocSfx: 9},
+  {id: "fx-przekreslenie", rola: "kontra", rodzina: "kreska", pola: ["tekst"], dlugosc: 2.2, pozycja: "dol", sfx: "swipe", mocSfx: 7},
   {id: "fx-vs", rola: "kontra", rodzina: "karta", pola: ["zle", "dobre"], dlugosc: 3.2, sfx: "whoosh", mocSfx: 9},
 
   // wyliczanki i procesy
+  {id: "mockup-plik", rola: "lista", rodzina: "karta", pola: [], dlugosc: 3.4, wys: 620, sfx: "click", mocSfx: 7},
   {id: "fx-lista", rola: "lista", rodzina: "lista", pola: ["punkty"], dlugosc: 3.4, sfx: "pop", mocSfx: 6},
   {id: "fx-etapy", rola: "lista", rodzina: "lista", pola: ["etapy"], dlugosc: 3.2, sfx: "pop", mocSfx: 5},
   {id: "fx-krok", rola: "lista", rodzina: "karta", pola: ["numer", "opis"], dlugosc: 2.6, sfx: "pop", mocSfx: 5},
@@ -123,8 +134,11 @@ const EFEKTY = [
   {id: "strzalka", rola: "etykieta", rodzina: "etykieta", pola: [], dlugosc: 2.2, sfx: "swipe", mocSfx: 2},
   {id: "light-sweep", rola: "etykieta", rodzina: "etykieta", pola: [], dlugosc: 1.6, sfx: null, mocSfx: 0},
 
-  // interludium pełnoekranowe
-  {naNapisach: true, id: "fx-cytat", rola: "interludium", rodzina: "karta", pola: ["tekst"], dlugosc: 3.4, sfx: "whoosh", mocSfx: 8},
+  // UWAGA: `fx-slam`, `glitch`, `scramble`, `marker` i `fx-cytat` sa poza automatem.
+  // Wszystkie robia to samo: biora fraze z transkrypcji i pokazuja ja wielka
+  // czcionka zamiast napisow. Fraza wycieta automatem prawie zawsze urywa sie
+  // w zlym miejscu, a napisy migaja. Zostaja do recznego uzycia z WLASNYM,
+  // krotkim haslem, gdy naprawde chcesz uderzyc jednym slowem.
 
   // końcówka
   {id: "fx-komentarz", rola: "cta", rodzina: "karta", pola: ["nick", "tresc"], dlugosc: 3.6, sfx: "pop", mocSfx: 9},
@@ -400,6 +414,54 @@ function fraza(napisy, od, maksZnakow = 26) {
 }
 
 /** Wypełnia propsy efektu treścią z napisów. */
+/* SLOWA, OD KTORYCH HASLO NIE MOZE SIE ZACZYNAC.
+   Fraza wycieta z transkrypcji lubi zaczynac sie od spojnika albo przerywnika,
+   bo mowa nie dzieli sie na naglowki. "NO I W TYM MOMENCIE TWOJ" i "WLASCIWIE
+   NO DARMOWA" to sa dokladnie takie przypadki: technicznie cytat, w kadrze
+   belkot. Obcinamy je z przodu, a jesli po obcieciu nie zostaje nic sensownego,
+   efekt tekstowy NIE wchodzi wcale. */
+const SLOWA_PUSTE = [
+  "no", "i", "a", "bo", "więc", "wiec", "że", "ze", "to", "ale", "po", "prostu",
+  "właściwie", "wlasciwie", "czyli", "tam", "już", "juz", "też", "tez", "tak",
+  "jakiś", "jakis", "taki", "takie", "tego", "tym", "ten", "ta", "te", "jest",
+  "są", "sa", "być", "byc", "no i", "gdy", "kiedy", "jak", "przez", "dla",
+  "na", "w", "z", "do", "od", "o", "u", "za", "przy", "pod", "nad"
+];
+
+/**
+ * Krotkie, KOMPLETNE haslo na karte. Zwraca null, gdy nie da sie go zbudowac.
+ *
+ * Bierze slowa od podanego miejsca, konczy na najblizszej interpunkcji (tam
+ * konczy sie mysl), obcina wiodace spojniki i przerywniki, a na koniec sprawdza,
+ * czy zostaly przynajmniej dwa slowa niosace tresc. Lepiej pominac efekt niz
+ * wstawic w kadr urwane zdanie: rolka z szescioma dobrymi efektami wyglada
+ * lepiej niz z osmioma, z ktorych dwa sa belkotem.
+ */
+function krotkieHaslo(napisy, indeks, maksSlow = 4) {
+  if (!napisy || !napisy.length) return null;
+  let slowa = [];
+  for (let i = indeks; i < napisy.length && slowa.length < maksSlow + 3; i++) {
+    const surowe = (napisy[i].tekst || "").trim();
+    if (!surowe) continue;
+    for (const w of surowe.split(/\s+/)) {
+      slowa.push(w);
+      if (/[.,!?:;]$/.test(w)) break;
+    }
+    if (slowa.length && /[.,!?:;]$/.test(slowa[slowa.length - 1])) break;
+  }
+  // obetnij wiodace slowa puste
+  while (slowa.length) {
+    const pierwsze = slowa[0].toLowerCase().replace(/[^a-ząćęłńóśźż]/g, "");
+    if (SLOWA_PUSTE.includes(pierwsze)) slowa.shift();
+    else break;
+  }
+  slowa = slowa.slice(0, maksSlow).map((w) => w.replace(/[.,!?:;]+$/, ""));
+  const niosace = slowa.filter((w) => w.replace(/[^a-ząćęłńóśźż]/gi, "").length > 2);
+  if (niosace.length < 2) return null;
+  const haslo = slowa.join(" ").trim();
+  return haslo.length >= 6 ? haslo : null;
+}
+
 function trescDlaEfektu(efekt, linijka, nastepna, napisy, indeks, numerRozdzialu = 1, szeroki = "") {
   const tekst = napisy && napisy.length ? fraza(napisy, indeks) : linijka.tekst.replace(/[.,!?:]+$/, "");
   const dalej = napisy && napisy.length
@@ -440,6 +502,42 @@ function trescDlaEfektu(efekt, linijka, nastepna, napisy, indeks, numerRozdzialu
       const klucz = slowa.length ? slowa[slowa.length - 1] : tekst.split(/\s+/).slice(-1)[0] || "MONTAŻ";
       return {nick: "twoj.profil", tresc: klucz.replace(/[.,!?:]+$/, "").toUpperCase()};
     }
+    /* ---- KARTY NAD NAPISAMI ----
+       Haslo jest krotkie i kompletne albo nie ma go wcale (patrz krotkieHaslo).
+       `null` w polu tekstowym jest sygnalem dla ukladania, zeby pominac ten
+       moment zamiast wstawiac w kadr urwane zdanie. */
+    case "karta-teza": {
+      const h = krotkieHaslo(napisy, indeks, 4);
+      return h ? {nadtytul: "", tekst: h.toUpperCase()} : {tekst: null};
+    }
+    case "badge-ikona": {
+      const h = krotkieHaslo(napisy, indeks, 4);
+      return h ? {ikona: "👉", tekst: h.toUpperCase()} : {tekst: null};
+    }
+    case "karta-liczba": {
+      const podpisK = scalone
+        .split(/\s+/)
+        .filter((w) => !/\d/.test(w) && w.replace(/[^a-ząćęłńóśźż]/gi, "").length > 2)
+        .slice(0, 3)
+        .join(" ")
+        .trim();
+      return {ikona: "📊", liczba: liczba.toUpperCase(), podpis: podpisK || "tyle to jest"};
+    }
+    case "pigulki-nie": {
+      const a = krotkieHaslo(napisy, indeks, 3);
+      const b = krotkieHaslo(napisy, Math.min(napisy.length - 1, indeks + 2), 3);
+      const punkty = [a, b].filter(Boolean);
+      return punkty.length ? {punkty: punkty.map((p) => p.toLowerCase()), nadtytul: ""} : {punkty: null};
+    }
+    case "karta-zamiana": {
+      const a = krotkieHaslo(napisy, indeks, 3);
+      const b = krotkieHaslo(napisy, Math.min(napisy.length - 1, indeks + 2), 3);
+      return a && b ? {nadtytul: "", stare: a.toUpperCase(), nowe: b.toUpperCase(), podpis: ""} : {stare: null};
+    }
+    case "mockup-plik":
+      // Mockup pokazuje proces, nie cytuje nagrania: nie ma czego zepsuc.
+      return {};
+
     /* ---- SCENY PELNOEKRANOWE ----
        Trzymaja sie tej samej zasady co reszta: cytuja to, co naprawde padlo
        w nagraniu. Zadnych dopisanych liczb, obietnic ani wynikow. Scena jest
@@ -522,8 +620,13 @@ function trescDlaEfektu(efekt, linijka, nastepna, napisy, indeks, numerRozdzialu
       return {pozycje: zrodlo.map((w, i) => ({ikona: ikony[i], podpis: w.toUpperCase().slice(0, 14)}))};
     }
     default:
-      // większość efektów bierze jedno pole tekstowe
-      if (efekt.pola.includes("tekst")) return {tekst: tekst.toUpperCase()};
+      // Wiekszosc efektow bierze jedno pole tekstowe. Idzie ono przez
+      // krotkieHaslo, zeby w kadrze nie ladowal srodek zdania. Gdy sensownego
+      // hasla nie da sie zbudowac, pole jest null i ukladanie pomija ten moment.
+      if (efekt.pola.includes("tekst")) {
+        const h = krotkieHaslo(napisy, indeks, 4) || (tekst.split(/\s+/).length <= 4 ? tekst : null);
+        return {tekst: h ? h.toUpperCase() : null};
+      }
       return {};
   }
 }
@@ -643,6 +746,13 @@ for (const k of kandydaci) {
   const plikEfektu = path.join("efekty", `${String(policzone + 1).padStart(2, "0")}-${efekt.id}.mov`);
   if (efekt.id === "chapter-label") licznikRozdzialow++;
   const props = trescDlaEfektu(efekt, k.linijka, k.nastepna, napisy, k.i, licznikRozdzialow, trescMomentu);
+  /* Pole ustawione na null oznacza: z tego miejsca nie da sie wyciac sensownego
+     hasla. Pomijamy moment zamiast wstawiac w kadr urwane zdanie. */
+  if (Object.values(props).some((w) => w === null)) continue;
+  /* Pelnokadrowy efekt tekstowy domyslnie siada na wysokosci napisow karaoke.
+     Chcemy go NAD nimi, zeby napisy zostaly widoczne, wiec podajemy pozycje
+     jawnie w propsach. defaultProps w Root.tsx tu nie wystarcza. */
+  if (efekt.pozycja) props.pozycja = efekt.pozycja;
 
   const od = Number(k.t.toFixed(2));
   const doK = Number((k.t + trwanie).toFixed(2));
@@ -896,9 +1006,14 @@ const plan = {
     "popraw teksty tam, gdzie automat wziął zbyt dosłownie to, co padło w nagraniu."
 };
 
-fs.writeFileSync(plikPlanu, JSON.stringify(plan, null, 2), "utf8");
+/* Przy renderze z poprawionego pliku NIE nadpisujemy planu ani listy efektow.
+   Inaczej narzedzie ukladalo rolke od nowa, zapisywalo swiezy efekty.json,
+   a dopiero potem go czytalo: recznie poprawione hasla znikaly, a renderowal
+   sie zestaw wylosowany przed chwila. */
+const tylkoRender = flaga("--renderuj-z-pliku");
+if (!tylkoRender) fs.writeFileSync(plikPlanu, JSON.stringify(plan, null, 2), "utf8");
 const plikEfektow = path.join(katalog, "efekty.json");
-fs.writeFileSync(plikEfektow, JSON.stringify(doRenderu, null, 2), "utf8");
+if (!tylkoRender) fs.writeFileSync(plikEfektow, JSON.stringify(doRenderu, null, 2), "utf8");
 
 historia.otwarcia = historia.otwarcia || {};
 historia.otwarcia[otwarcie.id] = (historia.rolek || 0) + 1;
@@ -935,6 +1050,68 @@ doRenderu.forEach((e, i) => {
   console.log(`  ${String(i + 1).padStart(2)}. ${String(nakladki[i].od).padStart(6)} s  ${e.id.padEnd(17)} ${opis}`);
 });
 console.log(`\nZapisane: ${plikPlanu} oraz ${plikEfektow}`);
+
+/* TEKSTY DO PRZEPISANIA.
+   Narzedzie wycina hasla z transkrypcji regulami, a mowa nie dzieli sie na
+   naglowki: nawet po filtrach wychodzi czasem srodek zdania ("PRZYSZLOSCI
+   BEDZIE TAK SAMO"). Tego nie da sie domknac algorytmem, bo trzeba ROZUMIEC,
+   co w zdaniu jest trescia. Dlatego to nie jest opcja, tylko krok procesu:
+   przepisz hasla na wlasne, krotkie i zrozumiale bez dzwieku, a DOPIERO POTEM
+   renderuj efekty. */
+const doPrzepisania = doRenderu
+  .map((e, i) => {
+    const teksty = Object.entries(e.props)
+      .filter(([pole, w]) => typeof w === "string" && w.length > 1 && !["ikona", "nick", "pozycja", "klucz"].includes(pole))
+      .map(([pole, w]) => pole + ': "' + w + '"');
+    return teksty.length
+      ? "  " + String(i + 1).padStart(2, " ") + ". " + e.id.padEnd(18) + " " + teksty.join("  |  ")
+      : null;
+  })
+  .filter(Boolean);
+
+if (doPrzepisania.length) {
+  const kreska = "=".repeat(70);
+  console.log([
+    "",
+    kreska,
+    "TEKSTY DO PRZEPISANIA  (zrob to ZANIM wyrenderujesz efekty)",
+    kreska,
+    doPrzepisania.join("\n"),
+    "",
+    "To sa hasla wyciete z transkrypcji regulami, wiec czesc urywa sie w zlym",
+    "miejscu. Otworz " + path.basename(plikEfektow) + ", przeczytaj kazde i przepisz",
+    "na krotkie haslo, ktore da sie zrozumiec bez dzwieku (2-4 slowa).",
+    "Zasada bez zmian: haslo mowi to, co PADLO w nagraniu, i nie dopisuje",
+    "liczb ani obietnic, ktorych nikt nie zlozyl.",
+    "",
+    "Karty maja tez pole `nadtytul`: maly tekst kursywa nad haslem, na przyklad",
+    "\"a teraz\" albo \"caly montaz zajmuje\". Puste jest dopuszczalne, ale",
+    "wypelnione wyglada duzo lepiej i tak robi to autor zestawu.",
+  ].join("\n"));
+}
+
+
+
+
+/* RENDER Z POPRAWIONEGO efekty.json.
+   Bez tego przepisanie tekstow bylo slepa uliczka: narzedzie kazalo poprawic
+   hasla, ale renderowalo wylacznie te, ktore samo przed chwila wymyslilo,
+   wiec poprawki trzeba bylo klikac recznie, efekt po efekcie. Teraz pelna
+   petla wyglada tak:
+     1. plan-efektow.mjs ...                (plan + propozycje tekstow)
+     2. poprawiasz hasla w efekty.json
+     3. plan-efektow.mjs ... --renderuj-z-pliku   (renderuje TWOJE teksty)
+   Plan (czasy, pozycje, dzwiek) zostaje bez zmian, podmieniaja sie same tresci. */
+if (tylkoRender) {
+  if (!fs.existsSync(plikEfektow)) {
+    console.error("Nie ma pliku " + plikEfektow + ". Najpierw zbuduj plan bez tej flagi.");
+    process.exit(1);
+  }
+  const zPliku = JSON.parse(fs.readFileSync(plikEfektow, "utf8"));
+  doRenderu.length = 0;
+  zPliku.forEach((e) => doRenderu.push(e));
+  console.log("\nRenderuje " + doRenderu.length + " efektow z poprawionego " + path.basename(plikEfektow) + ".");
+}
 
 /* -------------------- render efektów -------------------- */
 
@@ -993,7 +1170,7 @@ const polecenia = doRenderu.map((e) => {
   ];
 });
 
-if (renderujEfekty) {
+if (renderujEfekty || tylkoRender) {
   const remotion = folderRemotion;
   if (!cliRemotion) {
     console.error(`\nSilnik efektów jest niegotowy. Wejdź do ${remotion} i uruchom: npm install`);

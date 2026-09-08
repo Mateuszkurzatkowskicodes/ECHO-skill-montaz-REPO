@@ -33,6 +33,9 @@ import {
   ScenaTeza, ScenaKontra, ScenaLista, ScenaLiczba,
   ScenaProblem, ScenaKroki, ScenaKomentarz, ScenaCta,
 } from './compsSceny';
+import {
+  KartaTeza, KartaLiczba, PigulkiNie, BadgeIkona, MockupPlik, KartaZamiana, WYS_KARTY,
+} from './compsKarty';
 
 const FPS = 60;
 
@@ -328,13 +331,13 @@ export const Root: React.FC = () => {
       <Composition id="fx-lista" component={ListaCheck} durationInFrames={Math.round(3.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{punkty: ['NAGRYWASZ', 'WRZUCASZ PLIK', 'GOTOWE']}} />
       <Composition id="fx-przekreslenie" component={Przekreslenie} durationInFrames={Math.round(2.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{tekst: 'DROGI MONTAŻYSTA'}} />
       <Composition id="fx-wynik" component={KartaWyniku} durationInFrames={Math.round(2.8 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{liczba: '24 ZŁ', podpis: 'KOSZT JEDNEGO LEADA'}} />
-      <Composition id="fx-kolo" component={KoloZakreslenie} durationInFrames={Math.round(2.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{tekst: 'DARMOWE'}} />
+      <Composition id="fx-kolo" component={KoloZakreslenie} durationInFrames={Math.round(2.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{tekst: 'DARMOWE', pozycja: 'dol'}} />
       <Composition id="fx-vs" component={DwieKolumny} durationInFrames={Math.round(3.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{zle: '3 GODZINY', dobre: '4 MINUTY'}} />
       <Composition id="fx-komentarz" component={DymekKomentarza} durationInFrames={Math.round(3.6 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nick: 'karol.hvac', tresc: 'MONTAŻ'}} />
       <Composition id="fx-etapy" component={PasekEtapow} durationInFrames={Math.round(3.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{etapy: ['NAGRANIE', 'MONTAŻ', 'PUBLIKACJA']}} />
-      <Composition id="fx-stempel" component={Stempel} durationInFrames={Math.round(1.8 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{tekst: 'FAKT'}} />
+      <Composition id="fx-stempel" component={Stempel} durationInFrames={Math.round(1.8 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{tekst: 'FAKT', pozycja: 'dol'}} />
       <Composition id="fx-krok" component={CyfraKroku} durationInFrames={Math.round(2.6 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{numer: '1', opis: 'WRZUCASZ NAGRANIE'}} />
-      <Composition id="fx-podkreslenie" component={PodkreslenieReczne} durationInFrames={Math.round(2.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{tekst: 'JEDNA KOMENDA'}} />
+      <Composition id="fx-podkreslenie" component={PodkreslenieReczne} durationInFrames={Math.round(2.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{tekst: 'JEDNA KOMENDA', pozycja: 'dol'}} />
       <Composition id="fx-pytanie" component={PytanieOdpowiedz} durationInFrames={Math.round(3.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{pytanie: 'ILE TO ZAJMUJE?', odpowiedz: '4 MINUTY'}} />
       <Composition id="fx-ticker" component={Ticker} durationInFrames={Math.round(3.0 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{tekst: 'MONTAŻ Z AI • BEZ KOMBINOWANIA • '}} />
       <Composition id="fx-odliczanie" component={Odliczanie} durationInFrames={Math.round(2.6 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{od: 3, podpis: 'TYLE TO ZAJMUJE'}} />
@@ -352,6 +355,18 @@ export const Root: React.FC = () => {
       <Composition id="scena-kroki" component={ScenaKroki} durationInFrames={Math.round(3.8 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{kroki: ['wrzucasz nagranie', 'wpisujesz komendę', 'odbierasz gotowe'], etykieta: 'trzy kroki'}} />
       <Composition id="scena-komentarz" component={ScenaKomentarz} durationInFrames={Math.round(3.4 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{nick: 'ktos_z_komentarzy', tresc: 'napisz w komentarzu', etykieta: ''}} />
       <Composition id="scena-cta" component={ScenaCta} durationInFrames={Math.round(3.2 * FPS)} fps={FPS} width={1080} height={1920} defaultProps={{haslo: 'ZRÓB TO DZISIAJ', podpis: 'napisz w komentarzu'}} />
+
+      {/* KARTY NAD NAPISAMI. Niska kompozycja (620 px), ktora plan klaadzie nad
+          napisami karaoke, wiec napisy NIE musza znikac na czas efektu.
+          To jest forma, ktora dominuje w rolkach uznanych za dobre: mala karta
+          z ramka, ikona i wlasnym haslem, a nie cytat wielka czcionka.
+          Szczegoly: src/compsKarty.tsx */}
+      <Composition id="karta-teza" component={KartaTeza} durationInFrames={Math.round(2.8 * FPS)} fps={FPS} width={1080} height={WYS_KARTY} defaultProps={{nadtytul: 'ta rolka, którą oglądasz', tekst: 'ZMONTOWANA PRZEZ AI'}} />
+      <Composition id="karta-liczba" component={KartaLiczba} durationInFrames={Math.round(2.8 * FPS)} fps={FPS} width={1080} height={WYS_KARTY} defaultProps={{ikona: '⏳', liczba: '2h+', podpis: 'DZIENNIE NA MONTAŻ'}} />
+      <Composition id="pigulki-nie" component={PigulkiNie} durationInFrames={Math.round(3.0 * FPS)} fps={FPS} width={1080} height={WYS_KARTY} defaultProps={{punkty: ['bez cięcia', 'bez efektów'], nadtytul: ''}} />
+      <Composition id="badge-ikona" component={BadgeIkona} durationInFrames={Math.round(2.6 * FPS)} fps={FPS} width={1080} height={WYS_KARTY} defaultProps={{ikona: '🚫', tekst: 'NIE MUSISZ SIĘ UCZYĆ'}} />
+      <Composition id="mockup-plik" component={MockupPlik} durationInFrames={Math.round(3.4 * FPS)} fps={FPS} width={1080} height={WYS_KARTY} defaultProps={{nazwa: 'nagranie-surowe.mp4', podpis: 'bez cięcia · bez efektów', etykieta: 'montuję...'}} />
+      <Composition id="karta-zamiana" component={KartaZamiana} durationInFrames={Math.round(3.4 * FPS)} fps={FPS} width={1080} height={WYS_KARTY} defaultProps={{nadtytul: 'montażysta co miesiąc', stare: 'TYSIĄCE ZŁ', nowe: '0 ZŁ', podpis: ''}} />
     </>
   );
 };

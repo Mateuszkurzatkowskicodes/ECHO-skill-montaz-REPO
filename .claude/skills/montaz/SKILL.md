@@ -56,6 +56,43 @@ Zanim oddasz rolkę, każda z tych rzeczy ma być prawdziwa:
 | Zoom-punch | tylko na sklejkach, nigdy "co jakiś czas" |
 | Kontrola | `sprawdz.mjs` przeszedł, a `krytyk.mjs` ma komplet "tak" |
 
+## NAPISY NIGDY NIE ZNIKAJĄ, EFEKT SIEDZI NAD NIMI
+
+Najczęstszy sposób, w jaki ta rolka wychodzi źle: automat bierze frazę
+z transkrypcji, pokazuje ją wielką czcionką na wysokości napisów i na ten czas
+napisy wycina. Widz dostaje to samo zdanie dwa razy, raz małe i raz duże,
+urwane w losowym miejscu ("WŁAŚCIWIE NO DARMOWA"), a napisy w kółko znikają
+i wracają. Tak to wyglądało do 08.09.2026 i tak wyglądać nie ma.
+
+Zasada: **napisy karaoke lecą przez całą rolkę.** Jedyne, co ma prawo je
+zasłonić, to scena pełnoekranowa, bo ona zmienia cały kadr i ma własny tekst.
+Wszystko inne siedzi NAD napisami, na wysokości klatki piersiowej
+(`pozycja: "dol"` w propsach, a przy niskich kompozycjach plan robi to sam).
+
+## KARTY NAD NAPISAMI (podstawowa forma efektu)
+
+To jest forma, która dominuje w rolkach uznanych za dobre: mała karta z ramką,
+ikoną i **własnym krótkim hasłem**, a nie cytat wielką czcionką. Sześć sztuk
+w `compsKarty.tsx`:
+
+| Kompozycja | Do czego |
+|---|---|
+| `karta-teza` | nadtytuł kursywą + hasło w ramce. Podstawowy akcent |
+| `karta-liczba` | ikona + liczba + podpis ("⏳ 2h+ / DZIENNIE NA MONTAŻ") |
+| `pigulki-nie` | 2-3 pigułki z krzyżykiem, wjeżdżają kolejno |
+| `badge-ikona` | jedna pigułka z ikoną. Najczęstszy efekt we wzorcu |
+| `mockup-plik` | plik + pasek postępu. Pokazuje proces, zamiast go opisywać |
+| `karta-zamiana` | przekreślone stare, pod spodem nowe |
+
+**Nadtytuł kursywą to sygnatura tego stylu.** Mały, przygaszony tekst nad
+hasłem: "cały montaż zajmuje", "a teraz", "montażysta co miesiąc", "ta rolka,
+którą oglądasz". Karty i sceny mają na to pole. Puste jest dopuszczalne, ale
+wypełnione wygląda wyraźnie lepiej.
+
+**Poza automatem zostają wielkie napisy-slamy**: `fx-slam`, `glitch`, `scramble`,
+`marker`, `fx-cytat`. Wszystkie robią to samo, czyli pokazują cytat zamiast
+napisów. Użyj ich ręcznie, z WŁASNYM jednym słowem, gdy naprawdę chcesz uderzyć.
+
 ## SCENY PEŁNOEKRANOWE (to jest ta różnica, o którą chodzi)
 
 Jeśli rolka wygląda "podstawowo" mimo gęstych efektów, to prawie zawsze dlatego,
@@ -431,16 +468,30 @@ a plan weźmie je sam.
    propozycja cięć do akceptacji), czy user przytnie go sam. Ustal też format (rolka
    albo długi), gdzie ma pójść i czy ma własną muzykę.
 2. **Napisy:** `transkrypcja.py`.
-3. **Plan:** `plan-efektow.mjs`. Przejrzyj `efekty.json` i popraw teksty efektów.
-4. **Pokaż userowi plan** w dwóch zdaniach: ile efektów, jakie, jaka muzyka.
-5. **Render:** `plan-efektow.mjs --renderuj-efekty`, potem `buduj-filtr.mjs --renderuj`.
-6. **Kontrola techniczna:** `sprawdz.mjs`. Jeśli narzędzie zgłasza, że efektów
+3. **Plan:** `plan-efektow.mjs` (bez `--renderuj-efekty`). Narzędzie wypisze
+   listę **TEKSTÓW DO PRZEPISANIA**.
+4. **PRZEPISZ TEKSTY. To nie jest opcja, tylko krok procesu.** Hasła są wycięte
+   z transkrypcji regułami, a mowa nie dzieli się na nagłówki, więc część urywa
+   się w złym miejscu ("PRZYSZŁOŚCI BĘDZIE TAK SAMO"). Żaden filtr tego nie
+   domknie, bo trzeba ROZUMIEĆ, co w zdaniu jest treścią. Otwórz `efekty.json`,
+   przeczytaj każde hasło i przepisz na krótkie (2-4 słowa), zrozumiałe bez
+   dźwięku. Wypełnij `nadtytul` tam, gdzie karta go ma. Zasada bez zmian: hasło
+   mówi to, co PADŁO w nagraniu, i nie dopisuje liczb ani obietnic.
+5. **Pokaż userowi plan** w dwóch zdaniach: ile efektów, jakie, jaka muzyka.
+6. **Render:** `plan-efektow.mjs ... --renderuj-z-pliku` (renderuje TWOJE
+   poprawione teksty i nie rusza planu), potem `buduj-filtr.mjs --renderuj`.
+   Flaga `--renderuj-efekty` renderuje teksty wymyślone przez automat, więc
+   używaj jej tylko wtedy, gdy nic nie poprawiałeś.
+   **Nie mieszaj planu z efektami z różnych uruchomień:** plan trzyma pozycje
+   nakładek, więc plan z jednego przebiegu i efekty z innego kładą elementy
+   w złych miejscach kadru.
+7. **Kontrola techniczna:** `sprawdz.mjs`. Jeśli narzędzie zgłasza, że efektów
    jest za rzadko albo otwarcie jest płaskie, popraw i zrenderuj jeszcze raz.
    Nie oddawaj rolki z otwartą listą "DO POPRAWY".
-7. **Krytyk:** `krytyk.mjs`, obejrzenie kontaktówki i dziesięć pytań. Każde "nie"
+8. **Krytyk:** `krytyk.mjs`, obejrzenie kontaktówki i dziesięć pytań. Każde "nie"
    to poprawka i render. To jest ten krok, po którym pierwsza rolka wychodzi
    dobra, zamiast wracać z listą uwag od usera.
-8. **Koniec. Oddajesz gotowy plik i tyle.**
+9. **Koniec. Oddajesz gotowy plik i tyle.**
 
 **NIE dopisuj z automatu opisu pod rolkę, hashtagów ani propozycji CTA.** Obietnicą
 tego zestawu jest zmontowana rolka, a nie opis do niej. Dorzucanie tego z własnej
